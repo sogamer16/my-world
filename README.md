@@ -1,1 +1,22 @@
 # my-world
+
+An explorable 3D character sheet for Sohaib Qutub — a fantasy-RPG take on a portfolio.
+Six floating realms (Character, Quests, Skills, Trophies, Guilds, Portal) built with three.js.
+
+## Run
+
+No build step. Serve the folder with any static server:
+
+```sh
+python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+To publish, enable GitHub Pages for the repository (Settings → Pages → deploy from branch, root).
+
+## Edit
+
+All content lives in `js/data.js`. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
+three.js r170 is vendored in `vendor/three` (MIT).
+
+Controls: scroll, swipe, arrow keys, `1`–`6`, the hotbar, or click an island.
