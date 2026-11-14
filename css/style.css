@@ -173,6 +173,46 @@ a.gate::after { content: '→'; color: var(--accent); font-size: 1.3rem; transit
 a.gate:hover, a.gate:focus-visible { border-color: var(--accent); background: rgba(255, 122, 217, 0.1); box-shadow: 0 0 24px rgba(255, 122, 217, 0.25); outline: none; }
 a.gate:hover::after { transform: translateX(5px); }
 
+.note { font-size: 0.8rem; color: var(--dim); font-style: italic; margin: -4px 0 12px; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.flow span { font-size: 0.78rem; padding: 4px 9px; border: 1px solid var(--accent); color: var(--ink); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.flow i { color: var(--gold); font-style: normal; }
+button.gate { width: 100%; font: inherit; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--ink); padding: 16px 18px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.3); transition: 0.25s; }
+button.gate strong { font-family: var(--display); font-size: 1.15rem; letter-spacing: 0.08em; }
+button.gate span { color: var(--dim); font-style: italic; font-size: 0.9rem; }
+button.gate::after { content: '→'; color: var(--accent); font-size: 1.3rem; }
+button.gate:hover, button.gate:focus-visible { border-color: var(--accent); background: rgba(255, 122, 217, 0.1); outline: none; }
+
+.plain-link { display: block; margin: 1.1rem auto 0; background: none; border: 0; color: var(--ink); font: inherit; font-size: 0.95rem; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; opacity: 0.85; }
+.plain-link:hover, .plain-link:focus-visible { color: var(--gold); opacity: 1; outline: none; }
+.plain-btn { pointer-events: auto; margin-left: auto; font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); background: var(--glass); border: 1px solid var(--line); padding: 0.6em 1em; cursor: pointer; }
+.plain-btn:hover, .plain-btn:focus-visible { border-color: var(--gold); outline: none; }
+body:not(.playing) .plain-btn { pointer-events: none; }
+#panel-toggle { display: none; }
+
+/* ---------- plain summary view ---------- */
+#summary { position: fixed; inset: 0; z-index: 40; overflow-y: auto; background: #0d0b1a; color: #ece6d8; padding: 0 20px 60px; }
+#summary[hidden] { display: none; }
+#summary article { max-width: 760px; margin: 0 auto; font-size: 1.02rem; line-height: 1.6; }
+.s-bar { max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; gap: 12px; padding: 16px 0; position: sticky; top: 0; background: #0d0b1a; border-bottom: 1px solid var(--line); }
+.s-bar button { font: inherit; font-size: 0.9rem; color: var(--gold); background: none; border: 1px solid var(--line); padding: 0.5em 1em; cursor: pointer; }
+.s-bar button:hover, .s-bar button:focus-visible { border-color: var(--gold); outline: none; }
+#summary h1 { font-family: var(--display); font-size: clamp(2rem, 6vw, 3rem); margin-top: 28px; line-height: 1.1; }
+#summary h2 { font-family: var(--display); font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid var(--line); padding-bottom: 6px; margin: 34px 0 14px; }
+#summary h3 { display: block; font-family: var(--body); font-weight: 600; font-size: 1.12rem; letter-spacing: 0; text-transform: none; color: inherit; margin: 0; }
+#summary h3::after { display: none; }
+#summary h3 span, .s-when { font-weight: 400; font-size: 0.88rem; color: var(--dim); margin-left: 6px; }
+.s-role { color: var(--gold); margin: 4px 0; }
+.s-links { margin-bottom: 14px; }
+#summary a { color: #b9a4ff; }
+.s-item { margin-bottom: 20px; }
+.s-sub { color: var(--dim); font-style: italic; }
+#summary ul { margin: 6px 0 0 20px; }
+#summary li { margin-bottom: 3px; }
+.s-flow { font-size: 0.88rem; color: var(--dim); margin-top: 6px; }
+#summary p + p { margin-top: 8px; }
+body.no-webgl #title-screen, body.no-webgl #world { display: none; }
+
 /* ---------- hotbar ---------- */
 #hotbar { bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 8px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 #hotbar button {
@@ -196,10 +236,29 @@ a.gate:hover::after { transform: translateX(5px); }
   #hotbar { bottom: 0; left: 0; right: 0; transform: none; gap: 4px; padding: 6px 8px; border-left: 0; border-right: 0; border-bottom: 0; }
   #hotbar button { flex: 1; width: auto; min-width: 0; height: 60px; font-size: 0.46rem; letter-spacing: 0.02em; }
   #hotbar { gap: 3px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); }
+  #panel { height: var(--ph, 52vh); transition: height 0.35s ease, opacity 0.8s ease 0.3s; }
+  body.panel-min { --ph: 58px; }
+  body.panel-min #panel { overflow: hidden; }
+  #panel-toggle { display: block; right: 10px; bottom: calc(74px + env(safe-area-inset-bottom) + var(--ph, 52vh) - 1px); font-family: var(--display); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); background: rgba(14, 11, 28, 0.95); border: 1px solid var(--line); border-bottom: 0; padding: 0.55em 1em; cursor: pointer; transition: bottom 0.35s ease, opacity 0.8s ease 0.3s; }
+  .plain-btn { font-size: 0.58rem; padding: 0.5em 0.7em; }
+  .xp { display: none; }
   #panel { bottom: calc(74px + env(safe-area-inset-bottom)); }
   #hotbar button kbd { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01s !important; }
+}
+
+@media print {
+  html, body { height: auto; overflow: visible; background: #fff; }
+  body > *:not(#summary) { display: none !important; }
+  #summary { position: static; display: block !important; overflow: visible; background: #fff; color: #111; padding: 0; }
+  #summary article { max-width: none; font-size: 10.5pt; line-height: 1.4; }
+  .s-bar { display: none; }
+  #summary h1 { margin-top: 0; font-size: 22pt; }
+  #summary h2 { color: #111; border-color: #999; margin: 16pt 0 6pt; font-size: 10pt; }
+  .s-role, #summary a { color: #111; }
+  #summary h3 span, .s-when, .s-sub, .s-flow { color: #444; }
+  .s-item { margin-bottom: 9pt; break-inside: avoid; }
 }

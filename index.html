@@ -5,10 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sohaib Qutub — The Chronicle</title>
 <meta name="description" content="Sohaib Qutub — mechanical engineering student, builder of sensors, systems and software. An explorable 3D character sheet.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b0820">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sohaib Qutub — The Chronicle">
+<meta property="og:description" content="Mechanical engineering student who builds sensors, systems and software. Explore the projects as a 3D world.">
+<meta property="og:url" content="https://sogamer16.github.io/my-world/">
+<meta property="og:image" content="https://sogamer16.github.io/my-world/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Sohaib Qutub","url":"https://sogamer16.github.io/my-world/","description":"Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software.","alumniOf":{"@type":"CollegeOrUniversity","name":"University of Melbourne"},"sameAs":["https://www.linkedin.com/in/sohaibqutub","https://github.com/sogamer16"]}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3">
+<link rel="stylesheet" href="css/style.css?v=4">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
 </script>
@@ -22,6 +33,7 @@
     <h1>Sohaib Qutub</h1>
     <p class="subtitle">Artificer of Flow &amp; Circuit</p>
     <button id="start" type="button">Begin Adventure</button>
+    <button class="plain-link" type="button" data-open-summary>Or read the plain one-page version</button>
     <p class="hint">Scroll, swipe or press 1–7 to travel</p>
   </div>
 </div>
@@ -34,6 +46,7 @@
       <span id="place"></span>
     </div>
   </div>
+  <button class="plain-btn" type="button" data-open-summary>Plain view</button>
   <div class="xp" title="Degree progress">
     <span>Year <b id="xp-year"></b> · Bachelor of Design</span>
     <div class="xp-bar"><i id="xp-fill"></i></div>
@@ -42,9 +55,14 @@
 
 <main id="panel" class="hud" aria-live="polite"></main>
 
+<button id="panel-toggle" class="hud" type="button" aria-expanded="true">▾ Hide</button>
+
 <nav id="hotbar" class="hud" aria-label="Realms"></nav>
 
-<noscript><p style="padding:2rem;color:#fff">This chronicle needs JavaScript and WebGL.</p></noscript>
-<script type="module" src="js/main.js?v=3"></script>
+<div id="summary" hidden></div>
+
+<noscript><p style="position:relative;z-index:50;padding:2rem;color:#fff">Sohaib Qutub — Mechanical Engineering Systems student, University of Melbourne. This site needs JavaScript. Find me on <a style="color:#e3b866" href="https://www.linkedin.com/in/sohaibqutub">LinkedIn</a> or <a style="color:#e3b866" href="https://github.com/sogamer16">GitHub</a>.</p></noscript>
+<script type="module" src="js/summary.js?v=4"></script>
+<script type="module" src="js/main.js?v=4"></script>
 </body>
 </html>
