@@ -4,7 +4,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import * as D from './data.js?v=5';
+import * as D from './data.js?v=6';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -31,24 +31,41 @@ const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.5, 0.55, 0.62);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-scene.add(new THREE.HemisphereLight(0x8f7dff, 0x1a0f2e, 0.9));
+const hemi = new THREE.HemisphereLight(0x8f7dff, 0x1a0f2e, 0.9);
+scene.add(hemi);
 const moonLight = new THREE.DirectionalLight(0xcfd8ff, 1.3);
 moonLight.position.set(-40, 60, -20);
 scene.add(moonLight);
 
 /* ---------- sky ---------- */
+// The sky, fog and ambient light drift toward the colours of whichever land you are in:
+// Hejaz dusk, Gower sea-light, Melbourne night.
+const skyU = {
+  low: { value: new THREE.Vector3() }, mid: { value: new THREE.Vector3() },
+  top: { value: new THREE.Vector3() }, haze: { value: new THREE.Vector3() },
+};
+const mood = { sky: [0, 1, 2, 3].map(() => new THREE.Vector3()), fog: new THREE.Color(), hs: new THREE.Color(), hg: new THREE.Color() };
+function moodOf(key) {
+  const l = D.lands[key] || D.lands.neutral;
+  return { sky: l.sky.map((c) => new THREE.Vector3(...c)), fog: new THREE.Color(l.fog), hs: new THREE.Color(l.hemi[0]), hg: new THREE.Color(l.hemi[1]) };
+}
+function applyMood(target, k) {
+  mood.sky.forEach((v, i) => v.lerp(target.sky[i], k));
+  mood.fog.lerp(target.fog, k); mood.hs.lerp(target.hs, k); mood.hg.lerp(target.hg, k);
+  ['low', 'mid', 'top', 'haze'].forEach((n, i) => skyU[n].value.copy(mood.sky[i]));
+  scene.fog.color.copy(mood.fog); hemi.color.copy(mood.hs); hemi.groundColor.copy(mood.hg);
+}
 scene.add(new THREE.Mesh(
   new THREE.SphereGeometry(600, 32, 16),
   new THREE.ShaderMaterial({
-    side: THREE.BackSide, depthWrite: false, fog: false,
+    side: THREE.BackSide, depthWrite: false, fog: false, uniforms: skyU,
     vertexShader: 'varying vec3 p; void main(){ p = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: `varying vec3 p;
+    fragmentShader: `varying vec3 p; uniform vec3 low, mid, top, haze;
       void main(){
         float h = normalize(p).y;
-        vec3 low = vec3(0.075,0.035,0.16), mid = vec3(0.035,0.025,0.09), top = vec3(0.012,0.01,0.035);
         vec3 c = mix(low, mid, smoothstep(-0.35, 0.12, h));
         c = mix(c, top, smoothstep(0.1, 0.8, h));
-        c += vec3(0.20,0.07,0.22) * exp(-abs(h + 0.15) * 6.0) * 0.35;
+        c += haze * exp(-abs(h + 0.15) * 6.0) * 0.35;
         gl_FragColor = vec4(c, 1.0);
       }`,
   }),
@@ -119,38 +136,32 @@ function jitter(geo, amt) {
   return geo;
 }
 
-function island(color) {
+function island(color, landKey) {
+  const land = D.lands[landKey] || D.lands.neutral;
   const g = new THREE.Group();
-  const rock = new THREE.Mesh(jitter(new THREE.CylinderGeometry(6, 1, 7, 10, 4), 0.9), stone());
+  const rock = new THREE.Mesh(jitter(new THREE.CylinderGeometry(6, 1, 7, 10, 4), 0.9), stone(new THREE.Color(land.rock).getHex()));
   rock.position.y = -3.6;
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(6.4, 6, 0.5, 10), new THREE.MeshStandardMaterial({
-    color: new THREE.Color(color).multiplyScalar(0.22).add(new THREE.Color(0x16202a)), roughness: 1, flatShading: true,
-  }));
+  const ground = land.ground ? new THREE.Color(land.ground).multiplyScalar(0.55) : new THREE.Color(color).multiplyScalar(0.22).add(new THREE.Color(0x16202a));
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(6.4, 6, 0.5, 10), new THREE.MeshStandardMaterial({ color: ground, roughness: 1, flatShading: true }));
   g.add(rock, top);
-  for (let i = 0; i < 5; i++) { // small shards hanging beneath and crystals on the rim
+  for (let i = 0; i < 5; i++) { // crystals on the rim
     const a = (i / 5) * TAU + 0.4;
     const c = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.4, 5), glow(color, 0.8));
     c.position.set(Math.cos(a) * 5.3, 0.9, Math.sin(a) * 5.3);
     c.rotation.set(Math.sin(a) * 0.3, 0, Math.cos(a) * 0.3);
     g.add(c);
   }
-  for (let i = 0; i < 4; i++) {
-    const d = new THREE.Mesh(jitter(new THREE.DodecahedronGeometry(0.5 + (i % 2) * 0.4), 0.15), stone(0x2c2744));
+  for (let i = 0; i < 4; i++) { // loose rocks drifting beneath
+    const d = new THREE.Mesh(jitter(new THREE.DodecahedronGeometry(0.5 + (i % 2) * 0.4), 0.15), stone(new THREE.Color(land.rock).multiplyScalar(0.7).getHex()));
     const a = i * 1.7;
     d.position.set(Math.cos(a) * (7.5 + i), -2 - i * 1.3, Math.sin(a) * (7.5 + i));
     g.add(d); bob.push({ o: d, y: d.position.y, amp: 0.5, speed: 0.5 + i * 0.1, phase: i });
   }
-  const leaf = new THREE.MeshStandardMaterial({ color: new THREE.Color(color).multiplyScalar(0.3).add(new THREE.Color(0x0e2a26)), roughness: 1, flatShading: true });
-  [[-3.3, -4.2, 1.15], [3.0, -4.5, 0.9], [-1.2, -5.2, 0.7], [4.6, -3.0, 0.65]].forEach(([x, z, k]) => {
-    const tree = new THREE.Group();
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, 0.9, 5), stone(0x3a2718));
-    trunk.position.y = 0.45;
-    tree.add(trunk);
-    [[0.85, 1.3, 1.15], [0.62, 1.1, 1.85], [0.4, 0.9, 2.45]].forEach(([rad, h, y]) => {
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 6), leaf);
-      cone.position.y = y; cone.rotation.y = y; tree.add(cone);
-    });
+  // stand-in trees in the local style; generated models replace them where they exist
+  g.userData.trees = [[-3.3, -4.2, 1.15], [3.0, -4.5, 0.9], [-1.2, -5.2, 0.7], [4.6, -3.0, 0.65]].map(([x, z, k]) => {
+    const tree = (localTree[landKey] || localTree.neutral)(color);
     tree.position.set(x, 0.25, z); tree.scale.setScalar(k); g.add(tree);
+    return tree;
   });
   const light = new THREE.PointLight(color, 34, 26, 1.8);
   light.position.y = 5;
@@ -202,13 +213,61 @@ tick.push((t, dt) => {
   while (range.stuck.length > 9) range.group.remove(range.stuck.shift());
 });
 
+/* ---------- local trees ---------- */
+const flat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 1, flatShading: true });
+const localTree = {
+  hejaz() { // date palm
+    const t = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 2.6, 6), flat(0x6e4e30));
+    trunk.position.y = 1.3; trunk.rotation.z = 0.08; t.add(trunk);
+    const leaf = flat(0x5b7a2c);
+    for (let i = 0; i < 7; i++) {
+      const f = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.7, 4), leaf);
+      f.scale.z = 0.25; f.position.y = 2.55;
+      f.rotation.set(0, (i / 7) * TAU, 1.15); f.translateY(0.75); t.add(f);
+    }
+    return t;
+  },
+  gower() { // dark pine with yellow gorse at its foot
+    const t = localTree.neutral(0x1e4a35);
+    for (let i = 0; i < 3; i++) {
+      const b = new THREE.Mesh(new THREE.IcosahedronGeometry(0.32, 0), flat(0xd8b23a));
+      b.position.set(Math.cos(i * 2.1) * 0.6, 0.25, Math.sin(i * 2.1) * 0.6); t.add(b);
+    }
+    return t;
+  },
+  melbourne() { // gum tree: pale trunk, loose grey-green crown
+    const t = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.18, 2.2, 6), flat(0xd9d2c3));
+    trunk.position.y = 1.1; t.add(trunk);
+    const leaf = flat(0x5d7562);
+    [[0, 2.5, 0, 0.8], [0.5, 2.2, 0.2, 0.55], [-0.45, 2.3, -0.2, 0.6]].forEach(([x, y, z, r]) => {
+      const b = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 0), leaf); b.position.set(x, y, z); t.add(b);
+    });
+    return t;
+  },
+  neutral(color = 0x0e2a26) {
+    const t = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, 0.9, 5), flat(0x3a2718));
+    trunk.position.y = 0.45; t.add(trunk);
+    const leaf = flat(new THREE.Color(color).multiplyScalar(0.3).add(new THREE.Color(0x0e2a26)));
+    [[0.85, 1.3, 1.15], [0.62, 1.1, 1.85], [0.4, 0.9, 2.45]].forEach(([rad, h, y]) => {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 6), leaf);
+      cone.position.y = y; cone.rotation.y = y; t.add(cone);
+    });
+    return t;
+  },
+};
+
 /* ---------- generated models ---------- */
 // Each prop loads on top of a hand-built stand-in, which it replaces once ready.
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
+const models = {};
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=6`));
 function prop(g, name, { h, w, x = 0, y = 0.25, z = 0, ry = 0, lit = 0.5, replace = [], onLoad } = {}) {
-  gltf.load(`assets/models/${name}.glb?v=5`, (res) => {
-    const m = res.scene;
+  loadModel(name).then((res) => {
+    const m = res.scene.clone();
     const box = new THREE.Box3().setFromObject(m);
     const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
     const holder = new THREE.Group();
@@ -227,12 +286,12 @@ function prop(g, name, { h, w, x = 0, y = 0.25, z = 0, ry = 0, lit = 0.5, replac
     replace.forEach((o) => o.parent && o.parent.remove(o));
     g.add(holder);
     if (onLoad) onLoad(holder);
-  }, undefined, () => { /* keep the stand-in */ });
+  }).catch(() => { /* keep the stand-in */ });
 }
 
 const build = {
   hero(g, color) {
-    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(1.9, 0), glow(color, 0.9, { transparent: true, opacity: 0.94 }));
+    const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(1.9, 0), glow(color, 0.55, { transparent: true, opacity: 0.85 }));
     crystal.scale.y = 1.7; crystal.position.y = 5.4;
     g.add(crystal); spin.push({ o: crystal, y: 0.5 }); bob.push({ o: crystal, y: 5.4, amp: 0.35, speed: 1, phase: 0 });
     [3.2, 4.1, 5].forEach((r, i) => {
@@ -468,14 +527,74 @@ const build = {
   },
 };
 
+/* ---------- landmarks of the places I have lived ---------- */
+const landmarks = {
+  hero(g) { // Makkah: a Hejazi house with roshan balconies, date palms, and the farm AquaFlow was built for
+    prop(g, 'roshan', { h: 4.8, x: 2.6, z: -4.1, ry: -0.45, replace: g.userData.trees });
+    prop(g, 'palms', { h: 3.6, x: -4.3, z: -2.4, ry: 0.6 });
+    prop(g, 'palms', { h: 3.1, x: -1.2, z: -5.0, ry: 2.2 });
+    prop(g, 'farm', { w: 2.8, x: 0.2, z: 3.8, ry: 0.1 });
+    lanterns(g, [[-2.4, 2.6, -2.2], [0.6, 2.4, -3.6]], 0xffb050);
+  },
+  trophies(g) { // Swansea: a lighthouse, a castle ruin, the red dragon, and Welsh drizzle
+    prop(g, 'lighthouse', { h: 5.4, x: -4.1, z: -3.5, ry: 0.5, replace: g.userData.trees });
+    prop(g, 'castle', { h: 3.8, x: 4.0, z: -3.6, ry: -0.6 });
+    prop(g, 'dragon', { h: 2.1, x: 5.0, z: 2.3, ry: -1.0 });
+    rain(g);
+  },
+  quests(g) { // Melbourne: the city tram and a laneway lamp
+    prop(g, 'tram', { w: 4.6, x: 3.3, z: -4.2, ry: -0.55 });
+    prop(g, 'lamp', { h: 2.6, x: -4.7, z: 3.2, ry: 0.8 });
+    prop(g, 'gum', { h: 4.2, x: -3.9, z: -3.9, replace: g.userData.trees });
+  },
+  skills(g) { // Melbourne: the sandstone university arch
+    prop(g, 'arch', { h: 4.6, x: 0, z: -4.9, replace: g.userData.trees });
+    prop(g, 'gum', { h: 4.2, x: -4.5, z: -2.6, ry: 1.2 });
+    prop(g, 'gum', { h: 3.6, x: 4.6, z: -2.2, ry: 2.6 });
+  },
+  guilds(g) { // Melbourne: gum trees and a lamp by the camp
+    prop(g, 'gum', { h: 4.2, x: -4.3, z: -3.3, replace: g.userData.trees });
+    prop(g, 'gum', { h: 3.5, x: 3.7, z: -4.2, ry: 2 });
+    prop(g, 'lamp', { h: 2.4, x: 4.7, z: 1.4, ry: -0.9 });
+  },
+};
+function lanterns(g, spots, color) { // hanging fanous lanterns
+  spots.forEach(([x, y, z], i) => {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, y + 0.6, 5), flat(0x4a3424));
+    post.position.set(x, (y + 0.6) / 2 + 0.25, z);
+    const lamp = new THREE.Mesh(new THREE.OctahedronGeometry(0.26), glow(color, 2.2));
+    lamp.scale.y = 1.4; lamp.position.set(x, y, z + 0.3);
+    const l = new THREE.PointLight(color, 8, 7, 2); l.position.copy(lamp.position);
+    g.add(post, lamp, l); bob.push({ o: lamp, y, amp: 0.05, speed: 1.6, phase: i });
+  });
+}
+function rain(g) {
+  const n = 260, drops = new Float32Array(n * 6);
+  const seed = () => { const a = Math.random() * TAU, r = Math.sqrt(Math.random()) * 6.5; return [Math.cos(a) * r, Math.random() * 10 + 0.5, Math.sin(a) * r]; };
+  const set = (i, [x, y, z]) => drops.set([x, y, z, x + 0.04, y - 0.45, z], i * 6);
+  for (let i = 0; i < n; i++) set(i, seed());
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(drops, 3));
+  g.add(new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: 0xbfe3ff, transparent: true, opacity: 0.32, depthWrite: false })));
+  tick.push((t, dt) => {
+    if (reduceMotion) return;
+    for (let i = 0; i < n; i++) {
+      const y = drops[i * 6 + 1] - dt * 9;
+      if (y < 0.4) set(i, seed()); else { drops[i * 6 + 1] = y; drops[i * 6 + 4] = y - 0.45; }
+    }
+    geo.attributes.position.needsUpdate = true;
+  });
+}
+
 /* ---------- place realms on the ring ---------- */
 const realms = D.realms.map((r, i) => {
   const angle = (i / N) * TAU;
   const y = Math.sin(i * 1.7) * 3;
-  const g = island(r.color);
+  const g = island(r.color, r.land);
   g.position.set(Math.cos(angle) * RING, y, Math.sin(angle) * RING);
   g.rotation.y = -angle + Math.PI / 2; // local +z faces outward, toward the camera
+  g.userData.realm = i;
   build[r.id](g, r.color);
+  if (landmarks[r.id]) landmarks[r.id](g);
   g.traverse((o) => { o.userData.realm = i; });
   scene.add(g);
   bob.push({ o: g, y, amp: 0.45, speed: 0.45, phase: i * 1.3 });
@@ -510,7 +629,25 @@ function loose() {
 /*  Panels                                                             */
 /* ================================================================== */
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const head = (r, title) => `<p class="kicker">${esc(r.place)}</p><h2>${esc(title)}</h2>`;
+const head = (r, title) => {
+  const where = (D.lands[r.land] || {}).short;
+  return `<p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}</p><h2>${esc(title)}</h2>`;
+};
+function journeyMap() { // three stops in the order I lived there, laid out left to right
+  const W = 380, H = 170, at = [[70, 72], [190, 34], [305, 104]];
+  const arcs = at.slice(1).map((b, i) => {
+    const a = at[i];
+    return `<path d="M${a[0]} ${a[1]} Q${(a[0] + b[0]) / 2} ${Math.min(a[1], b[1]) - 30} ${b[0]} ${b[1]}" />`;
+  }).join('');
+  const dots = D.hero.journey.map((j, i) => {
+    const [x, y] = at[i];
+    return `<g class="jm-${j.land}"><circle cx="${x}" cy="${y}" r="5" /><circle class="halo" cx="${x}" cy="${y}" r="10" />
+      <text x="${x}" y="${y + 26}" text-anchor="middle">${esc(j.place)} <tspan class="ar">${esc(j.ar)}</tspan></text>
+      <text class="sub" x="${x}" y="${y + 40}" text-anchor="middle">${esc(j.note)}</text></g>`;
+  }).join('');
+  return `<svg class="journey-map" viewBox="0 0 ${W} ${H}" role="img" aria-label="Makkah, then Swansea, then Melbourne">
+    <g class="arcs">${arcs}</g>${dots}</svg>`;
+}
 
 const panels = {
   hero: (r) => `${head(r, D.hero.title)}
@@ -524,8 +661,8 @@ const panels = {
       <div class="attr"><span class="k" title="${esc(a.label)}">${a.key}</span>
         <div class="bar"><i style="width:${a.value * 5}%"></i></div><span class="v">${a.value}</span>
         <small>${esc(a.label)} — ${esc(a.note)}</small></div>`).join('')}</section>
-    <section><h3>Journey</h3><div class="journey">${D.hero.journey.map((j) => `<span>${esc(j)}</span>`).join('<span class="arrow">➝</span>')}</div></section>
-    <section><h3>Tongues</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)}</span>`).join('')}</div></section>`,
+    <section><h3>Journey</h3>${journeyMap()}</section>
+    <section><h3>Tongues</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
 
   quests: (r) => `${head(r, 'Quest Log')}
     <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
@@ -564,7 +701,7 @@ const panels = {
       <div class="score"><span>Last <b id="s-last">–</b></span><span>Best <b id="s-best">${best || '–'}</b></span><span>Shots <b id="s-n">${shots}</b></span></div>
     </div>
     <section style="margin-top:18px">${D.pursuits.map((p) => `
-      <div class="pursuit"><span class="pg">${esc(p.glyph)}</span>
+      <div class="pursuit"><span class="pg">${esc(p.glyph)}</span>${p.flag ? `<span class="chequer" title="${esc(p.flag)}" aria-label="${esc(p.flag)}"></span>` : ''}
         <div><strong>${esc(p.name)}</strong><p>${esc(p.detail)}</p>${p.extra ? `<p class="extra">${esc(p.extra)}</p>` : ''}</div></div>`).join('')}</section>`,
 
   guilds: (r) => `${head(r, 'Guilds & Academies')}
@@ -705,6 +842,8 @@ const look = new THREE.Vector3();
 const clock = new THREE.Clock();
 const motePos = motes.geometry.attributes.position;
 
+const moods = Object.fromEntries(Object.keys(D.lands).map((k) => [k, moodOf(k)]));
+applyMood(moods[D.realms[0].land], 1);
 let lowPower = false;
 const perf = { n: 0, sum: 0 };
 function frame() {
@@ -739,6 +878,7 @@ function frame() {
   camAngle += (targetAngle + idle - camAngle) * ease;
   const r = realms[Math.max(current, 0)];
   camY += (r.y + 6.5 - camY) * ease;
+  applyMood(moods[r.land] || moods.neutral, 1 - Math.exp(-dt * 1.4));
   const d = playing ? dist : 30;
   camera.position.set(Math.cos(camAngle) * (RING + d) - Math.sin(camAngle) * pointer.x * 1.2, camY + pointer.y * 0.8 + (playing ? 0 : 5), Math.sin(camAngle) * (RING + d) + Math.cos(camAngle) * pointer.x * 1.2);
   look.set(Math.cos(camAngle) * RING, camY - 3, Math.sin(camAngle) * RING);

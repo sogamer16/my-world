@@ -18,7 +18,9 @@ To publish, enable GitHub Pages for the repository (Settings → Pages → deplo
 
 All content lives in `js/data.js`. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
 three.js r170 is vendored in `vendor/three` (MIT).
-The hero, workbench, sword, tree, trophy, camp and portal gate in `assets/models` were generated with Meshy and compressed with gltf-transform.
+The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform.
+
+The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle) and Melbourne (tram, sandstone arch, gum trees, laneway lamps). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
 
 Controls: scroll, swipe, arrow keys, `1`–`7`, the hotbar, or click an island. On the Archery Range, click the target (or press space) to shoot.
 Each realm has a link, e.g. `#quests`. `#summary` opens the plain one-page version, which also prints cleanly to PDF and is shown automatically when WebGL is unavailable.
