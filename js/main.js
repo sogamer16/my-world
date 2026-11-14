@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import * as D from './data.js?v=3';
+import * as D from './data.js?v=4';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -15,7 +15,8 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ================================================================== */
 const canvas = document.getElementById('world');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+let maxDpr = Math.min(devicePixelRatio, innerWidth <= 820 ? 1.75 : 2);
+renderer.setPixelRatio(maxDpr);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
@@ -70,6 +71,26 @@ const motes = points(900, (v) => {
 }, 0.16, 0xffd9a0, 0.6);
 scene.add(motes);
 
+// a sea of soft cloud far below the islands, for depth
+const cloudTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.4, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const clouds = new THREE.Group();
+for (let i = 0; i < 70; i++) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: cloudTex, color: i % 3 ? 0x6a4fc4 : 0xc46ab0, transparent: true, opacity: 0.1 + Math.random() * 0.1, depthWrite: false, fog: false,
+  }));
+  const a = Math.random() * TAU, r = 10 + Math.random() * 95;
+  s.position.set(Math.cos(a) * r, -24 - Math.random() * 14, Math.sin(a) * r);
+  s.scale.set(40 + Math.random() * 40, 14 + Math.random() * 10, 1);
+  clouds.add(s);
+}
+scene.add(clouds);
+
 const moon = new THREE.Mesh(new THREE.SphereGeometry(26, 32, 32), new THREE.MeshBasicMaterial({ color: 0xe9e2ff, fog: false }));
 moon.position.set(-150, 150, -300);
 scene.add(moon);
@@ -118,6 +139,18 @@ function island(color) {
     d.position.set(Math.cos(a) * (7.5 + i), -2 - i * 1.3, Math.sin(a) * (7.5 + i));
     g.add(d); bob.push({ o: d, y: d.position.y, amp: 0.5, speed: 0.5 + i * 0.1, phase: i });
   }
+  const leaf = new THREE.MeshStandardMaterial({ color: new THREE.Color(color).multiplyScalar(0.3).add(new THREE.Color(0x0e2a26)), roughness: 1, flatShading: true });
+  [[-3.3, -4.2, 1.15], [3.0, -4.5, 0.9], [-1.2, -5.2, 0.7], [4.6, -3.0, 0.65]].forEach(([x, z, k]) => {
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, 0.9, 5), stone(0x3a2718));
+    trunk.position.y = 0.45;
+    tree.add(trunk);
+    [[0.85, 1.3, 1.15], [0.62, 1.1, 1.85], [0.4, 0.9, 2.45]].forEach(([rad, h, y]) => {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(rad, h, 6), leaf);
+      cone.position.y = y; cone.rotation.y = y; tree.add(cone);
+    });
+    tree.position.set(x, 0.25, z); tree.scale.setScalar(k); g.add(tree);
+  });
   const light = new THREE.PointLight(color, 34, 26, 1.8);
   light.position.y = 5;
   g.add(light);
@@ -449,7 +482,7 @@ const panels = {
       <dt>Guild</dt><dd>${esc(D.hero.guild)}</dd>
       <dt>Realm</dt><dd>${esc(D.hero.realm)}</dd>
     </dl>
-    <section><h3>Attributes</h3>${D.hero.attributes.map((a) => `
+    <section><h3>Attributes</h3><p class="note">Scores are for flavour; the evidence beside each is real.</p>${D.hero.attributes.map((a) => `
       <div class="attr"><span class="k" title="${esc(a.label)}">${a.key}</span>
         <div class="bar"><i style="width:${a.value * 5}%"></i></div><span class="v">${a.value}</span>
         <small>${esc(a.label)} — ${esc(a.note)}</small></div>`).join('')}</section>
@@ -461,12 +494,13 @@ const panels = {
     <section style="margin-top:16px">${D.quests.map((q, i) => `
       <details class="quest"${i === 0 ? ' open' : ''}>
         <summary>
-          <span class="q-kind">${esc(q.kind)} · ${esc(q.when)}</span>
+          <span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
         <div class="q-body"><p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
+          ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
         </div>
       </details>`).join('')}</section>`,
@@ -505,7 +539,8 @@ const panels = {
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
     <section style="margin-top:20px">${D.portals.map((p) => `
-      <a class="gate" href="${esc(p.href)}" target="_blank" rel="noopener"><div><strong>${esc(p.name)}</strong><br><span>${esc(p.hint)}</span></div></a>`).join('')}</section>`,
+      <a class="gate" href="${esc(p.href)}" target="_blank" rel="noopener"><div><strong>${esc(p.name)}</strong><br><span>${esc(p.hint)}</span></div></a>`).join('')}
+      <button class="gate" type="button" data-open-summary><div><strong>One-page summary</strong><br><span>Plain version you can print or save as a PDF</span></div></button></section>`,
 };
 
 /* ================================================================== */
@@ -554,8 +589,17 @@ function start() {
 }
 document.getElementById('start').addEventListener('click', start);
 
+const toggle = document.getElementById('panel-toggle');
+toggle.addEventListener('click', () => {
+  const min = document.body.classList.toggle('panel-min');
+  toggle.textContent = min ? '▴ Show' : '▾ Hide';
+  toggle.setAttribute('aria-expanded', String(!min));
+  layout();
+});
+
 addEventListener('keydown', (e) => {
-  if (!playing) { if (e.key === 'Enter' || e.key === ' ') start(); return; }
+  if (document.body.classList.contains('summary-open')) return;
+  if (!playing) { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) start(); return; }
   if (e.key >= '1' && e.key <= String(N)) go(+e.key - 1);
   else if ((e.key === ' ' || e.key === 'Enter') && realms[current].id === 'pursuits' && !e.target.closest('button, a, summary')) loose();
   else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(current + 1);
@@ -604,13 +648,14 @@ function layout() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false);
   composer.setSize(w, h);
-  composer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(maxDpr);
+  composer.setPixelRatio(maxDpr);
   camera.aspect = w / h;
   const mobile = w <= 820;
-  dist = mobile ? 36 : 21;
+  dist = mobile ? (document.body.classList.contains('panel-min') ? 30 : 36) : 21;
   // keep the island clear of the panel: shift the view rather than the camera
   if (!playing) camera.clearViewOffset();
-  else if (mobile) camera.setViewOffset(w, h, 0, h * 0.27, w, h);
+  else if (mobile) camera.setViewOffset(w, h, 0, h * (document.body.classList.contains('panel-min') ? 0.06 : 0.27), w, h);
   else camera.setViewOffset(w, h, Math.min(440, w * 0.42) / 2 + 10, h * 0.02, w, h);
   camera.updateProjectionMatrix();
 }
@@ -622,8 +667,19 @@ const look = new THREE.Vector3();
 const clock = new THREE.Clock();
 const motePos = motes.geometry.attributes.position;
 
+let lowPower = false;
+const perf = { n: 0, sum: 0 };
 function frame() {
-  const dt = Math.min(clock.getDelta(), 0.05);
+  const raw = clock.getDelta();
+  const dt = Math.min(raw, 0.05);
+  // if the device cannot hold ~20fps, trade the glow and sharpness for smoothness
+  if (!lowPower && playing && document.visibilityState === 'visible') {
+    perf.n++; perf.sum += raw;
+    if (perf.n === 80) {
+      if (perf.sum / perf.n > 0.05) { lowPower = true; maxDpr = 1; bloom.enabled = false; layout(); }
+      perf.n = 0; perf.sum = 0;
+    }
+  }
   const t = clock.elapsedTime;
   const m = reduceMotion ? 0 : 1;
 
@@ -637,6 +693,7 @@ function frame() {
   }
   motePos.needsUpdate = true;
   stars.rotation.y = t * 0.004;
+  clouds.rotation.y = t * 0.006 * m;
 
   // camera rides a wider ring around the islands
   const idle = playing ? 0 : t * 0.05;

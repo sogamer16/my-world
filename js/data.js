@@ -33,6 +33,7 @@ export const quests = [
   {
     name: 'Totex Energy',
     kind: 'Main Quest',
+    plain: 'Internship',
     role: 'Engineering Intern · energy startup',
     when: 'Jul – Sep 2026',
     status: 'Complete',
@@ -47,7 +48,9 @@ export const quests = [
   },
   {
     name: 'AquaFlow',
+    flow: ['Flow sensors on each branch', 'Arduino branch node', 'Central server', 'Alert on flow drop'],
     kind: 'Epic Quest',
+    plain: 'Ongoing project',
     role: 'Smart drip-irrigation monitoring · personal project',
     when: '2024 – Present',
     status: 'Active',
@@ -64,8 +67,10 @@ export const quests = [
   },
   {
     name: 'ABAAD Robotics',
+    flow: ['Build the robot', 'Code it in Arabic blocks', 'Train the AI overnight', 'Showcase'],
     kind: 'Epic Quest',
-    role: 'AI robotics program for ages 14–18 · founder project',
+    plain: 'Ongoing project',
+    role: 'AI robotics program for ages 14–18 · personal project',
     when: '2026 – Present',
     status: 'Active',
     summary:
@@ -80,7 +85,9 @@ export const quests = [
   },
   {
     name: 'Sentinel',
+    flow: ['Command to field device', 'Check against thermal, vibration, humidity', 'Isolation Forest verdict', 'Execute or quarantine'],
     kind: 'Raid',
+    plain: 'Competition build',
     role: 'OT physical-layer intrusion detection · ICA Engineering IT Innovation Pitch',
     when: '2026',
     status: 'Complete',
@@ -96,7 +103,9 @@ export const quests = [
   },
   {
     name: 'Sirius',
+    flow: ['A date in history', 'Distance light has travelled since', 'Stars at that distance', '3D sky map'],
     kind: 'Raid',
+    plain: 'Competition build',
     role: 'Real-time astronomical web app · CISSA Codebrew Hackathon',
     when: '2026 · 60-hour build',
     status: 'Complete',
@@ -113,6 +122,7 @@ export const quests = [
   {
     name: 'The Flow Trials',
     kind: 'Side Quest',
+    plain: 'Side project',
     role: 'CFD guided project · SimScale / Coursera',
     when: '2025',
     status: 'Complete',
@@ -126,15 +136,16 @@ export const quests = [
   {
     name: 'The Game Forge',
     kind: 'Side Quest',
+    plain: 'Side project',
     role: 'Game jams and small games · C#',
     when: '2025 – 2026',
     status: 'Complete',
     summary: 'Games built for the fun of it and against the clock.',
     objectives: [
       'Game Jam 2026 entry on the theme of ecosystems',
-      'Creep Crawlers — a creature game in C#',
+      'Creep Crawlers — built in C#',
       'Much Ado About Nothing — Shakespeare retold as a 2D game',
-      'Turbo Bros: Overdrive — a racing game design',
+      'Turbo Bros: Overdrive — game design',
     ],
     loot: ['C#', 'Game design', 'Game jams'],
   },
@@ -192,11 +203,11 @@ export const rankNames = ['', 'Novice', 'Adept', 'Seasoned'];
 
 export const trophies = [
   { name: 'McKinsey Forward', detail: 'McKinsey & Company professional development program', when: '2025', tier: 'gold' },
-  { name: 'Silver Tongue', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
-  { name: 'Six Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
+  { name: 'Silver Tongue', plain: 'Debating', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
+  { name: 'Six Hackathons', plain: 'Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
   { name: 'Duke of Edinburgh', detail: 'Bronze Award', when: '2023', tier: 'bronze' },
-  { name: 'Way of the Empty Hand', detail: 'Multiple regional karate medals', when: '', tier: 'gold' },
-  { name: 'Twin Stars', detail: 'A* in GCSE Mathematics and Physics', when: '2023', tier: 'gold' },
+  { name: 'Way of the Empty Hand', plain: 'Karate', detail: 'Multiple regional karate medals', when: '', tier: 'gold' },
+  { name: 'Twin Stars', plain: 'GCSEs', detail: 'A* in GCSE Mathematics and Physics', when: '2023', tier: 'gold' },
 ];
 
 export const scrolls = [
@@ -217,7 +228,7 @@ export const pursuits = [
   {
     name: 'Karate',
     glyph: '拳',
-    detail: 'Years on the mat and multiple regional competition medals. Where the discipline comes from.',
+    detail: 'Multiple regional competition medals. Where the discipline comes from.',
   },
   {
     name: 'Making games',
@@ -261,8 +272,8 @@ export const academies = [
 ];
 
 export const portals = [
-  { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Send a raven' },
-  { name: 'GitHub', href: 'https://github.com/sogamer16', hint: 'Inspect the workshop' },
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Message me here' },
+  { name: 'GitHub', href: 'https://github.com/sogamer16', hint: 'See the code' },
 ];
 
 export const realms = [
