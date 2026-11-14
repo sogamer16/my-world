@@ -2,6 +2,7 @@
 
 export const hero = {
   name: 'Sohaib Qutub',
+  nameAr: 'صهيب قطب',
   title: 'Artificer of Flow & Circuit',
   klass: 'Mechanical Engineering Systems',
   guild: 'University of Melbourne',
@@ -9,11 +10,16 @@ export const hero = {
   year: 1,
   years: 3,
   lore:
-    'I build things. An engineering student who wants to know how and why the machine works — ' +
-    'then wires it, codes it and ships it. Six hackathons deep, in teams and alone, across ' +
-    'mechanical engineering, embedded systems, ML and software. Off the bench: an archer, ' +
-    'a karateka, a game-jammer, and the builder of a robotics program for teenagers.',
-  journey: ['Makkah', 'Swansea, Wales', 'Melbourne'],
+    'I grew up between Makkah and Swansea, and now I build things in Melbourne. I study ' +
+    'mechanical engineering because I still want to answer the question every kid asks — how ' +
+    'does this actually work? — and then wire it, code it and ship it. Six hackathons in, ' +
+    'across mechanical engineering, embedded systems, ML and software. Off the bench: compound ' +
+    'archery, karate, game jams, and a robotics program that teaches teenagers in Arabic and English.',
+  journey: [
+    { place: 'Makkah', ar: 'مكة', land: 'hejaz', note: 'Roots' },
+    { place: 'Swansea', ar: 'سوانزي', land: 'gower', note: 'School · 9 GCSEs, 2023' },
+    { place: 'Melbourne', ar: 'ملبورن', land: 'melbourne', note: 'Trinity 2025 · UniMelb 2026 →' },
+  ],
   attributes: [
     { key: 'INT', label: 'Intellect', value: 16, note: 'A* Maths & Physics · CFD · ML' },
     { key: 'DEX', label: 'Craft', value: 17, note: 'Wiring, sensors, Arduino, Raspberry Pi' },
@@ -23,9 +29,9 @@ export const hero = {
     { key: 'PER', label: 'Focus', value: 15, note: 'Compound archery · draw, anchor, release, repeat' },
   ],
   tongues: [
-    { name: 'Arabic', rank: 'Native' },
-    { name: 'English', rank: 'IELTS 8.0' },
-    { name: 'Welsh', rank: 'Beginner' },
+    { name: 'Arabic', rank: 'Native', hello: 'أهلاً' },
+    { name: 'English', rank: 'IELTS 8.0', hello: 'Hello' },
+    { name: 'Welsh', rank: 'Beginner', hello: 'Croeso' },
   ],
 };
 
@@ -233,6 +239,7 @@ export const pursuits = [
   {
     name: 'Making games',
     glyph: '♞',
+    flag: 'For Indianapolis, where I lived when I was very small',
     detail: 'Game jams and small C# games — the fastest way to learn what "finished" means.',
   },
   {
@@ -276,12 +283,37 @@ export const portals = [
   { name: 'GitHub', href: 'https://github.com/sogamer16', hint: 'See the code' },
 ];
 
+// The three places that shaped me; each island belongs to one of them.
+export const lands = {
+  hejaz: {
+    short: 'Makkah',
+    sky: [[0.30, 0.13, 0.07], [0.12, 0.05, 0.07], [0.02, 0.015, 0.04], [0.45, 0.2, 0.08]],
+    fog: '#1a0d10', hemi: ['#ffb27a', '#2a1a10'], ground: '#b08455', rock: '#6b4a35',
+  },
+  gower: {
+    short: 'Swansea',
+    sky: [[0.07, 0.13, 0.16], [0.03, 0.06, 0.09], [0.01, 0.02, 0.035], [0.08, 0.2, 0.2]],
+    fog: '#081216', hemi: ['#9fd2e0', '#10201c'], ground: '#3f6b45', rock: '#4a4f58',
+  },
+  melbourne: {
+    short: 'Melbourne',
+    sky: [[0.10, 0.05, 0.18], [0.04, 0.03, 0.10], [0.012, 0.012, 0.04], [0.25, 0.12, 0.12]],
+    fog: '#0b0a1c', hemi: ['#a08fff', '#1a1430'], ground: '#4a5a3c', rock: '#3b3555',
+  },
+  neutral: {
+    short: '',
+    sky: [[0.075, 0.035, 0.16], [0.035, 0.025, 0.09], [0.012, 0.01, 0.035], [0.20, 0.07, 0.22]],
+    fog: '#0a0718', hemi: ['#8f7dff', '#1a0f2e'], ground: null, rock: '#3b3555',
+  },
+};
+
+// Ordered as the journey runs: Makkah, then Swansea, then Melbourne.
 export const realms = [
-  { id: 'hero', glyph: '✦', name: 'Character', place: 'The Crystal Spire', color: '#b79bff' },
-  { id: 'quests', glyph: '⚔', name: 'Quests', place: 'The Standing Stones', color: '#ff8a5c' },
-  { id: 'skills', glyph: '❖', name: 'Skills', place: 'The Constellation Tree', color: '#7cc4ff' },
-  { id: 'trophies', glyph: '♛', name: 'Trophies', place: 'The Hall of Deeds', color: '#ffd166' },
-  { id: 'pursuits', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', color: '#5ee6d6' },
-  { id: 'guilds', glyph: '⚑', name: 'Guilds', place: 'The Banner Camp', color: '#8dffb0' },
-  { id: 'portal', glyph: '◈', name: 'Portal', place: 'The Waygate', color: '#ff7ad9' },
+  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', color: '#f4b860' },
+  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', color: '#e8474f' },
+  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Laneway Workshop', color: '#c79bff' },
+  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'The Sandstone Grove', color: '#7cc4ff' },
+  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Gathering Camp', color: '#8dffb0' },
+  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', color: '#5ee6d6' },
+  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', color: '#ff7ad9' },
 ];

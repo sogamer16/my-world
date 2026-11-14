@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=5';
+import * as D from './data.js?v=6';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -12,7 +12,7 @@ el.innerHTML = `
   </div>
   <article>
     <header>
-      <h1>${esc(D.hero.name)}</h1>
+      <h1>${esc(D.hero.name)} <span class="s-ar" lang="ar" dir="rtl">${esc(D.hero.nameAr)}</span></h1>
       <p class="s-role">${esc(D.hero.klass)} student · ${esc(D.hero.guild)} · ${esc(D.hero.realm)}</p>
       <p class="s-links">${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.lore)}</p>
@@ -43,6 +43,7 @@ el.innerHTML = `
 
     <h2>Languages and interests</h2>
     <p>${D.hero.tongues.map((t) => `${esc(t.name)} (${esc(t.rank)})`).join(', ')}</p>
+    <p>Lived in ${D.hero.journey.map((j) => esc(j.place)).join(', ')}.</p>
     <p>${D.pursuits.map((p) => esc(p.name)).join(', ')}</p>
   </article>`;
 
