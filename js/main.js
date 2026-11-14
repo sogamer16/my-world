@@ -269,16 +269,37 @@ const build = {
         new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: e, roughness: 1 }));
       ring.position.set(T.x, T.y, T.z + i * 0.004); g.add(ring);
     });
-    // a recurve bow resting beside the target
+    // a compound bow resting beside the target: riser, short limbs, cams, string and cables
     const bow = new THREE.Group();
-    const limb = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.06, 6, 24, Math.PI * 0.9), glow(color, 0.9));
-    limb.rotation.z = -Math.PI * 0.45;
-    const tips = [Math.PI * 0.45, -Math.PI * 0.45].map((a) => new THREE.Vector3(Math.cos(a) * 1.5, Math.sin(a) * 1.5, 0));
-    const string = new THREE.Line(new THREE.BufferGeometry().setFromPoints(tips), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.6, 6), stone(0x3a2718));
-    grip.position.x = 1.5;
-    bow.add(limb, string, grip); bow.position.set(-3.6, 2.3, 1.4); bow.rotation.set(0, 0.5, 0.12);
-    g.add(bow); bob.push({ o: bow, y: 2.3, amp: 0.18, speed: 1.1, phase: 2 });
+    const bar = (x1, y1, x2, y2, w, mat) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, Math.hypot(x2 - x1, y2 - y1), w * 0.7), mat);
+      m.position.set((x1 + x2) / 2, (y1 + y2) / 2, 0); m.rotation.z = Math.atan2(y2 - y1, x2 - x1) - Math.PI / 2;
+      bow.add(m);
+    };
+    const riserMat = stone(0x2c3c48), limbMat = glow(color, 0.7);
+    bar(1.2, -0.3, 1.2, 0.3, 0.2, stone(0x3a2718)); // grip
+    bar(1.2, 0.3, 1.34, 0.8, 0.13, riserMat); bar(1.2, -0.3, 1.34, -0.8, 0.13, riserMat);
+    bar(1.34, 0.8, 0.62, 1.42, 0.1, limbMat); bar(1.34, -0.8, 0.62, -1.42, 0.1, limbMat);
+    [1.42, -1.42].forEach((y) => {
+      const cam = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.055, 6, 18), glow(0xe3b866, 1.3));
+      cam.position.set(0.62, y, 0); cam.scale.y = 0.8;
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.12, 8), riserMat);
+      hub.rotation.x = Math.PI / 2; hub.position.copy(cam.position);
+      bow.add(cam, hub);
+    });
+    const P = (x, y) => new THREE.Vector3(x, y, 0);
+    bow.add(new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints([P(0.42, 1.42), P(0.42, -1.42), P(0.8, 1.38), P(0.66, -1.3), P(0.66, 1.3), P(0.8, -1.38)]),
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })));
+    const stab = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.1, 6), riserMat);
+    stab.rotation.z = -Math.PI / 2; stab.position.set(1.85, -0.2, 0);
+    const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.16, 8), glow(color, 1));
+    weight.rotation.z = Math.PI / 2; weight.position.set(2.45, -0.2, 0);
+    const sight = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.02, 6, 16), glow(0xff5a4a, 1.6));
+    sight.rotation.y = Math.PI / 2; sight.position.set(1.62, 0.45, 0);
+    bar(1.3, 0.45, 1.6, 0.45, 0.04, riserMat);
+    bow.add(stab, weight, sight); bow.scale.setScalar(1.15); bow.position.set(-2.6, 2.5, 2.4); bow.rotation.set(0, Math.PI - 0.35, 0.08);
+    g.add(bow); bob.push({ o: bow, y: 2.5, amp: 0.18, speed: 1.1, phase: 2 });
     // quiver
     const quiver = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 1.5, 7), stone(0x4a2f1c));
     quiver.position.set(3.4, 0.95, 1.6); quiver.rotation.z = -0.2; g.add(quiver);
