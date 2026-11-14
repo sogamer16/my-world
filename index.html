@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sohaib Qutub — The Chronicle</title>
+<meta name="description" content="Sohaib Qutub — mechanical engineering student, builder of sensors, systems and software. An explorable 3D character sheet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+</script>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<div id="title-screen">
+  <div class="title-inner">
+    <p class="eyebrow">A chronicle in six realms</p>
+    <h1>Sohaib Qutub</h1>
+    <p class="subtitle">Artificer of Flow &amp; Circuit</p>
+    <button id="start" type="button">Begin Adventure</button>
+    <p class="hint">Scroll, swipe or press 1–6 to travel</p>
+  </div>
+</div>
+
+<header id="hud-top" class="hud">
+  <div class="crest">
+    <span class="crest-mark"><b>SQ</b></span>
+    <div>
+      <strong>Sohaib Qutub</strong>
+      <span id="place"></span>
+    </div>
+  </div>
+  <div class="xp" title="Degree progress">
+    <span>Year <b id="xp-year"></b> · Bachelor of Design</span>
+    <div class="xp-bar"><i id="xp-fill"></i></div>
+  </div>
+</header>
+
+<main id="panel" class="hud" aria-live="polite"></main>
+
+<nav id="hotbar" class="hud" aria-label="Realms"></nav>
+
+<noscript><p style="padding:2rem;color:#fff">This chronicle needs JavaScript and WebGL.</p></noscript>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
