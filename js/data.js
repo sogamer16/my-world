@@ -20,7 +20,7 @@ export const hero = {
     { key: 'CHA', label: 'Voice', value: 15, note: 'Debating · pitches · 200+ person events' },
     { key: 'STR', label: 'Discipline', value: 14, note: 'Karate medals · Duke of Edinburgh' },
     { key: 'WIS', label: 'Systems Sense', value: 15, note: 'Sees how the whole thing fits together' },
-    { key: 'PER', label: 'Focus', value: 15, note: 'Archery · draw, anchor, release, repeat' },
+    { key: 'PER', label: 'Focus', value: 15, note: 'Compound archery · draw, anchor, release, repeat' },
   ],
   tongues: [
     { name: 'Arabic', rank: 'Native' },
@@ -209,11 +209,10 @@ export const scrolls = [
 
 export const pursuits = [
   {
-    name: 'Archery',
+    name: 'Compound archery',
     glyph: '➶',
     detail:
-      'Draw, anchor, release. It is the same loop as engineering: change one variable, watch where it lands, go again.',
-    extra: 'Side project: planning a field companion app for hunters in Victoria.',
+      'Cams, let-off, a release aid and a sight to tune. It is the same loop as engineering: change one variable, watch where it lands, go again.',
   },
   {
     name: 'Karate',
