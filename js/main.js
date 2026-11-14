@@ -3,7 +3,8 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import * as D from './data.js?v=4';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as D from './data.js?v=5';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -201,6 +202,34 @@ tick.push((t, dt) => {
   while (range.stuck.length > 9) range.group.remove(range.stuck.shift());
 });
 
+/* ---------- generated models ---------- */
+// Each prop loads on top of a hand-built stand-in, which it replaces once ready.
+// If a model fails to load, the stand-in simply stays.
+const gltf = new GLTFLoader();
+function prop(g, name, { h, w, x = 0, y = 0.25, z = 0, ry = 0, lit = 0.5, replace = [], onLoad } = {}) {
+  gltf.load(`assets/models/${name}.glb?v=5`, (res) => {
+    const m = res.scene;
+    const box = new THREE.Box3().setFromObject(m);
+    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+    const holder = new THREE.Group();
+    m.position.set(-c.x, -box.min.y, -c.z);
+    holder.add(m);
+    holder.scale.setScalar(h ? h / size.y : w / Math.max(size.x, size.z));
+    holder.position.set(x, y, z); holder.rotation.y = ry;
+    m.traverse((o) => {
+      o.userData.realm = g.userData.realm;
+      if (o.isMesh) { // self-lit by its own texture so it reads clearly in the night scene
+        const mt = o.material;
+        mt.metalness = 0; mt.roughness = 0.85;
+        mt.emissive = new THREE.Color(0xffffff); mt.emissiveMap = mt.map; mt.emissiveIntensity = lit;
+      }
+    });
+    replace.forEach((o) => o.parent && o.parent.remove(o));
+    g.add(holder);
+    if (onLoad) onLoad(holder);
+  }, undefined, () => { /* keep the stand-in */ });
+}
+
 const build = {
   hero(g, color) {
     const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(1.9, 0), glow(color, 0.9, { transparent: true, opacity: 0.94 }));
@@ -218,6 +247,8 @@ const build = {
       shards.add(s);
     }
     g.add(shards); spin.push({ o: shards, y: -0.4 });
+    prop(g, 'hero', { h: 3.9, x: -3.2, z: 2.3, ry: 0.4 });
+    prop(g, 'anvil', { h: 2.4, x: 3.1, z: 2.2, ry: -0.45 });
   },
 
   quests(g, color) {
@@ -242,11 +273,13 @@ const build = {
     grip.position.y = 4.05;
     sword.add(blade, guard, grip); sword.position.set(0, 0, 1.2); sword.rotation.z = 0.08;
     g.add(sword);
+    prop(g, 'sword', { h: 5, z: 1.3, replace: [sword] });
   },
 
   skills(g) {
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.5, 3.4, 6), stone(0x4d4168));
     trunk.position.y = 1.9; g.add(trunk);
+    prop(g, 'tree', { h: 5, replace: [trunk] });
     const linePts = [];
     const root = new THREE.Vector3(0, 3.6, 0);
     const heart = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), glow(0xffffff, 0.9));
@@ -275,6 +308,7 @@ const build = {
   trophies(g, color) {
     const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(1.1, 0.3, 90, 10), glow(color, 0.9, { metalness: 1, roughness: 0.2, flatShading: false }));
     knot.position.y = 5.2; g.add(knot); spin.push({ o: knot, y: 0.5, x: 0.2 });
+    prop(g, 'trophy', { h: 4.2, replace: [knot], onLoad: (o) => spin.push({ o, y: 0.35 }) });
     const tint = { gold: 0xffd166, silver: 0xcfd8e6, bronze: 0xd08a52 };
     D.trophies.forEach((t, i) => {
       const a = (i / D.trophies.length) * TAU;
@@ -373,23 +407,25 @@ const build = {
       emblem.position.set(x, h + 0.5, -1.2); spin.push({ o: emblem, y: 1 });
       g.add(pole, flag, emblem);
     });
+    const old = [];
     for (let i = 0; i < 5; i++) { // campfire logs + flame
       const log = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.3, 5), stone(0x3a2718));
       log.rotation.set(Math.PI / 2.4, (i / 5) * TAU, 0); log.position.set(0, 0.45, 1.6);
-      g.add(log);
+      g.add(log); old.push(log);
     }
     const flame = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 6), glow(0xff8a3c, 3));
     flame.position.set(0, 1.2, 1.6);
     const fire = new THREE.PointLight(0xff8a3c, 40, 16, 2); fire.position.set(0, 1.8, 1.6);
-    g.add(flame, fire);
+    g.add(flame, fire); old.push(flame);
     tick.push((t) => {
       const f = 1 + Math.sin(t * 11) * 0.08 + Math.sin(t * 17.3) * 0.06;
       flame.scale.set(f, 1 + Math.sin(t * 9) * 0.18, f); fire.intensity = 40 * f;
     });
     [[-3.6, 2.6], [3.7, 2.4]].forEach(([x, z]) => {
       const tent = new THREE.Mesh(new THREE.ConeGeometry(1.3, 1.9, 4), stone(0x5d5078));
-      tent.position.set(x, 1.2, z); tent.rotation.y = Math.PI / 4; g.add(tent);
+      tent.position.set(x, 1.2, z); tent.rotation.y = Math.PI / 4; g.add(tent); old.push(tent);
     });
+    prop(g, 'camp', { w: 6.4, z: 1.7, ry: -0.5, replace: old });
     void color;
   },
 
@@ -397,8 +433,9 @@ const build = {
     const gate = new THREE.Group(); gate.position.y = 4.4; g.add(gate);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(3, 0.28, 8, 48), stone(0x4a4466));
     gate.add(ring);
+    const oldGate = [ring];
     const inner = new THREE.Mesh(new THREE.TorusGeometry(2.72, 0.07, 6, 64), glow(color, 2.6));
-    gate.add(inner);
+    gate.add(inner); oldGate.push(inner);
     const mat = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
       uniforms: { t: { value: 0 }, c: { value: new THREE.Color(color) } },
@@ -424,8 +461,9 @@ const build = {
       const a = (i / 8) * TAU;
       const r = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.5), glow(0xe3b866, 2));
       r.position.set(Math.cos(a) * 3, Math.sin(a) * 3, 0); r.rotation.z = a;
-      gate.add(r);
+      gate.add(r); oldGate.push(r);
     }
+    prop(g, 'gate', { h: 6.8, lit: 0.85, replace: oldGate, onLoad: () => { gate.position.y = 3.75; gate.scale.setScalar(0.95); } });
     gate.userData.face = true;
   },
 };
