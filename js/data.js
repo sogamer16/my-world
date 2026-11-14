@@ -11,7 +11,8 @@ export const hero = {
   lore:
     'I build things. An engineering student who wants to know how and why the machine works — ' +
     'then wires it, codes it and ships it. Six hackathons deep, in teams and alone, across ' +
-    'mechanical engineering, embedded systems, ML and software.',
+    'mechanical engineering, embedded systems, ML and software. Off the bench: an archer, ' +
+    'a karateka, a game-jammer, and the builder of a robotics program for teenagers.',
   journey: ['Makkah', 'Swansea, Wales', 'Melbourne'],
   attributes: [
     { key: 'INT', label: 'Intellect', value: 16, note: 'A* Maths & Physics · CFD · ML' },
@@ -19,6 +20,7 @@ export const hero = {
     { key: 'CHA', label: 'Voice', value: 15, note: 'Debating · pitches · 200+ person events' },
     { key: 'STR', label: 'Discipline', value: 14, note: 'Karate medals · Duke of Edinburgh' },
     { key: 'WIS', label: 'Systems Sense', value: 15, note: 'Sees how the whole thing fits together' },
+    { key: 'PER', label: 'Focus', value: 15, note: 'Compound archery · draw, anchor, release, repeat' },
   ],
   tongues: [
     { name: 'Arabic', rank: 'Native' },
@@ -59,6 +61,22 @@ export const quests = [
       'Next: stepper or solenoid valves to throttle flow at specific points',
     ],
     loot: ['Arduino', 'C/C++', 'Flow sensors', 'IoT', 'Solar'],
+  },
+  {
+    name: 'ABAAD Robotics',
+    kind: 'Epic Quest',
+    role: 'AI robotics program for ages 14–18 · founder project',
+    when: '2026 – Present',
+    status: 'Active',
+    summary:
+      'A hands-on course where teenagers build a robot, train its AI themselves and show it off — designed so Arabic speakers are first-class.',
+    objectives: [
+      'Al-Anqa: the robot platform students assemble and drive, with wheel hardware under test',
+      'Arabic block-coding interface in the spirit of Scratch, so the first program is written in the student\'s own language',
+      'Hand-gesture recognition built to run on ordinary classroom laptops',
+      'Three-day intensive format — build, train a model overnight, showcase — with an Australia pilot proposal drafted',
+    ],
+    loot: ['Robotics', 'JavaScript', 'Computer vision', 'Curriculum design', 'Proposal writing'],
   },
   {
     name: 'Sentinel',
@@ -105,6 +123,21 @@ export const quests = [
     ],
     loot: ['CFD', 'SimScale', 'Fluid mechanics'],
   },
+  {
+    name: 'The Game Forge',
+    kind: 'Side Quest',
+    role: 'Game jams and small games · C#',
+    when: '2025 – 2026',
+    status: 'Complete',
+    summary: 'Games built for the fun of it and against the clock.',
+    objectives: [
+      'Game Jam 2026 entry on the theme of ecosystems',
+      'Creep Crawlers — a creature game in C#',
+      'Much Ado About Nothing — Shakespeare retold as a 2D game',
+      'Turbo Bros: Overdrive — a racing game design',
+    ],
+    loot: ['C#', 'Game design', 'Game jams'],
+  },
 ];
 
 // rank: 1 Novice · 2 Adept · 3 Seasoned
@@ -116,6 +149,8 @@ export const skillTree = [
     skills: [
       { name: 'Python', rank: 3 },
       { name: 'C / C++', rank: 3 },
+      { name: 'JavaScript', rank: 2 },
+      { name: 'C#', rank: 2 },
       { name: 'Bash', rank: 2 },
       { name: 'Linux / WSL', rank: 2 },
       { name: 'Git / GitHub', rank: 2 },
@@ -147,6 +182,8 @@ export const skillTree = [
       { name: 'Modbus', rank: 2 },
       { name: 'GPIO', rank: 2 },
       { name: 'HVAC wiring', rank: 2 },
+      { name: 'Robot platforms', rank: 2 },
+      { name: 'Gesture recognition', rank: 1 },
     ],
   },
 ];
@@ -168,6 +205,35 @@ export const scrolls = [
   'Introduction to Materials Science — ASU',
   'Crystal Structures & Properties of Metals — ASU',
   'Introduction to Cybersecurity Fundamentals',
+];
+
+export const pursuits = [
+  {
+    name: 'Compound archery',
+    glyph: '➶',
+    detail:
+      'Cams, let-off, a release aid and a sight to tune. It is the same loop as engineering: change one variable, watch where it lands, go again.',
+  },
+  {
+    name: 'Karate',
+    glyph: '拳',
+    detail: 'Years on the mat and multiple regional competition medals. Where the discipline comes from.',
+  },
+  {
+    name: 'Making games',
+    glyph: '♞',
+    detail: 'Game jams and small C# games — the fastest way to learn what "finished" means.',
+  },
+  {
+    name: 'Debating',
+    glyph: '❝',
+    detail: 'Second place at Trinity College. Arguing a side I was handed five minutes ago.',
+  },
+  {
+    name: 'Design & 3D',
+    glyph: '✎',
+    detail: 'Blender modelling and animation, and pattern work — including a camouflage built from Arabic-inspired geometry.',
+  },
 ];
 
 export const guilds = [
@@ -204,6 +270,7 @@ export const realms = [
   { id: 'quests', glyph: '⚔', name: 'Quests', place: 'The Standing Stones', color: '#ff8a5c' },
   { id: 'skills', glyph: '❖', name: 'Skills', place: 'The Constellation Tree', color: '#7cc4ff' },
   { id: 'trophies', glyph: '♛', name: 'Trophies', place: 'The Hall of Deeds', color: '#ffd166' },
+  { id: 'pursuits', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', color: '#5ee6d6' },
   { id: 'guilds', glyph: '⚑', name: 'Guilds', place: 'The Banner Camp', color: '#8dffb0' },
   { id: 'portal', glyph: '◈', name: 'Portal', place: 'The Waygate', color: '#ff7ad9' },
 ];

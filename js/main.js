@@ -124,6 +124,50 @@ function island(color) {
   return g;
 }
 
+/* ---------- archery range ---------- */
+const range = { center: new THREE.Vector3(0, 3.5, -0.6), radius: 1.6, group: null, color: 0xffffff, flights: [], stuck: [] };
+function arrow(color) { // points along +z: tip at the origin, shaft trailing behind toward -z... flipped on use
+  const a = new THREE.Group();
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.5, 5), stone(0xd9c7a0));
+  shaft.rotation.x = Math.PI / 2; shaft.position.z = 0.75;
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.2, 5), stone(0x9aa3b5));
+  tip.rotation.x = -Math.PI / 2; tip.position.z = -0.05;
+  a.add(shaft, tip);
+  for (let i = 0; i < 3; i++) {
+    const f = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.34), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 1.4, side: THREE.DoubleSide }));
+    f.position.z = 1.32; f.rotation.set(Math.PI / 2, 0, 0); f.rotation.order = 'ZXY'; f.rotation.z = (i / 3) * TAU;
+    f.translateX(0.07); a.add(f);
+  }
+  return a;
+}
+function stick(a, x, y) { // embed an arrow in the target face at offset (x, y) from the centre
+  a.position.set(range.center.x + x, range.center.y + y, range.center.z + 0.12);
+  a.rotation.set(-y * 0.12 + 0.05, x * 0.12, 0);
+}
+function shoot() {
+  if (!range.group) return;
+  // gaussian-ish spread; steadier hands land closer to gold
+  const r = Math.min(range.radius * 0.98, Math.abs((Math.random() + Math.random() + Math.random() - 1.5) * 1.5));
+  const th = Math.random() * TAU;
+  const x = Math.cos(th) * r, y = Math.sin(th) * r;
+  const a = arrow(range.color);
+  range.group.add(a);
+  range.flights.push({ a, x, y, t: 0, from: new THREE.Vector3(THREE.MathUtils.randFloatSpread(1.5), 2.4, 17) });
+  return Math.max(1, 10 - Math.floor(r / (range.radius / 10)));
+}
+tick.push((t, dt) => {
+  for (const f of range.flights) {
+    f.t = Math.min(1, f.t + dt / 0.42);
+    const to = new THREE.Vector3(range.center.x + f.x, range.center.y + f.y, range.center.z + 0.12);
+    f.a.position.lerpVectors(f.from, to, f.t);
+    f.a.position.y += Math.sin(f.t * Math.PI) * 1.1;
+    f.a.rotation.set(-Math.cos(f.t * Math.PI) * 0.12, 0, 0);
+    if (f.t === 1) { stick(f.a, f.x, f.y); range.stuck.push(f.a); }
+  }
+  range.flights = range.flights.filter((f) => f.t < 1);
+  while (range.stuck.length > 9) range.group.remove(range.stuck.shift());
+});
+
 const build = {
   hero(g, color) {
     const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(1.9, 0), glow(color, 0.9, { transparent: true, opacity: 0.94 }));
@@ -145,13 +189,13 @@ const build = {
 
   quests(g, color) {
     D.quests.forEach((q, i) => {
-      const a = THREE.MathUtils.mapLinear(i, 0, D.quests.length - 1, -1.15, 1.15) + Math.PI / 2;
-      const h = 3.2 + (i % 2) * 1.1 + (i === 0 ? 1.2 : 0);
-      const m = new THREE.Mesh(jitter(new THREE.BoxGeometry(1.1, h, 0.7, 1, 3, 1), 0.14), stone(0x4a4466));
-      m.position.set(Math.cos(a) * 3.9, h / 2 + 0.2, -Math.sin(a) * 3.9 + 2.2);
+      const a = THREE.MathUtils.mapLinear(i, 0, D.quests.length - 1, -1.5, 1.5) + Math.PI / 2;
+      const h = 2.8 + (i % 2) * 0.9 + (i === 0 ? 1.2 : 0);
+      const m = new THREE.Mesh(jitter(new THREE.BoxGeometry(0.95, h, 0.6, 1, 3, 1), 0.14), stone(0x4a4466));
+      m.position.set(Math.cos(a) * 4.4, h / 2 + 0.2, -Math.sin(a) * 4.4 + 2.4);
       m.rotation.y = a - Math.PI / 2;
-      const rune = new THREE.Mesh(new THREE.BoxGeometry(0.5, h * 0.55, 0.06), glow(q.status === 'Active' ? 0x8dffb0 : color, 1.8));
-      rune.position.set(0, 0, 0.36); m.add(rune);
+      const rune = new THREE.Mesh(new THREE.BoxGeometry(0.42, h * 0.55, 0.06), glow(q.status === 'Active' ? 0x8dffb0 : color, 1.8));
+      rune.position.set(0, 0, 0.31); m.add(rune);
       const mark = new THREE.Mesh(new THREE.OctahedronGeometry(0.34), glow(q.status === 'Active' ? 0x8dffb0 : 0xe3b866, 2.4));
       mark.position.set(m.position.x, h + 1.1, m.position.z);
       g.add(m, mark); spin.push({ o: mark, y: 1.4 }); bob.push({ o: mark, y: h + 1.1, amp: 0.22, speed: 1.6, phase: i });
@@ -208,6 +252,71 @@ const build = {
       gem.position.set(x, 2.4, z);
       g.add(ped, gem); spin.push({ o: gem, y: 1 }); bob.push({ o: gem, y: 2.4, amp: 0.18, speed: 1.3, phase: i });
     });
+  },
+
+  pursuits(g, color) {
+    const T = range.center;
+    const leg = (x, z) => {
+      const l = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 3.6, 5), stone(0x6b5a44));
+      l.position.set(x, 1.9, z - 0.5); l.rotation.x = z ? 0.35 : -0.12; l.rotation.z = -x * 0.14; g.add(l);
+    };
+    leg(-0.9, 0); leg(0.9, 0); leg(0, -1.1);
+    const butt = new THREE.Mesh(new THREE.CylinderGeometry(range.radius + 0.25, range.radius + 0.25, 0.35, 28), stone(0x5a4a2c));
+    butt.rotation.x = Math.PI / 2; butt.position.set(T.x, T.y, T.z - 0.2); g.add(butt);
+    // standard target face: gold, red, blue, black, white — two scoring rings each
+    [[0x9a9aa2, 0], [0x121218, 0], [0x1f5fb8, 0.12], [0xb8322a, 0.15], [0xd9a520, 0.4]].forEach(([c, e], i) => {
+      const ring = new THREE.Mesh(new THREE.CircleGeometry(range.radius * (1 - i / 5), 40),
+        new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: e, roughness: 1 }));
+      ring.position.set(T.x, T.y, T.z + i * 0.004); g.add(ring);
+    });
+    // a compound bow resting beside the target: riser, short limbs, cams, string and cables
+    const bow = new THREE.Group();
+    const bar = (x1, y1, x2, y2, w, mat) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, Math.hypot(x2 - x1, y2 - y1), w * 0.7), mat);
+      m.position.set((x1 + x2) / 2, (y1 + y2) / 2, 0); m.rotation.z = Math.atan2(y2 - y1, x2 - x1) - Math.PI / 2;
+      bow.add(m);
+    };
+    const riserMat = stone(0x2c3c48), limbMat = glow(color, 0.7);
+    bar(1.2, -0.3, 1.2, 0.3, 0.2, stone(0x3a2718)); // grip
+    bar(1.2, 0.3, 1.34, 0.8, 0.13, riserMat); bar(1.2, -0.3, 1.34, -0.8, 0.13, riserMat);
+    bar(1.34, 0.8, 0.62, 1.42, 0.1, limbMat); bar(1.34, -0.8, 0.62, -1.42, 0.1, limbMat);
+    [1.42, -1.42].forEach((y) => {
+      const cam = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.055, 6, 18), glow(0xe3b866, 1.3));
+      cam.position.set(0.62, y, 0); cam.scale.y = 0.8;
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.12, 8), riserMat);
+      hub.rotation.x = Math.PI / 2; hub.position.copy(cam.position);
+      bow.add(cam, hub);
+    });
+    const P = (x, y) => new THREE.Vector3(x, y, 0);
+    bow.add(new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints([P(0.42, 1.42), P(0.42, -1.42), P(0.8, 1.38), P(0.66, -1.3), P(0.66, 1.3), P(0.8, -1.38)]),
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })));
+    const stab = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.1, 6), riserMat);
+    stab.rotation.z = -Math.PI / 2; stab.position.set(1.85, -0.2, 0);
+    const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.16, 8), glow(color, 1));
+    weight.rotation.z = Math.PI / 2; weight.position.set(2.45, -0.2, 0);
+    const sight = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.02, 6, 16), glow(0xff5a4a, 1.6));
+    sight.rotation.y = Math.PI / 2; sight.position.set(1.62, 0.45, 0);
+    bar(1.3, 0.45, 1.6, 0.45, 0.04, riserMat);
+    bow.add(stab, weight, sight); bow.scale.setScalar(1.15); bow.position.set(-2.6, 2.5, 2.4); bow.rotation.set(0, Math.PI - 0.35, 0.08);
+    g.add(bow); bob.push({ o: bow, y: 2.5, amp: 0.18, speed: 1.1, phase: 2 });
+    // quiver
+    const quiver = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 1.5, 7), stone(0x4a2f1c));
+    quiver.position.set(3.4, 0.95, 1.6); quiver.rotation.z = -0.2; g.add(quiver);
+    for (let i = 0; i < 4; i++) {
+      const a = arrow(color); a.rotation.x = -Math.PI / 2 + (i - 1.5) * 0.08; a.rotation.z = -0.2 + (i - 1.5) * 0.06;
+      a.position.set(3.55 + (i - 1.5) * 0.09, 1.5, 1.6); g.add(a);
+    }
+    // dojo lanterns for the other pursuits
+    [[-4.4, -1.6, 0xff8a5c], [4.4, -1.4, 0xb79bff]].forEach(([x, z, c], i) => {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 2.4, 5), stone(0x4a4466));
+      post.position.set(x, 1.4, z);
+      const lamp = new THREE.Mesh(new THREE.OctahedronGeometry(0.32), glow(c, 2));
+      lamp.position.set(x, 3, z);
+      g.add(post, lamp); spin.push({ o: lamp, y: 0.9 }); bob.push({ o: lamp, y: 3, amp: 0.12, speed: 1.4, phase: i });
+    });
+    range.group = g; range.color = color;
+    [[0.5, 0.42], [-0.62, -0.2]].forEach(([x, y]) => { const a = arrow(color); stick(a, x, y); g.add(a); });
   },
 
   guilds(g, color) {
@@ -315,6 +424,17 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+let best = 0, shots = 0;
+try { best = +localStorage.getItem('best-shot') || 0; } catch { /* storage unavailable */ }
+function loose() {
+  const score = shoot();
+  if (!score) return;
+  shots++;
+  if (score > best) { best = score; try { localStorage.setItem('best-shot', best); } catch { /* ignore */ } }
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setTimeout(() => { set('s-last', score === 10 ? '10 ✦' : score); set('s-best', best); set('s-n', shots); }, 420);
+}
+
 /* ================================================================== */
 /*  Panels                                                             */
 /* ================================================================== */
@@ -365,6 +485,16 @@ const panels = {
         <div><strong>${esc(t.name)}</strong><span>${esc(t.detail)}</span></div><time>${esc(t.when)}</time></div>`).join('')}</section>
     <section><h3>Scrolls of Certification</h3><ul class="scrolls">${D.scrolls.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`,
 
+  pursuits: (r) => `${head(r, 'Beyond the Workshop')}
+    <p class="lore">What I do when nobody is marking it.</p>
+    <div class="range">
+      <button type="button" id="loose">Loose an arrow</button>
+      <div class="score"><span>Last <b id="s-last">–</b></span><span>Best <b id="s-best">${best || '–'}</b></span><span>Shots <b id="s-n">${shots}</b></span></div>
+    </div>
+    <section style="margin-top:18px">${D.pursuits.map((p) => `
+      <div class="pursuit"><span class="pg">${esc(p.glyph)}</span>
+        <div><strong>${esc(p.name)}</strong><p>${esc(p.detail)}</p>${p.extra ? `<p class="extra">${esc(p.extra)}</p>` : ''}</div></div>`).join('')}</section>`,
+
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
       <div class="card"><time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
@@ -390,6 +520,7 @@ let targetAngle = realms[0].angle;
 hotbar.innerHTML = realms.map((r, i) =>
   `<button type="button" data-i="${i}" style="--c:${r.color}"><kbd>${i + 1}</kbd><span class="g">${r.glyph}</span>${r.name}</button>`).join('');
 hotbar.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); });
+panel.addEventListener('click', (e) => { if (e.target.closest('#loose')) loose(); });
 
 function go(i) {
   i = ((i % N) + N) % N;
@@ -408,6 +539,7 @@ function go(i) {
   void panel.offsetWidth;
   panel.classList.add('swap');
   hotbar.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-current', k === i));
+  if (playing) history.replaceState(null, '', `#${r.id}`);
 }
 
 document.getElementById('xp-year').textContent = `${D.hero.year} of ${D.hero.years}`;
@@ -425,6 +557,7 @@ document.getElementById('start').addEventListener('click', start);
 addEventListener('keydown', (e) => {
   if (!playing) { if (e.key === 'Enter' || e.key === ' ') start(); return; }
   if (e.key >= '1' && e.key <= String(N)) go(+e.key - 1);
+  else if ((e.key === ' ' || e.key === 'Enter') && realms[current].id === 'pursuits' && !e.target.closest('button, a, summary')) loose();
   else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(current + 1);
   else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(current - 1);
 });
@@ -456,7 +589,11 @@ canvas.addEventListener('pointerup', (e) => {
   if (!down || !playing) return;
   const dx = e.clientX - down.x, dy = e.clientY - down.y; down = null;
   if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) return go(current + (dx < 0 ? 1 : -1));
-  if (Math.abs(dx) + Math.abs(dy) < 8) { const h = pick(e); if (h >= 0) go(h); }
+  if (Math.abs(dx) + Math.abs(dy) < 8) {
+    const h = pick(e);
+    if (h >= 0 && h === current && realms[h].id === 'pursuits') loose();
+    else if (h >= 0) go(h);
+  }
 });
 
 /* ================================================================== */
@@ -517,5 +654,6 @@ function frame() {
 }
 
 layout();
-go(0);
+go(Math.max(0, realms.findIndex((r) => `#${r.id}` === location.hash)));
+if (location.hash.length > 1 && current > 0) start();
 frame();

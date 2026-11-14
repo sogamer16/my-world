@@ -1,7 +1,7 @@
 # my-world
 
 An explorable 3D character sheet for Sohaib Qutub — a fantasy-RPG take on a portfolio.
-Six floating realms (Character, Quests, Skills, Trophies, Guilds, Portal) built with three.js.
+Seven floating realms (Character, Quests, Skills, Trophies, Pursuits, Guilds, Portal) built with three.js.
 
 ## Run
 
@@ -19,4 +19,5 @@ To publish, enable GitHub Pages for the repository (Settings → Pages → deplo
 All content lives in `js/data.js`. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
 three.js r170 is vendored in `vendor/three` (MIT).
 
-Controls: scroll, swipe, arrow keys, `1`–`6`, the hotbar, or click an island.
+Controls: scroll, swipe, arrow keys, `1`–`7`, the hotbar, or click an island. On the Archery Range, click the target (or press space) to shoot.
+Each realm has a link, e.g. `#quests`.

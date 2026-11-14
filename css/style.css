@@ -150,6 +150,18 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
 .card p { font-size: 0.93rem; color: #d9cfba; margin-top: 4px; }
 .card time { float: right; color: var(--dim); font-size: 0.8rem; }
 
+.range { margin-top: 16px; padding: 14px; border: 1px solid var(--line); background: rgba(0, 0, 0, 0.3); display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+#loose { font-family: var(--display); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.8rem; padding: 0.8em 1.3em; cursor: pointer; color: #06231f; background: linear-gradient(180deg, #b5fff4, var(--accent)); border: 1px solid #e6fffb; transition: 0.15s; }
+#loose:hover, #loose:focus-visible { filter: brightness(1.15); box-shadow: 0 0 18px var(--accent); outline: none; }
+#loose:active { transform: scale(0.96); }
+.score { display: flex; gap: 16px; font-size: 0.85rem; color: var(--dim); }
+.score b { font-family: var(--display); color: var(--ink); font-size: 1.05rem; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.pursuit { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.pursuit .pg { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--accent); color: var(--accent); font-size: 1.1rem; }
+.pursuit strong { font-family: var(--display); font-size: 1.05rem; }
+.pursuit p { font-size: 0.93rem; color: #d9cfba; }
+.pursuit p.extra { color: var(--dim); font-style: italic; margin-top: 3px; }
+
 /* portal */
 a.gate {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; text-decoration: none; color: var(--ink);
@@ -182,7 +194,8 @@ a.gate:hover::after { transform: translateX(5px); }
   #panel::before { top: -20px; margin: -20px -16px 16px; }
   h2 { font-size: 1.4rem; }
   #hotbar { bottom: 0; left: 0; right: 0; transform: none; gap: 4px; padding: 6px 8px; border-left: 0; border-right: 0; border-bottom: 0; }
-  #hotbar button { flex: 1; width: auto; min-width: 0; height: 62px; font-size: 0.5rem; letter-spacing: 0.04em; }
+  #hotbar button { flex: 1; width: auto; min-width: 0; height: 60px; font-size: 0.46rem; letter-spacing: 0.02em; }
+  #hotbar { gap: 3px; padding: 6px; }
   #hotbar button kbd { display: none; }
 }
 
