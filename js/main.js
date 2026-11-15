@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=8';
+import * as D from './data.js?v=9';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -412,7 +412,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=8`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=9`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -573,12 +573,12 @@ const build = {
   },
 
   guilds(g, color) {
-    [[-2.6, 0x1f8f5f, 5.4, 'unimelb.svg', '#000f46'], [2.6, 0x7a2bd6, 4.6, 'samu.png', '#ffffff']].forEach(([x, c, h, logo, bg], i) => {
+    [[-2.6, 0x1f8f5f, 5.4, 'unimelb.svg', '#000f46'], [2.6, 0x006c35, 4.6, null, '#006c35']].forEach(([x, c, h, logo, bg], i) => {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, h, 6), stone(0x6b5a44));
       pole.position.set(x, h / 2 + 0.2, -1.2);
       const geo = new THREE.PlaneGeometry(1.7, 2.6, 8, 8);
       geo.translate(0.85, 0, 0);
-      const map = logoTexture(logo, { w: 340, h: 520, bg, pad: 0.1 });
+      const map = logo ? logoTexture(logo, { w: 340, h: 520, bg, pad: 0.1 }) : ssamBanner();
       const flag = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map, side: THREE.DoubleSide, roughness: 0.9 }));
       flag.castShadow = true; pole.castShadow = true;
       flag.position.set(x + 0.05, h - 1.2, -1.2);
@@ -671,7 +671,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
   };
-  img.src = `assets/logos/${file}?v=8`;
+  img.src = `assets/logos/${file}?v=9`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -686,6 +686,24 @@ function signboard(g, { x, z, ry = 0, w = 1.6, h = 0.7, y = 1.1, logo, bg = '#ff
   board.position.y = y; board.castShadow = true; board.receiveShadow = true; s.add(board);
   s.position.set(x, 0.3, z); s.rotation.y = ry; g.add(s);
   return s;
+}
+// The Saudi Students Association in Melbourne, by name (no official logo file available).
+function ssamBanner() {
+  const c = document.createElement('canvas'); c.width = 340; c.height = 520;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const draw = () => {
+    const x = c.getContext('2d');
+    x.fillStyle = '#006c35'; x.fillRect(0, 0, 340, 520);
+    x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = 4; x.strokeRect(16, 16, 308, 488);
+    x.fillStyle = '#ffffff'; x.textAlign = 'center'; x.direction = 'rtl';
+    x.font = '700 50px "Aref Ruqaa", serif';
+    ['نادي الطلبة', 'السعودي', 'في ملبورن'].forEach((t, i) => x.fillText(t, 170, 150 + i * 70));
+    x.direction = 'ltr'; x.font = '600 64px Oswald, Arial, sans-serif'; x.fillText('SSAM', 170, 420);
+    tex.needsUpdate = true;
+  };
+  draw();
+  Promise.all([document.fonts.load('700 50px "Aref Ruqaa"', 'نادي'), document.fonts.load('600 64px Oswald')]).then(draw).catch(() => {});
+  return tex;
 }
 // A roll-up banner, like the CISSA one at Codebrew.
 function rollup(g, { x, z, ry = 0 }) {
@@ -776,7 +794,6 @@ const landmarks = {
   quests(g) { // Melbourne: the city tram and a laneway lamp
     prop(g, 'tram', { w: 4.6, x: 3.3, z: -4.2, ry: -0.55 });
     rollup(g, { x: -2.3, z: 3.6, ry: 0.3 });
-    signboard(g, { x: 2.7, z: 4.0, ry: -0.2, w: 1.4, h: 0.55, y: 0.75, logo: 'totex.svg', bg: '#0b0b0b', pad: 0.06 });
     prop(g, 'lamp', { h: 2.6, x: -4.7, z: 3.2, ry: 0.8 });
     lampLight(g, -4.85, 2.5, 3.1);
     prop(g, 'gum', { h: 4.2, x: -3.9, z: -3.9, replace: g.userData.trees });
@@ -912,7 +929,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=8" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=9" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -946,12 +963,12 @@ const panels = {
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}">
-        <img src="assets/logos/${esc(b.logo)}?v=8" alt="${esc(b.name)} logo" loading="lazy"><span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=9" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=8" alt="">` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=9" alt="">` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=8" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=9" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
