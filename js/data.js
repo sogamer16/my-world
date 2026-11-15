@@ -218,7 +218,8 @@ export const trophies = [
   { name: 'Silver Tongue', plain: 'Debating', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
   { name: 'Six Hackathons', plain: 'Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
   { name: 'Sohaib the Great', plain: 'Leavers hoodie', detail: 'Olchfa School leavers hoodie — number 23', when: '2023', tier: 'silver' },
-  { name: 'Duke of Edinburgh', detail: 'Bronze Award', when: '2023', tier: 'bronze' },
+  // medalLogo: put the official logo file in assets/logos and name it here (e.g. 'dofe.png') to show it on the 3D medal
+  { name: 'Duke of Edinburgh', detail: 'Bronze Award', when: '2023', tier: 'bronze', medalLogo: '' },
   { name: 'Way of the Empty Hand', plain: 'Karate', detail: 'Multiple regional karate medals', when: '', tier: 'gold' },
   { name: 'Twin Stars', plain: 'GCSEs', detail: 'A* in GCSE Mathematics and Physics', when: '2023', tier: 'gold' },
 ];
