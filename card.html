@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sohaib Qutub — Scan or tap</title>
+<meta name="description" content="Scan the code to open Sohaib Qutub's portfolio or CV.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0b0820">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #efe6d2; --dim: #a99f8c; --gold: #e3b866; --bg: #07060f; --line: rgba(227, 184, 102, 0.28); --accent: #b79bff;
+    --display: 'Cinzel', 'Trajan Pro', Georgia, serif; --body: 'Spectral', Georgia, 'Times New Roman', serif; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: radial-gradient(ellipse at 50% 0%, #1b1440, var(--bg) 70%) fixed var(--bg); color: var(--ink); font-family: var(--body); line-height: 1.55; min-height: 100vh; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  a { color: var(--gold); }
+
+  /* ---------- on screen: hold the phone up ---------- */
+  .show { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 20px 16px; text-align: center; }
+  .show .ar { font-family: 'Aref Ruqaa', serif; font-size: 1.7rem; line-height: 1.1; color: var(--gold); }
+  .show h1 { font-family: var(--display); font-size: clamp(1.5rem, 6vw, 2.2rem); letter-spacing: 0.08em; line-height: 1.15; }
+  .show .role { color: var(--dim); font-style: italic; }
+  .qr { width: min(78vw, 46svh, 380px); aspect-ratio: 1; background: #fff; border-radius: 14px; padding: 6px; box-shadow: 0 0 0 1px var(--line), 0 0 50px rgba(183, 155, 255, 0.25); }
+  .qr img { display: block; width: 100%; height: 100%; }
+  .pick { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .pick button { background: none; border: 0; padding: 10px 20px; font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.1em; min-height: 44px; }
+  .pick button[aria-pressed='true'] { background: var(--gold); color: #17110a; }
+  .pick button:focus-visible, .more button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .dest { font-size: 0.85rem; color: var(--dim); word-break: break-all; }
+  .more { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 18px; font-size: 0.95rem; }
+  .more button, .more a { background: none; border: 0; padding: 8px 4px; color: var(--gold); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- how to make the physical card ---------- */
+  .how { max-width: 640px; margin: 0 auto; padding: 8px 20px 70px; }
+  .how h2 { font-family: var(--display); font-size: 1.15rem; letter-spacing: 0.1em; color: var(--gold); margin: 28px 0 8px; }
+  .how ol { padding-left: 1.3em; }
+  .how li { margin: 6px 0; }
+  .how code { background: rgba(255, 255, 255, 0.08); padding: 1px 6px; border-radius: 4px; font-size: 0.9em; word-break: break-all; }
+  .how .note { color: var(--dim); font-style: italic; margin-top: 10px; }
+
+  /* ---------- the printed sheet ---------- */
+  .sheet { display: none; }
+  .bc { -webkit-print-color-adjust: exact; print-color-adjust: exact; width: 85.6mm; height: 54mm; background: #fff; color: #0b0820; display: grid; grid-template-columns: 1fr 31mm; align-items: center; gap: 3mm; padding: 5mm 5mm 5mm 6mm; border: 0.2mm dashed #b9b9b9; overflow: hidden; break-inside: avoid; }
+  .bc .ar { font-family: 'Aref Ruqaa', serif; font-size: 13pt; line-height: 1; color: #8a6a2c; }
+  .bc strong { display: block; font-family: var(--display); font-size: 13pt; letter-spacing: 0.06em; line-height: 1.15; margin-top: 1.5mm; }
+  .bc .role { font-size: 7.5pt; line-height: 1.35; margin-top: 1.5mm; }
+  .bc .rule { width: 14mm; height: 0.35mm; background: #e3b866; margin: 2.5mm 0; }
+  .bc .url { font-size: 6.5pt; color: #444; word-break: break-all; }
+  .bc figure { text-align: center; }
+  .bc figure img { display: block; width: 31mm; height: 31mm; }
+  .bc figcaption { font-family: var(--display); font-size: 6pt; letter-spacing: 0.12em; margin-top: 0.5mm; }
+
+  @page { size: A4; margin: 12mm; }
+  @media print {
+    body { background: #fff; }
+    .show, .how { display: none; }
+    .sheet { display: grid; grid-template-columns: repeat(2, 85.6mm); justify-content: center; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<main class="show">
+  <p class="ar" lang="ar" dir="rtl">صهيب قطب</p>
+  <h1>Sohaib Qutub</h1>
+  <p class="role">Mechanical Engineering Systems · University of Melbourne</p>
+  <div class="qr"><img id="qr" src="assets/qr/world.svg" alt="QR code that opens Sohaib Qutub's 3D portfolio"></div>
+  <div class="pick" role="group" aria-label="Where the code leads">
+    <button type="button" data-to="world" aria-pressed="true">My world</button>
+    <button type="button" data-to="cv" aria-pressed="false">My CV</button>
+  </div>
+  <p class="dest" id="dest">sogamer16.github.io/my-world</p>
+  <p class="more">
+    <button type="button" id="share" hidden>Send the link</button>
+    <button type="button" id="print">Print cards</button>
+    <a href="#how">Make it tappable</a>
+    <a href="./">Open the world</a>
+  </p>
+</main>
+
+<section class="how" id="how">
+  <h2>Tap: an NFC card or sticker</h2>
+  <ol>
+    <li>Buy a blank <b>NTAG215</b> or <b>NTAG216</b> card or sticker. A white PVC card is the same size as the printed card below, so the print can go straight on top.</li>
+    <li>Install the free <b>NFC Tools</b> app (iPhone or Android). Choose Write → Add a record → URL.</li>
+    <li>Enter <code id="nfc-url">https://sogamer16.github.io/my-world/</code>, press Write, and hold the tag to the top of the phone.</li>
+    <li>Test it with another phone. Once it works, use Other → Lock tag so nobody can overwrite it. Locking is permanent.</li>
+  </ol>
+  <p class="note">Phones read the tag with no app: the screen only has to be on and unlocked. A sticker on the back of a phone case works too, as long as the case is not metal.</p>
+
+  <h2>Scan: a printed card</h2>
+  <ol>
+    <li>Pick "My world" or "My CV" above, then press Print cards.</li>
+    <li>Print at 100% scale (not "fit to page") on A4 card stock. Each sheet gives ten cards, 85.6 × 54 mm, cut on the dashed lines.</li>
+  </ol>
+  <p class="note">No printer nearby? This page on your phone is the card: hold the code up and let them scan it.</p>
+</section>
+
+<div class="sheet" id="sheet" aria-hidden="true"></div>
+
+<script>
+  const base = 'https://sogamer16.github.io/my-world/';
+  const targets = {
+    world: { url: base, label: 'sogamer16.github.io/my-world', alt: "QR code that opens Sohaib Qutub's 3D portfolio", cap: 'Scan · my world' },
+    cv: { url: base + '#summary', label: 'sogamer16.github.io/my-world/#summary', alt: "QR code that opens Sohaib Qutub's CV", cap: 'Scan · my CV' },
+  };
+  const qr = document.getElementById('qr');
+  const sheet = document.getElementById('sheet');
+  let now = 'world';
+
+  function pick(key) {
+    now = targets[key] ? key : 'world';
+    const t = targets[now];
+    qr.src = `assets/qr/${now}.svg`;
+    qr.alt = t.alt;
+    document.getElementById('dest').textContent = t.label;
+    document.getElementById('nfc-url').textContent = t.url;
+    document.querySelectorAll('.pick button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.to === now)));
+    sheet.innerHTML = Array.from({ length: 10 }, () => `
+      <div class="bc">
+        <div>
+          <span class="ar" lang="ar" dir="rtl">صهيب قطب</span>
+          <strong>Sohaib Qutub</strong>
+          <p class="role">Mechanical Engineering Systems<br>University of Melbourne</p>
+          <div class="rule"></div>
+          <p class="url">${t.label}</p>
+        </div>
+        <figure><img src="assets/qr/${now}.svg" alt=""><figcaption>${t.cap}</figcaption></figure>
+      </div>`).join('');
+    history.replaceState(null, '', now === 'world' ? location.pathname : '#cv');
+  }
+
+  document.querySelectorAll('.pick button').forEach((b) => b.addEventListener('click', () => pick(b.dataset.to)));
+  document.getElementById('print').addEventListener('click', () => window.print());
+  const share = document.getElementById('share');
+  if (navigator.share) {
+    share.hidden = false;
+    share.addEventListener('click', () => navigator.share({ title: 'Sohaib Qutub', url: targets[now].url }).catch(() => {}));
+  }
+  pick(location.hash === '#cv' ? 'cv' : 'world');
+</script>
+</body>
+</html>

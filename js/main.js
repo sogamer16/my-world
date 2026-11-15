@@ -1145,7 +1145,8 @@ const panels = {
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
     <section style="margin-top:20px">${D.portals.map((p) => `
       <a class="gate" href="${esc(p.href)}" target="_blank" rel="noopener"><div><strong>${esc(p.name)}</strong><br><span>${esc(p.hint)}</span></div></a>`).join('')}
-      <button class="gate" type="button" data-open-summary><div><strong>One-page summary</strong><br><span>Plain version you can print or save as a PDF</span></div></button></section>`,
+      <button class="gate" type="button" data-open-summary><div><strong>One-page summary</strong><br><span>Plain version you can print or save as a PDF</span></div></button>
+      <a class="gate" href="card.html"><div><strong>Scan or tap card</strong><br><span>A QR code to show, print, or write to an NFC tag</span></div></a></section>`,
 };
 
 /* ================================================================== */
