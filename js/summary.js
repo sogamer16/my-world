@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=28';
+import * as D from './data.js?v=29';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -16,7 +16,7 @@ el.innerHTML = `
       <p class="s-role">${esc(D.hero.klass)} student · ${esc(D.hero.guild)} · ${esc(D.hero.realm)}</p>
       <p class="s-links">${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.lore)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=28" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=29" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Experience and projects</h2>
@@ -27,6 +27,7 @@ el.innerHTML = `
         <p>${esc(q.summary)}</p>
         <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
         ${q.flow ? `<p class="s-flow">${q.flow.map(esc).join(' → ')}</p>` : ''}
+        ${q.links ? `<p class="s-flow">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(' · ')}</p>` : ''}
       </section>`).join('')}
 
     <h2>Skills</h2>

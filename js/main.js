@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=28';
-import { map as MAP } from './worldmap.js?v=28';
+import * as D from './data.js?v=29';
+import { map as MAP } from './worldmap.js?v=29';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=28`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=29`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -797,7 +797,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=28`;
+  img.src = `assets/logos/${file}?v=29`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -1361,10 +1361,11 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=28" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=29" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
+          ${q.links ? `<p class="q-links">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
         </div>
       </details>`).join('')}</section>`,
 
@@ -1397,12 +1398,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=28" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=29" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=28" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=29" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=28" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=29" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1431,6 +1432,30 @@ panel.addEventListener('keydown', (e) => {
   const n = D.skillTree.length;
   pickSchool(e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : school + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1), true);
 });
+// header buttons that travel, e.g. Contact -> the Portal
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-go]');
+  if (b) { start(); go(realms.findIndex((r) => r.id === b.dataset.go)); }
+});
+
+// One-time hints for things that are easy to miss. Remembered per browser where storage allows.
+const hintEl = document.getElementById('hint');
+const touch = matchMedia('(hover: none)').matches;
+const hints = {
+  pursuits: touch ? 'Tap the target on the island to loose an arrow.' : 'Click the target on the island, or press Space, to loose an arrow.',
+};
+let hintTimer = 0;
+function showHint(id) {
+  if (!hintEl || !hints[id] || !playing) return;
+  let seen = {};
+  try { seen = JSON.parse(localStorage.getItem('hints-seen') || '{}'); } catch { /* storage blocked: show it anyway */ }
+  if (seen[id]) return;
+  seen[id] = 1;
+  try { localStorage.setItem('hints-seen', JSON.stringify(seen)); } catch { /* fine */ }
+  hintEl.textContent = hints[id]; hintEl.classList.add('on');
+  clearTimeout(hintTimer); hintTimer = setTimeout(() => hintEl.classList.remove('on'), 6500);
+}
+
 // Skills panel: pointing at a skill lights its node in the tree; "Used in" jumps to the proof.
 const skillOf = (e) => e.target.closest?.('.skill')?.dataset.skill;
 panel.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse') lightSkill(skillOf(e) || null); });
@@ -1475,6 +1500,8 @@ function go(i) {
   panel.classList.add('swap');
   hotbar.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-current', k === i));
   if (playing) history.replaceState(null, '', `#${r.id}`);
+  hintEl?.classList.remove('on');
+  setTimeout(() => { if (current === i) showHint(r.id); }, 1200);
 }
 
 document.getElementById('xp-year').textContent = `${D.hero.year} of ${D.hero.years}`;
