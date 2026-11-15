@@ -36,3 +36,7 @@ The car at the camp (`assets/models/car.glb`) is my silver 2005 Holden Astra CD 
 Saudi touches: the Makkah island has a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.
 
 Arab folklore: the Quests stones are the pillars of Iram (إرم ذات العماد); Sinbad's Rukh circles the islands, flapping its wings, and its egg sits on the Swansea island; a verse attributed to Antarah ibn Shaddad is carved by the archery range; tales of Juha rotate on the title screen. Content is in `folklore` in `js/data.js`.
+
+Reading: al-Ghazali (Tahafut al-Falasifa) is quoted on the Quests panel and Ibn Khaldun (al-Muqaddimah) on the Guilds panel (`thinkers` in `js/data.js`). A small fennec-fox spirit companion, a nod to Taran Matharu's Summoner series in my own design, is summoned through a glowing circle on each island you visit.
+
+Watching: Hatem Ali's Andalusian trilogy (a Córdoba-style horseshoe arch on the archery island), Death Note and Code Geass (a chess game, a black notebook and a red apple on the table beside it). Only moods and objects are used; no characters, logos or posters.

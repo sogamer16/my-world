@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=17';
+import * as D from './data.js?v=19';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=17`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=19`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -578,6 +578,8 @@ const build = {
     }
     lanterns(g, [[-4.4, 2.6, -1.6], [4.4, 2.6, -1.4]], 0xffb060);
     verseTablet(g, { x: 1.4, z: 3.9, ry: -0.15 });
+    andalusArch(g, { x: -2.9, z: -3.4, ry: 0.5 });
+    strategyTable(g, { x: 2.9, z: -3.0, ry: -0.5 });
     g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     range.group = g; range.color = color;
     [[0.5, 0.42], [-0.62, -0.2]].forEach(([x, y]) => { const a = arrow(color); stick(a, x, y); g.add(a); });
@@ -686,7 +688,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=17`;
+  img.src = `assets/logos/${file}?v=19`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -842,6 +844,58 @@ function saudiFlag(g, { x, z, h = 6.2, ry = 0, size = 1, fog = true, glowAmt = 0
     for (let k = 0; k < p.count; k++) { const px = base[k * 3] / size; p.setZ(k, Math.sin(px * 2.4 - t * 2.6) * 0.09 * px * size); }
     p.needsUpdate = true; geo.computeVertexNormals();
   });
+}
+
+/* ---------- things I watch ---------- */
+// A horseshoe arch of red brick and cream stone voussoirs, as in the Great Mosque of Córdoba,
+// for Hatem Ali's Andalusian trilogy.
+function andalusArch(g, { x, z, ry = 0 }) {
+  const a = new THREE.Group(), R = 1.05, n = 17, red = flat(0x8a3a28), cream = flat(0xd6c49c), col = flat(0x9a8f80);
+  const span = Math.PI * 1.3, start = -Math.PI * 0.15;
+  for (let i = 0; i < n; i++) {
+    const t0 = start + (i / n) * span, t1 = start + ((i + 1) / n) * span;
+    const seg = new THREE.Mesh(new THREE.TorusGeometry(R, 0.2, 6, 3, t1 - t0), i % 2 ? cream : red);
+    seg.rotation.z = t0; seg.scale.z = 1.6; a.add(seg);
+  }
+  const endY = Math.sin(start) * R; // the arch's feet sit below its centre
+  a.position.y = 1.85 - endY;
+  [-1, 1].forEach((sd) => {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.15, 1.85, 10), col);
+    c.position.set(sd * Math.cos(start) * R, endY - 0.925, 0); a.add(c);
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.14, 0.38), cream); cap.position.set(sd * Math.cos(start) * R, endY - 0.02, 0); a.add(cap);
+  });
+  a.children.forEach((o) => { o.castShadow = true; o.receiveShadow = true; });
+  const holder = new THREE.Group(); holder.add(a); holder.position.set(x, 0.3, z); holder.rotation.y = ry; g.add(holder);
+}
+// A small table with a chess game in progress (Code Geass) and a black notebook beside a red apple (Death Note).
+function strategyTable(g, { x, z, ry = 0 }) {
+  const t = new THREE.Group(), wood2 = flat(0x5a3b22);
+  const top = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.9), wood2); top.position.y = 0.82; t.add(top);
+  [[-0.6, -0.36], [0.6, -0.36], [-0.6, 0.36], [0.6, 0.36]].forEach(([lx, lz]) => {
+    const l = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.8, 0.07), wood2); l.position.set(lx, 0.41, lz); t.add(l);
+  });
+  const c = document.createElement('canvas'); c.width = c.height = 128; const q = c.getContext('2d');
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) { q.fillStyle = (i + j) % 2 ? '#2a2420' : '#e6dcc6'; q.fillRect(i * 16, j * 16, 16, 16); }
+  const bt = new THREE.CanvasTexture(c); bt.colorSpace = THREE.SRGBColorSpace; bt.magFilter = THREE.NearestFilter;
+  const board = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.04, 0.62), [wood2, wood2, new THREE.MeshStandardMaterial({ map: bt, roughness: 0.6 }), wood2, wood2, wood2]);
+  board.position.set(-0.28, 0.88, 0); t.add(board);
+  const piece = (px, pz, black, h, crown) => {
+    const m = flat(black ? 0x1c1a1e : 0xf0ead8), p = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.05, h, 10), m); body.position.y = h / 2; p.add(body);
+    const head = crown ? new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.07, 0.02), m) : new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), m);
+    head.position.y = h + 0.03; p.add(head);
+    if (crown) { const bar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.02), m); bar.position.y = h + 0.04; p.add(bar); }
+    p.position.set(-0.28 + px * 0.0775, 0.9, pz * 0.0775); t.add(p);
+  };
+  piece(-0.5, 1.5, true, 0.16, true); piece(1.5, -2.5, false, 0.16, true); piece(0.5, 0.5, true, 0.1); piece(2.5, -0.5, false, 0.1);
+  piece(-1.5, 2.5, true, 0.08); piece(-2.5, -1.5, false, 0.08); piece(3.5, 1.5, false, 0.08);
+  const book = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.42), [flat(0xe8e0cc), flat(0x101012), flat(0x101012), flat(0x101012), flat(0x101012), flat(0x101012)]);
+  book.position.set(0.38, 0.89, 0.05); book.rotation.y = 0.25; t.add(book);
+  const apple = new THREE.Mesh(new THREE.SphereGeometry(0.08, 14, 10), new THREE.MeshStandardMaterial({ color: 0xb3121b, roughness: 0.35 }));
+  apple.scale.y = 0.9; apple.position.set(0.5, 0.93, -0.28); t.add(apple);
+  const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.05, 4), flat(0x4a3220)); stalk.position.set(0.5, 1.02, -0.28); t.add(stalk);
+  t.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  t.position.set(x, 0.3, z); t.rotation.y = ry; g.add(t);
 }
 
 /* ---------- Arab folklore ---------- */
@@ -1022,6 +1076,43 @@ tick.push((t) => {
   rukh.position.y += Math.sin(t * 4.2 + 1.2) * 0.25;
 });
 
+/* ---------- my companion ---------- */
+// A small fennec-fox spirit, after the summoned companions of Taran Matharu's Summoner books (my own
+// design). Each time you travel it is summoned onto the island you arrive at, through a glowing circle.
+const companion = new THREE.Group();
+const circleTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
+  x.translate(256, 256); x.strokeStyle = '#7ff0e0'; x.shadowColor = '#7ff0e0'; x.shadowBlur = 18;
+  [[230, 6], [200, 3], [120, 3]].forEach(([r, w]) => { x.lineWidth = w; x.beginPath(); x.arc(0, 0, r, 0, TAU); x.stroke(); });
+  x.lineWidth = 4;
+  for (const off of [0, Math.PI / 4]) { x.beginPath(); for (let k = 0; k <= 4; k++) { const a = off + k * Math.PI / 2; x[k ? 'lineTo' : 'moveTo'](Math.cos(a) * 200, Math.sin(a) * 200); } x.stroke(); }
+  for (let k = 0; k < 16; k++) { const a = k * TAU / 16; x.beginPath(); x.arc(Math.cos(a) * 215, Math.sin(a) * 215, 6, 0, TAU); x.fill(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const circle = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshBasicMaterial({ map: circleTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
+circle.rotation.x = -Math.PI / 2; circle.position.y = 0.34;
+const foxHolder = new THREE.Group(); companion.add(circle, foxHolder);
+loadModel('fox').then((res) => {
+  const m = res.scene.clone(), box = new THREE.Box3().setFromObject(m), size = box.getSize(new THREE.Vector3());
+  m.position.set(-box.getCenter(new THREE.Vector3()).x, -box.min.y, -box.getCenter(new THREE.Vector3()).z);
+  m.traverse((o) => { if (o.isMesh) { o.material.metalness = 0; o.material.roughness = 0.9; o.castShadow = true; } });
+  const k = 0.95 / size.y; m.scale.setScalar(k); foxHolder.add(m);
+}).catch(() => {});
+let summonT = 99;
+function summon(i) {
+  const g = realms[i].group; g.add(companion);
+  companion.position.set(1.9, 0, 2.9); companion.rotation.y = -0.4;
+  summonT = 0;
+}
+tick.push((t, dt) => {
+  summonT += dt;
+  const k = THREE.MathUtils.clamp(summonT / 0.9, 0, 1), e = 1 - Math.pow(1 - k, 3);
+  circle.material.opacity = summonT < 2.4 ? Math.min(1, summonT * 3) * (1 - THREE.MathUtils.smoothstep(summonT, 1.4, 2.4)) * 0.9 : 0;
+  circle.rotation.z = t * 0.8; circle.scale.setScalar(0.6 + 0.4 * e);
+  foxHolder.scale.setScalar(Math.max(0.001, THREE.MathUtils.smoothstep(summonT, 0.35, 1.0)));
+  foxHolder.position.y = 0.32 + (reduceMotion ? 0 : Math.abs(Math.sin(t * 2.2)) * 0.06);
+});
+
 let best = 0, shots = 0;
 try { best = +localStorage.getItem('best-shot') || 0; } catch { /* storage unavailable */ }
 function loose() {
@@ -1037,6 +1128,8 @@ function loose() {
 /*  Panels                                                             */
 /* ================================================================== */
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const thinker = (t) => `<blockquote class="verse"><p lang="ar" dir="rtl">${t.ar.map(esc).join('<br>')}</p>
+  <p>${esc(t.en)}</p><cite>${esc(t.by)} · <span lang="ar">${esc(t.byAr)}</span></cite><p class="verse-note">${esc(t.note)}</p></blockquote>`;
 const head = (r, title) => {
   const where = (D.lands[r.land] || {}).short;
   return `<p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
@@ -1074,6 +1167,7 @@ const panels = {
 
   quests: (r) => `${head(r, 'Quest Log')}
     <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
+    ${thinker(D.thinkers.ghazali)}
     <section style="margin-top:16px">${D.quests.map((q, i) => `
       <details class="quest"${i === 0 ? ' open' : ''}>
         <summary>
@@ -1081,7 +1175,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=17" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=19" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1115,14 +1209,15 @@ const panels = {
         <div><strong>${esc(p.name)}</strong><p>${esc(p.detail)}</p>${p.extra ? `<p class="extra">${esc(p.extra)}</p>` : ''}</div></div>`).join('')}</section>`,
 
   guilds: (r) => `${head(r, 'Guilds & Academies')}
+    ${thinker(D.thinkers.khaldun)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=17" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=19" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=17" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=19" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=17" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=19" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1154,6 +1249,7 @@ function go(i) {
   d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
   targetAngle += d;
   current = i;
+  summon(i);
   document.documentElement.style.setProperty('--accent', r.color);
   place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;
   panel.classList.remove('swap');

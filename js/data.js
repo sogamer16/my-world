@@ -226,6 +226,22 @@ export const scrolls = [
 ];
 
 // Arab folklore and poetry woven through the world.
+// Two books I keep returning to, set beside the parts of my life they speak to.
+export const thinkers = {
+  ghazali: {
+    ar: ['الاقترانُ بين ما يُعتقَدُ في العادة سببًا وما يُعتقَدُ مُسبَّبًا', 'ليس ضروريًّا عندنا'],
+    en: 'The connection between what is habitually believed to be a cause and what is believed to be its effect is not, for us, a necessary one.',
+    by: 'al-Ghazali, Tahafut al-Falasifa', byAr: 'الغزالي، تهافت الفلاسفة',
+    note: 'An engineer trusts cause and effect every day. Ghazali taught me to ask why it holds.',
+  },
+  khaldun: {
+    ar: ['الإنسانُ مدنيٌّ بالطبع'],
+    en: 'Man is social by nature — and a group holds together by its ʿasabiyya, its shared solidarity.',
+    by: 'Ibn Khaldun, al-Muqaddimah', byAr: 'ابن خلدون، المقدمة',
+    note: 'Every club and team on this page runs on ʿasabiyya before it runs on plans.',
+  },
+};
+
 export const folklore = {
   antarah: {
     ar: ['لا يَحمِلُ الحِقدَ مَن تَعلو بِهِ الرُتَبُ', 'وَلا يَنالُ العُلا مَن طَبعُهُ الغَضَبُ'],
@@ -257,6 +273,20 @@ export const pursuits = [
     glyph: '♞',
     flag: 'For Indianapolis, where I lived when I was very small',
     detail: 'Game jams and small C# games — the fastest way to learn what "finished" means.',
+  },
+  {
+    name: 'Reading',
+    glyph: '❧',
+    detail:
+      "Fiction that grows up with you: Darren Shan's vampire saga, the Demonata and Zom-B, and Taran Matharu's Summoner series — the reason a small companion follows you around this world.",
+    extra: "And the classics: al-Ghazali's Tahafut al-Falasifa and Ibn Khaldun's Muqaddimah.",
+  },
+  {
+    name: 'Watching',
+    glyph: '♚',
+    detail:
+      "Hatem Ali's Andalusian trilogy — Saqr Quraysh, Rabi' Qurtuba and Muluk al-Tawa'if — the rise and fall of al-Andalus, which reads like Ibn Khaldun's cycles of ʿasabiyya on screen.",
+    extra: 'And anime built on battles of wits: Death Note and Code Geass, where every move is planned several turns ahead.',
   },
   {
     name: 'Debating',
