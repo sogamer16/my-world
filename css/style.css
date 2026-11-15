@@ -192,6 +192,17 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
   background: conic-gradient(#fff 25%, #111 0 50%, #fff 0 75%, #111 0) 0 0 / 6.5px 6.5px; transform: rotate(-12deg); z-index: 1; }
 .s-ar { font-family: 'Aref Ruqaa', serif; font-size: 0.7em; color: var(--gold); margin-left: 0.4em; }
 
+.logo-wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.logo-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 6px 8px; background: #f6f3ec; border: 1px solid var(--line); text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+.logo-tile img { height: 46px; max-width: 100%; object-fit: contain; }
+.logo-tile span { font-size: 0.7rem; color: #5a5348; letter-spacing: 0.04em; }
+.logo-tile:hover, .logo-tile:focus-visible { transform: translateY(-2px); box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 45%, transparent); outline: none; }
+.card-logo { float: right; height: 30px; max-width: 90px; object-fit: contain; margin: 2px 0 6px 10px; background: #f6f3ec; padding: 3px 5px; border-radius: 3px; }
+.card time { clear: right; }
+.q-logo { height: 30px; margin: 2px 0 8px; }
+.s-logos { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.s-logos img { height: 38px; max-width: 130px; object-fit: contain; background: #f6f3ec; padding: 4px 6px; border-radius: 3px; }
+
 /* portal */
 a.gate {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; text-decoration: none; color: var(--ink);
