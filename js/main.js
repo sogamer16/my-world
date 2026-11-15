@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=32';
-import { map as MAP } from './worldmap.js?v=32';
+import * as D from './data.js?v=33';
+import { map as MAP } from './worldmap.js?v=33';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=32`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=33`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -793,7 +793,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=32`;
+  img.src = `assets/logos/${file}?v=33`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -925,7 +925,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=32`;
+    img.src = `assets/logos/${logo}?v=33`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1384,10 +1384,14 @@ const panels = {
       <dt>Guild</dt><dd>${esc(D.hero.guild)}</dd>
       <dt>Realm</dt><dd>${esc(D.hero.realm)}</dd>
     </dl>
-    <section><h3>Attributes</h3><p class="note">Scores are for flavour; the evidence beside each is real.</p>${D.hero.attributes.map((a) => `
-      <div class="attr"><span class="k" title="${esc(a.label)}">${a.key}</span>
-        <div class="bar"><i style="width:${a.value * 5}%"></i></div><span class="v">${a.value}</span>
-        <small>${esc(a.label)} — ${esc(a.note)}</small></div>`).join('')}</section>
+    <section><h3>Attributes</h3><p class="note">Scores are for flavour; the evidence under each is real.</p>
+      <div class="stats">${D.hero.attributes.map((a) => {
+        const mod = Math.floor((a.value - 10) / 2);
+        return `<div class="stat">
+          <div class="medallion" aria-label="${esc(a.label)} ${a.value}, modifier ${mod >= 0 ? '+' : ''}${mod}"><b>${a.value}</b><span>${mod >= 0 ? '+' : ''}${mod}</span></div>
+          <div class="stat-text"><strong>${esc(a.label)} <abbr>${esc(a.key)}</abbr></strong><p>${esc(a.note)}</p></div>
+        </div>`;
+      }).join('')}</div></section>
     <section><h3>Journey</h3>${journeyMap()}</section>
     <section><h3>Tongues</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
 
@@ -1401,7 +1405,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=32" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=33" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1438,12 +1442,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=32" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=33" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=32" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=33" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=32" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=33" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
