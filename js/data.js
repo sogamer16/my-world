@@ -233,8 +233,8 @@ export const mottos = {
     en: 'Cause and effect are only a habit until you test them. Every move here was planned a few turns ahead.',
   },
   guilds: {
-    ar: ['كلُّ نهوضٍ يبنيه تفكيرٌ جماعي', 'وكلُّ سقوطٍ يبدأ باستهتار'],
-    en: 'Every rise is built by people thinking together; every fall begins with carelessness. A group holds by its solidarity before its plans.',
+    ar: ['كلُّ نهوضٍ يبنيه تفكيرٌ جماعي', 'وكلُّ سقوطٍ يبدأ باستهتارٍ فردي'],
+    en: 'Every rise is built by people thinking together; every fall begins with one person\'s carelessness. A group holds by its solidarity before its plans.',
   },
 };
 
