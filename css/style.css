@@ -383,3 +383,15 @@ body.no-webgl #title-screen, body.no-webgl #world { display: none; }
 #hint.on { opacity: 1; transform: translate(-50%, 0); }
 @media (min-width: 821px) { #hint { left: calc((100vw - min(440px, 42vw) - 20px) / 2); max-width: min(420px, calc(100vw - min(440px, 42vw) - 60px)); } }
 @media (max-width: 820px) { #hint { top: calc(70px + env(safe-area-inset-top)); bottom: auto; font-size: 0.85rem; } }
+
+/* ---------- plain role, seeking, start here, next chapter ---------- */
+.plain-role { margin: 0.4em 0 0.6em; font-size: clamp(0.9rem, 2.2vw, 1.02rem); color: var(--ink); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.8); }
+.seeking { margin-top: 12px; padding: 10px 14px; border-left: 2px solid var(--accent); background: rgba(255, 255, 255, 0.04); color: var(--ink); }
+.s-seeking { font-weight: 600; }
+.s-updated { margin-top: 28px; font-size: 0.85rem; color: #777; }
+.start-here { grid-column: 1 / -1; justify-self: start; margin-bottom: 4px; padding: 1px 7px; font-family: var(--display); font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #1a1206; background: var(--gold); border-radius: 2px; vertical-align: 1px; }
+details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
+.next-ch { display: block; width: 100%; margin-top: 22px; padding: 12px 14px; text-align: right; font-family: var(--display); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+.next-ch i { font-family: var(--body); font-style: italic; letter-spacing: 0; text-transform: none; color: var(--dim); margin-left: 6px; }
+.next-ch:hover, .next-ch:focus-visible { border-color: var(--gold); background: rgba(227, 184, 102, 0.08); outline: none; }

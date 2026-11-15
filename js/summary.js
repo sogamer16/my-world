@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=29';
+import * as D from './data.js?v=32';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -14,9 +14,10 @@ el.innerHTML = `
     <header>
       <h1>${esc(D.hero.name)} <span class="s-ar" lang="ar" dir="rtl">${esc(D.hero.nameAr)}</span></h1>
       <p class="s-role">${esc(D.hero.klass)} student · ${esc(D.hero.guild)} · ${esc(D.hero.realm)}</p>
-      <p class="s-links">${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
+      <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
+      <p class="s-seeking">${esc(D.hero.seeking)}</p>
       <p>${esc(D.hero.lore)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=29" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=32" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Experience and projects</h2>
@@ -47,6 +48,7 @@ el.innerHTML = `
     <p>${D.hero.tongues.map((t) => `${esc(t.name)} (${esc(t.rank)})`).join(', ')}</p>
     <p>Lived in ${D.hero.journey.map((j) => esc(j.place)).join(', ')}.</p>
     <p>${D.pursuits.map((p) => esc(p.name)).join(', ')}</p>
+    <p class="s-updated">Updated ${esc(D.hero.updated)}</p>
   </article>`;
 
 const open = () => { el.hidden = false; document.body.classList.add('summary-open'); el.scrollTop = 0; el.querySelector('button').focus(); };

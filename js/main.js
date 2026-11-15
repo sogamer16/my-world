@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=29';
-import { map as MAP } from './worldmap.js?v=29';
+import * as D from './data.js?v=32';
+import { map as MAP } from './worldmap.js?v=32';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -450,7 +450,7 @@ draco.preload(); // fetch the decoder now, alongside the first models
 const gltf = new GLTFLoader().setDRACOLoader(draco);
 // Staged loading: models are fetched a few at a time, those for the island in view
 // (and its neighbours) first. `where` is a realm index, or { hops } for things that
-// are not on one island (the companion fox, the Rukh).
+// are not on one island (the Rukh).
 const models = {}, wants = {}, queue = [];
 const LOAD_AT_ONCE = 3;
 let active = 0, done = 0, pumpSoon = 0;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=29`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=32`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -772,10 +772,6 @@ const build = {
       r.position.set(Math.cos(a) * 3, Math.sin(a) * 3, 0); r.rotation.z = a;
       gate.add(r); oldGate.push(r);
     }
-    // a lone wolf on the rocks at the island's edge, howling at the crescent
-    const rock = new THREE.Mesh(jitter(new THREE.DodecahedronGeometry(0.9, 0), 0.2), stone(0x3d3a4a));
-    rock.scale.set(1.3, 0.7, 1); rock.position.set(-4.0, 0.55, 2.2); rock.castShadow = true; g.add(rock);
-    prop(g, 'wolf', { h: 1.7, x: -4.0, y: 1.1, z: 2.2, ry: 0.9 });
     prop(g, 'gate', { h: 6.8, lit: 0.12, replace: oldGate, onLoad: () => { gate.position.y = 3.75; gate.scale.setScalar(0.95); } });
     gate.userData.face = true;
   },
@@ -797,7 +793,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=29`;
+  img.src = `assets/logos/${file}?v=32`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -886,6 +882,85 @@ function hoodieStand(g, x, z, ry) {
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.3, 8), flat(0x2b2b30)); pole.position.set(x, 1.0, z);
   [base, pole].forEach((o) => { o.castShadow = true; o.receiveShadow = true; g.add(o); });
   prop(g, 'hoodie', { h: 3.0, x, y: 1.3, z, ry, onLoad: (holder) => applyHoodiePrint(holder, g) });
+}
+
+// The Duke of Edinburgh Bronze Award: a cast bronze medal on a ribbon, hanging from a little
+// wooden stand. The face shows the official logo once its file is supplied (medalLogo in data.js);
+// until then a laurel ring and lettering drawn in code.
+function medalFace(top, mid, bottom, logo, onLogo) {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const draw = () => {
+    const x = c.getContext('2d'), R = 256;
+    const gr = x.createRadialGradient(R * 0.8, R * 0.7, 20, R, R, R);
+    gr.addColorStop(0, '#f6c896'); gr.addColorStop(0.6, '#cf8a4e'); gr.addColorStop(1, '#8a4c22');
+    x.fillStyle = gr; x.fillRect(0, 0, 512, 512);
+    x.lineWidth = 10; x.strokeStyle = 'rgba(60, 30, 10, 0.55)';
+    x.beginPath(); x.arc(R, R, R - 18, 0, Math.PI * 2); x.stroke();
+    if (logoImg) { // the official badge fills the face; the medal itself takes the badge's shape (see onLogo)
+      x.drawImage(logoImg, 0, 0, 512, 512);
+      tex.needsUpdate = true; return;
+    }
+    x.lineWidth = 3; x.beginPath(); x.arc(R, R, R - 92, 0, Math.PI * 2); x.stroke();
+    // laurel: two branches of leaves curving up each side of the centre
+    x.fillStyle = 'rgba(70, 36, 12, 0.7)';
+    for (const side of [-1, 1]) for (let k = 0; k < 9; k++) {
+      const a = Math.PI / 2 + side * (0.35 + k * 0.27), r = R - 122;
+      x.save(); x.translate(R + Math.cos(a) * r, R + Math.sin(a) * r); x.rotate(a + side * 0.6);
+      x.beginPath(); x.ellipse(0, 0, 15, 6, 0, 0, Math.PI * 2); x.fill(); x.restore();
+    }
+    // lettering around the top edge, then the centre
+    x.fillStyle = '#2e1405'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.font = '700 34px Cinzel, Georgia, serif';
+    const letters = top.toUpperCase().split(''), span = 2.3, r = R - 55;
+    letters.forEach((ch, k) => {
+      const a = -Math.PI / 2 - span / 2 + (k + 0.5) * (span / letters.length);
+      x.save(); x.translate(R + Math.cos(a) * r, R + Math.sin(a) * r); x.rotate(a + Math.PI / 2); x.fillText(ch, 0, 0); x.restore();
+    });
+    x.font = '900 92px Cinzel, Georgia, serif'; x.fillText(mid.toUpperCase(), R, R - 8);
+    x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(bottom, R, R + 70);
+    tex.needsUpdate = true;
+  };
+  let logoImg = null;
+  if (logo) {
+    const img = new Image();
+    img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
+    img.src = `assets/logos/${logo}?v=32`;
+  }
+  draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
+  return tex;
+}
+function bronzeMedal(g, { x, z, ry = 0, scale = 1 }) {
+  const stand = new THREE.Group(); stand.position.set(x, 0.3, z); stand.rotation.y = ry; stand.scale.setScalar(scale); g.add(stand);
+  const w = wood();
+  const base = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.14, 0.5), w); base.position.y = 0.07;
+  const postL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 2.2, 0.09), w); postL.position.set(-0.55, 1.17, 0);
+  const postR = postL.clone(); postR.position.x = 0.55;
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.1, 0.12), w); bar.position.y = 2.25;
+  [base, postL, postR, bar].forEach((o) => { o.castShadow = true; o.receiveShadow = true; stand.add(o); });
+  // the medal swings from the bar
+  const hang = new THREE.Group(); hang.position.y = 2.2; stand.add(hang);
+  const ribbonTex = (() => {
+    const c = document.createElement('canvas'); c.width = 64; c.height = 8;
+    const k = c.getContext('2d');
+    [['#7a1420', 0, 64], ['#d9a441', 22, 6], ['#d9a441', 36, 6]].forEach(([col, at, wd]) => { k.fillStyle = col; k.fillRect(at, 0, wd, 8); });
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.9, 0.02), new THREE.MeshStandardMaterial({ map: ribbonTex, roughness: 0.8 }));
+  ribbon.position.y = -0.45; ribbon.castShadow = true; hang.add(ribbon);
+  const clasp = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.07, 0.05), new THREE.MeshStandardMaterial({ color: 0xc8844a, metalness: 0.4, roughness: 0.35 }));
+  clasp.position.y = -0.9; hang.add(clasp);
+  // only half metallic: there is no environment map, so a fully metallic medal would look nearly black
+  const bronze = new THREE.MeshStandardMaterial({ color: 0xc8844a, metalness: 0.4, roughness: 0.38 });
+  // with the official badge supplied, the disc and its rim become the badge's oval
+  // (the disc is turned a quarter about its axis, so its local z is the medal's width)
+  const shape = (aspect) => { disc.scale.z = aspect; ring.scale.x = aspect; };
+  const face = new THREE.MeshStandardMaterial({ map: medalFace("Duke of Edinburgh's", 'Bronze', '2023', D.trophies.find((t) => t.name === 'Duke of Edinburgh')?.medalLogo, (a) => shape(a)), metalness: 0.3, roughness: 0.45, emissive: 0x3a1c08, emissiveIntensity: 0.25 });
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.07, 48), [bronze, face, face]);
+  disc.rotation.set(Math.PI / 2, Math.PI / 2, 0); // face the viewer, lettering upright
+  disc.position.y = -1.41; disc.castShadow = true; hang.add(disc);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.035, 8, 48), bronze); ring.position.copy(disc.position); hang.add(ring);
+  tick.push((t) => { if (!reduceMotion) hang.rotation.z = Math.sin(t * 1.1 + x) * 0.06; });
 }
 
 // Me, generated with Meshy from a full-length photo of me in a suit.
@@ -1108,6 +1183,7 @@ const landmarks = {
     prop(g, 'dragon', { h: 2.1, x: 5.0, z: 2.3, ry: -1.0 });
     hoodieStand(g, -3.4, 2.2, Math.PI + 0.45); // back to the viewer, so the print shows
     signboard(g, { x: -1.6, z: 3.9, ry: 0.15, w: 1.5, h: 0.5, y: 0.55, logo: 'olchfa.svg', pad: 0.08 });
+    bronzeMedal(g, { x: 2.3, z: 3.9, ry: -0.3, scale: 1.35 }); // Duke of Edinburgh Bronze Award, 2023
     rain(g);
   },
   quests(g) { // Melbourne: the city tram and a laneway lamp
@@ -1226,42 +1302,6 @@ tick.push((t) => {
   rukh.position.y += Math.sin(t * 4.2 + 1.2) * 0.25;
 });
 
-/* ---------- my companion ---------- */
-// A small fennec-fox spirit companion (my own design). Each time you travel it is summoned onto the island you arrive at, through a glowing circle.
-const companion = new THREE.Group();
-const circleTex = (() => {
-  const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
-  x.translate(256, 256); x.strokeStyle = '#7ff0e0'; x.shadowColor = '#7ff0e0'; x.shadowBlur = 18;
-  [[230, 6], [200, 3], [120, 3]].forEach(([r, w]) => { x.lineWidth = w; x.beginPath(); x.arc(0, 0, r, 0, TAU); x.stroke(); });
-  x.lineWidth = 4;
-  for (const off of [0, Math.PI / 4]) { x.beginPath(); for (let k = 0; k <= 4; k++) { const a = off + k * Math.PI / 2; x[k ? 'lineTo' : 'moveTo'](Math.cos(a) * 200, Math.sin(a) * 200); } x.stroke(); }
-  for (let k = 0; k < 16; k++) { const a = k * TAU / 16; x.beginPath(); x.arc(Math.cos(a) * 215, Math.sin(a) * 215, 6, 0, TAU); x.fill(); }
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-})();
-const circle = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshBasicMaterial({ map: circleTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
-circle.rotation.x = -Math.PI / 2; circle.position.y = 0.34;
-const foxHolder = new THREE.Group(); companion.add(circle, foxHolder);
-loadModel('fox', { hops: 1 }).then((res) => {
-  const m = res.scene.clone(), box = new THREE.Box3().setFromObject(m), size = box.getSize(new THREE.Vector3());
-  m.position.set(-box.getCenter(new THREE.Vector3()).x, -box.min.y, -box.getCenter(new THREE.Vector3()).z);
-  m.traverse((o) => { if (o.isMesh) { o.material.metalness = 0; o.material.roughness = 0.9; o.castShadow = true; } });
-  const k = 0.95 / size.y; m.scale.setScalar(k); foxHolder.add(m);
-}).catch(() => {});
-let summonT = 99;
-function summon(i) {
-  const g = realms[i].group; g.add(companion);
-  companion.position.set(1.9, 0, 2.9); companion.rotation.y = -0.4;
-  summonT = 0;
-}
-tick.push((t, dt) => {
-  summonT += dt;
-  const k = THREE.MathUtils.clamp(summonT / 0.9, 0, 1), e = 1 - Math.pow(1 - k, 3);
-  circle.material.opacity = summonT < 2.4 ? Math.min(1, summonT * 3) * (1 - THREE.MathUtils.smoothstep(summonT, 1.4, 2.4)) * 0.9 : 0;
-  circle.rotation.z = t * 0.8; circle.scale.setScalar(0.6 + 0.4 * e);
-  foxHolder.scale.setScalar(Math.max(0.001, THREE.MathUtils.smoothstep(summonT, 0.35, 1.0)));
-  foxHolder.position.y = 0.32 + (reduceMotion ? 0 : Math.abs(Math.sin(t * 2.2)) * 0.06);
-});
-
 let best = 0, shots = 0;
 try { best = +localStorage.getItem('best-shot') || 0; } catch { /* storage unavailable */ }
 function loose() {
@@ -1355,13 +1395,13 @@ const panels = {
     <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
     ${motto(D.mottos.quests)}
     <section style="margin-top:16px">${D.quests.map((q, i) => `
-      <details class="quest" data-name="${esc(q.name)}"${i === 0 ? ' open' : ''}>
+      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 ? ' open' : ''}>
         <summary>
-          <span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
+          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=29" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=32" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1398,16 +1438,18 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=29" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=32" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=29" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=32" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=29" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=32" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
-    <section style="margin-top:20px">${D.portals.map((p) => `
+    <p class="seeking">${esc(D.hero.seeking)}</p>
+    <section style="margin-top:20px">
+      <a class="gate" href="mailto:${esc(D.email.join('@'))}"><div><strong>Email</strong><br><span>${esc(D.email.join('@'))}</span></div></a>${D.portals.map((p) => `
       <a class="gate" href="${esc(p.href)}" target="_blank" rel="noopener"><div><strong>${esc(p.name)}</strong><br><span>${esc(p.hint)}</span></div></a>`).join('')}
       <button class="gate" type="button" data-open-summary><div><strong>One-page summary</strong><br><span>Plain version you can print or save as a PDF</span></div></button></section>`,
 };
@@ -1474,12 +1516,21 @@ panel.addEventListener('click', (e) => {
 });
 function showIn(realmId, name) {
   go(realms.findIndex((r) => r.id === realmId));
-  const el = [...panel.querySelectorAll('[data-name]')].find((x) => x.dataset.name === name);
+  reveal([...panel.querySelectorAll('[data-name]')].find((x) => x.dataset.name === name));
+}
+const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function reveal(el) {
   if (!el) return;
   if (el.tagName === 'DETAILS') el.open = true;
   el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
   el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
 }
+// opening a quest puts its own link in the address bar, e.g. #quests/sentinel, ready to share
+panel.addEventListener('toggle', (e) => {
+  const d = e.target;
+  if (playing && d.matches?.('details[data-name]') && d.open) history.replaceState(null, '', `#${realms[current].id}/${slug(d.dataset.name)}`);
+}, true);
+panel.addEventListener('click', (e) => { if (e.target.closest('[data-next]')) go(current + 1); });
 
 function go(i) {
   i = ((i % N) + N) % N;
@@ -1490,11 +1541,11 @@ function go(i) {
   d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
   targetAngle += d;
   current = i; schedulePump(); skillLit = null;
-  summon(i);
   document.documentElement.style.setProperty('--accent', r.color);
   place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;
   panel.classList.remove('swap');
-  panel.innerHTML = panels[r.id](r);
+  const nx = realms[(i + 1) % N];
+  panel.innerHTML = panels[r.id](r) + `<button type="button" class="next-ch" data-next>${i < N - 1 ? `Next chapter · ${esc(nx.name)} <i>${esc(nx.place)}</i>` : 'Back to chapter one'} →</button>`;
   panel.scrollTop = 0;
   void panel.offsetWidth;
   panel.classList.add('swap');
@@ -1682,6 +1733,9 @@ function frame() {
 }
 
 layout();
-go(Math.max(0, realms.findIndex((r) => `#${r.id}` === location.hash)));
-if (location.hash.length > 1 && current > 0) start();
+// links like #quests or #quests/sentinel open a realm, and optionally one quest or pursuit in it
+const [hashRealm, hashItem] = decodeURIComponent(location.hash.slice(1)).split('/');
+go(Math.max(0, realms.findIndex((r) => r.id === hashRealm)));
+if (hashRealm && (current > 0 || hashItem)) start();
+if (hashItem) reveal([...panel.querySelectorAll('[data-name]')].find((x) => slug(x.dataset.name) === hashItem));
 frame();
