@@ -5,8 +5,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=23';
-import { map as MAP } from './worldmap.js?v=23';
+import * as D from './data.js?v=24';
+import { map as MAP } from './worldmap.js?v=24';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -422,7 +422,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=23`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=24`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -549,37 +549,51 @@ const build = {
         new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: e, roughness: 1 }));
       ring.position.set(T.x, T.y, T.z + i * 0.004); g.add(ring);
     });
-    // a compound bow resting beside the target: riser, short limbs, cams, string and cables
+    // a compound bow standing on its stand beside the target, side-on so its shape reads:
+    // a riser that bows forward, short split limbs swept back, eccentric cams, string, cables,
+    // a sight and a front stabiliser. Archer's side is -x, target side +x.
     const bow = new THREE.Group();
-    const bar = (x1, y1, x2, y2, w, mat) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w, Math.hypot(x2 - x1, y2 - y1), w * 0.7), mat);
-      m.position.set((x1 + x2) / 2, (y1 + y2) / 2, 0); m.rotation.z = Math.atan2(y2 - y1, x2 - x1) - Math.PI / 2;
-      bow.add(m);
+    const riserMat = new THREE.MeshStandardMaterial({ color: 0x4a5560, metalness: 0.55, roughness: 0.35 });
+    const limbMat = new THREE.MeshStandardMaterial({ color: 0x2bb3a6, metalness: 0.2, roughness: 0.4, emissive: 0x0d4a45, emissiveIntensity: 0.6 });
+    const camMat = new THREE.MeshStandardMaterial({ color: 0xd2a75a, metalness: 0.85, roughness: 0.3 });
+    const stringMat = new THREE.MeshStandardMaterial({ color: 0xfff6e0, roughness: 0.6, emissive: 0x6a6458, emissiveIntensity: 0.6 });
+    const rod = (a, b, r, mat, z = 0) => { // a cylinder from point a to point b (x, y)
+      const va = new THREE.Vector3(a[0], a[1], z), vb = new THREE.Vector3(b[0], b[1], z), len = va.distanceTo(vb);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), mat);
+      m.position.copy(va).add(vb).multiplyScalar(0.5);
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vb.clone().sub(va).normalize());
+      bow.add(m); return m;
     };
-    const riserMat = stone(0x2c3c48), limbMat = new THREE.MeshStandardMaterial({ color: 0x1d6f6a, roughness: 0.5, metalness: 0.3 });
-    bar(1.2, -0.3, 1.2, 0.3, 0.2, stone(0x3a2718)); // grip
-    bar(1.2, 0.3, 1.34, 0.8, 0.13, riserMat); bar(1.2, -0.3, 1.34, -0.8, 0.13, riserMat);
-    bar(1.34, 0.8, 0.62, 1.42, 0.1, limbMat); bar(1.34, -0.8, 0.62, -1.42, 0.1, limbMat);
-    [1.42, -1.42].forEach((y) => {
-      const cam = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.055, 6, 18), new THREE.MeshStandardMaterial({ color: 0xd9b064, metalness: 0.8, roughness: 0.35 }));
-      cam.position.set(0.62, y, 0); cam.scale.y = 0.8;
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.12, 8), riserMat);
-      hub.rotation.x = Math.PI / 2; hub.position.copy(cam.position);
-      bow.add(cam, hub);
-    });
-    const P = (x, y) => new THREE.Vector3(x, y, 0);
-    bow.add(new THREE.LineSegments(
-      new THREE.BufferGeometry().setFromPoints([P(0.42, 1.42), P(0.42, -1.42), P(0.8, 1.38), P(0.66, -1.3), P(0.66, 1.3), P(0.8, -1.38)]),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })));
-    const stab = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 1.1, 6), riserMat);
-    stab.rotation.z = -Math.PI / 2; stab.position.set(1.85, -0.2, 0);
-    const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.16, 8), riserMat);
-    weight.rotation.z = Math.PI / 2; weight.position.set(2.45, -0.2, 0);
-    const sight = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.02, 6, 16), glow(0xff5a4a, 0.8));
-    sight.rotation.y = Math.PI / 2; sight.position.set(1.62, 0.45, 0);
-    bar(1.3, 0.45, 1.6, 0.45, 0.04, riserMat);
-    bow.add(stab, weight, sight); bow.scale.setScalar(1.15); bow.position.set(-2.6, 2.5, 2.4); bow.rotation.set(0, Math.PI - 0.35, 0.08);
-    g.add(bow); bob.push({ o: bow, y: 2.5, amp: 0.18, speed: 1.1, phase: 2 });
+    for (const sy of [1, -1]) {
+      rod([0, 0.13 * sy], [0.07, 0.38 * sy], 0.045, riserMat); // riser
+      rod([0.07, 0.38 * sy], [0.12, 0.62 * sy], 0.04, riserMat);
+      for (const z of [-0.035, 0.035]) rod([0.12, 0.62 * sy], [-0.04, 1.02 * sy], 0.022, limbMat, z); // split limbs
+      const cam = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.022, 8, 24), camMat);
+      cam.position.set(-0.07, 1.05 * sy, 0); cam.scale.set(1, 1.25, 1); bow.add(cam);
+      const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.12, 8), riserMat);
+      axle.rotation.x = Math.PI / 2; axle.position.copy(cam.position); bow.add(axle);
+    }
+    rod([0, -0.14], [0, 0.14], 0.06, new THREE.MeshStandardMaterial({ color: 0x3a2718, roughness: 0.8 })); // grip
+    rod([-0.17, 1.05], [-0.17, -1.05], 0.012, stringMat); // string
+    rod([-0.02, 0.98], [0.01, -0.98], 0.006, stringMat, 0.03); // cables
+    rod([0.01, 0.98], [-0.02, -0.98], 0.006, stringMat, -0.03);
+    rod([0.03, 0.2], [-0.08, 0.2], 0.012, riserMat); // cable guard
+    rod([0.06, 0.3], [0.26, 0.3], 0.012, riserMat); // sight bar
+    const pin = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 6, 16), riserMat);
+    pin.rotation.y = Math.PI / 2; pin.position.set(0.28, 0.3, 0); bow.add(pin);
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), glow(0x6dff8a, 1.5)); dot.position.set(0.28, 0.3, 0); bow.add(dot);
+    rod([0.04, -0.1], [0.72, -0.1], 0.018, riserMat); // stabiliser
+    rod([0.72, -0.1], [0.8, -0.1], 0.045, riserMat);
+    const rest = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.05), camMat); rest.position.set(0.02, 0.16, 0.03); bow.add(rest);
+    // a simple stand: base plate and post with a cradle under the grip
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x3a3f46, metalness: 0.5, roughness: 0.5 });
+    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.06, 16), standMat); plate.position.y = -1.2;
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.04, 8), standMat); post.position.set(-0.3, -0.68, 0);
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.03, 0.06), standMat); arm.position.set(-0.15, -0.16, 0);
+    bow.add(plate, post, arm);
+    bow.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    bow.scale.setScalar(1.7); bow.position.set(-3.2, 0.3 + 1.23 * 1.7, 2.7); bow.rotation.y = 0.15;
+    g.add(bow);
     // quiver
     const quiver = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 1.5, 7), stone(0x4a2f1c));
     quiver.position.set(3.4, 0.95, 1.6); quiver.rotation.z = -0.2; g.add(quiver);
@@ -703,7 +717,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=23`;
+  img.src = `assets/logos/${file}?v=24`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -934,23 +948,6 @@ function verseTablet(g, { x, z, ry = 0, w = 1.9, h = 1.15 }) {
   const foot = new THREE.Mesh(new THREE.BoxGeometry(w * 1.1, 0.28, 0.5), stoneM); foot.position.set(x, 0.42, z); foot.rotation.y = ry; foot.castShadow = true;
   g.add(slab, foot);
 }
-// The Rukh's egg, from Sinbad's second voyage: a huge pale egg in a nest of driftwood.
-function rukhEgg(g, { x, z }) {
-  const c = document.createElement('canvas'); c.width = c.height = 256; const q = c.getContext('2d');
-  q.fillStyle = '#f1ece0'; q.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 260; i++) { q.fillStyle = `rgba(120,95,70,${0.15 + Math.random() * 0.35})`; q.beginPath(); q.arc(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 4, 0, 7); q.fill(); }
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const egg = new THREE.Mesh(new THREE.SphereGeometry(0.62, 28, 20), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55 }));
-  egg.scale.set(1, 1.35, 1); egg.position.set(x, 1.05, z); egg.rotation.z = 0.12; egg.castShadow = true; egg.receiveShadow = true;
-  const nest = new THREE.Group();
-  for (let i = 0; i < 26; i++) {
-    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.1 + Math.random() * 0.6, 5), flat(i % 3 ? 0x6b4a2e : 0x8a6a44));
-    const a = (i / 26) * TAU; s.position.set(Math.cos(a) * 0.62, 0.2 + (i % 3) * 0.08, Math.sin(a) * 0.62);
-    s.rotation.set(Math.PI / 2 + (Math.random() - 0.5) * 0.4, 0, a + Math.PI / 2 + (Math.random() - 0.5) * 0.5); s.castShadow = true; nest.add(s);
-  }
-  nest.position.set(x, 0.3, z);
-  g.add(egg, nest);
-}
 
 /* ---------- landmarks of the places I have lived ---------- */
 const landmarks = {
@@ -970,7 +967,6 @@ const landmarks = {
     prop(g, 'lighthouse', { h: 5.4, x: -4.1, z: -3.5, ry: 0.5, replace: g.userData.trees });
     prop(g, 'castle', { h: 3.8, x: 4.0, z: -3.6, ry: -0.6 });
     prop(g, 'dragon', { h: 2.1, x: 5.0, z: 2.3, ry: -1.0 });
-    rukhEgg(g, { x: 2.3, z: 3.1 });
     hoodieStand(g, -3.4, 2.2, Math.PI + 0.45); // back to the viewer, so the print shows
     signboard(g, { x: -1.6, z: 3.9, ry: 0.15, w: 1.5, h: 0.5, y: 0.55, logo: 'olchfa.svg', pad: 0.08 });
     rain(g);
@@ -1192,7 +1188,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=23" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=24" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1229,12 +1225,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=23" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=24" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=23" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=24" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=23" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=24" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
