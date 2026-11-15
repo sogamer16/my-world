@@ -20,7 +20,7 @@ All content lives in `js/data.js`. `hero.seeking` is the line about what I'm loo
 three.js r170 is vendored in `vendor/three` (MIT).
 The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform (`gltf-transform draco in.glb out.glb`; WebP textures). The Draco decoder is vendored in `vendor/three/addons/libs/draco`. Models load a few at a time, the island in view and its neighbours first, with a progress bar on the title screen.
 
-The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle, and the Duke of Edinburgh Bronze Award medal; to show the official logo on it, add the file to `assets/logos` and set `medalLogo` on that trophy in `js/data.js`) and Melbourne (tram, sandstone arch, gum trees, laneway lamps, and Wadi Abqar, where the skill tree grows). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
+The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle, and the Duke of Edinburgh Bronze Award medal, which carries the award's badge via `medalLogo` on that trophy in `js/data.js`) and Melbourne (tram, sandstone arch, gum trees, laneway lamps, and Wadi Abqar, where the skill tree grows). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
 
 Controls: scroll, swipe, arrow keys, `1`–`7`, the hotbar, or click an island. On the Archery Range, click the target (or press space) to shoot.
 The header has **CV** (the plain one-page version, printable to PDF) and **Contact** (jumps to the Portal). A one-time hint explains the Archery Range on first visit.
@@ -28,7 +28,7 @@ Each realm has a link, e.g. `#quests`, and so does each quest or pursuit, e.g. `
 
 After changing any file in `js/` or `css/`, bump the `?v=` number in `index.html` and in the `data.js` imports at the top of `js/main.js` and `js/summary.js`, so browsers fetch the new version instead of a cached one.
 
-Logos in `assets/logos` belong to their organisations and are shown only to identify where I study and take part: University of Melbourne (Wikimedia), Trinity College, Olchfa School and CISSA (their own websites). The Saudi Students Association in Melbourne (SSAM) logo is the club's official logo, supplied by me. The leavers-hoodie print is redrawn in code (`hoodiePrint` in `js/main.js`).
+Logos in `assets/logos` belong to their organisations and are shown only to identify where I study and take part: University of Melbourne (Wikimedia), Trinity College, Olchfa School and CISSA (their own websites). The Saudi Students Association in Melbourne (SSAM) logo is the club's official logo, supplied by me. The Duke of Edinburgh's Award badge (`dofe.webp`, cropped to the oval) was supplied by me and is shown only to mark the Bronze Award I hold. The leavers-hoodie print is redrawn in code (`hoodiePrint` in `js/main.js`).
 
 The hero figure (`assets/models/me.glb`) was generated with Meshy from a full-length photo of me.
 

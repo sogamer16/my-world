@@ -887,7 +887,7 @@ function hoodieStand(g, x, z, ry) {
 // The Duke of Edinburgh Bronze Award: a cast bronze medal on a ribbon, hanging from a little
 // wooden stand. The face shows the official logo once its file is supplied (medalLogo in data.js);
 // until then a laurel ring and lettering drawn in code.
-function medalFace(top, mid, bottom, logo) {
+function medalFace(top, mid, bottom, logo, onLogo) {
   const c = document.createElement('canvas'); c.width = c.height = 512;
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   const draw = () => {
@@ -897,11 +897,8 @@ function medalFace(top, mid, bottom, logo) {
     x.fillStyle = gr; x.fillRect(0, 0, 512, 512);
     x.lineWidth = 10; x.strokeStyle = 'rgba(60, 30, 10, 0.55)';
     x.beginPath(); x.arc(R, R, R - 18, 0, Math.PI * 2); x.stroke();
-    if (logoImg) { // the official logo, on a pale enamel disc, with the year beneath
-      x.fillStyle = 'rgba(255, 246, 230, 0.92)'; x.beginPath(); x.arc(R, R, R - 40, 0, Math.PI * 2); x.fill();
-      const iw = logoImg.naturalWidth || 300, ih = logoImg.naturalHeight || 300, k = Math.min(300 / iw, 250 / ih);
-      x.drawImage(logoImg, R - (iw * k) / 2, R - 30 - (ih * k) / 2, iw * k, ih * k);
-      x.fillStyle = '#2e1405'; x.textAlign = 'center'; x.font = '700 46px Cinzel, Georgia, serif'; x.fillText(bottom, R, R + 150);
+    if (logoImg) { // the official badge fills the face; the medal itself takes the badge's shape (see onLogo)
+      x.drawImage(logoImg, 0, 0, 512, 512);
       tex.needsUpdate = true; return;
     }
     x.lineWidth = 3; x.beginPath(); x.arc(R, R, R - 92, 0, Math.PI * 2); x.stroke();
@@ -925,7 +922,11 @@ function medalFace(top, mid, bottom, logo) {
     tex.needsUpdate = true;
   };
   let logoImg = null;
-  if (logo) { const img = new Image(); img.onload = () => { logoImg = img; draw(); }; img.src = `assets/logos/${logo}?v=32`; }
+  if (logo) {
+    const img = new Image();
+    img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
+    img.src = `assets/logos/${logo}?v=32`;
+  }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
 }
@@ -951,7 +952,10 @@ function bronzeMedal(g, { x, z, ry = 0, scale = 1 }) {
   clasp.position.y = -0.9; hang.add(clasp);
   // only half metallic: there is no environment map, so a fully metallic medal would look nearly black
   const bronze = new THREE.MeshStandardMaterial({ color: 0xc8844a, metalness: 0.4, roughness: 0.38 });
-  const face = new THREE.MeshStandardMaterial({ map: medalFace("Duke of Edinburgh's", 'Bronze', '2023', D.trophies.find((t) => t.name === 'Duke of Edinburgh')?.medalLogo), metalness: 0.3, roughness: 0.45, emissive: 0x3a1c08, emissiveIntensity: 0.25 });
+  // with the official badge supplied, the disc and its rim become the badge's oval
+  // (the disc is turned a quarter about its axis, so its local z is the medal's width)
+  const shape = (aspect) => { disc.scale.z = aspect; ring.scale.x = aspect; };
+  const face = new THREE.MeshStandardMaterial({ map: medalFace("Duke of Edinburgh's", 'Bronze', '2023', D.trophies.find((t) => t.name === 'Duke of Edinburgh')?.medalLogo, (a) => shape(a)), metalness: 0.3, roughness: 0.45, emissive: 0x3a1c08, emissiveIntensity: 0.25 });
   const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.07, 48), [bronze, face, face]);
   disc.rotation.set(Math.PI / 2, Math.PI / 2, 0); // face the viewer, lettering upright
   disc.position.y = -1.41; disc.castShadow = true; hang.add(disc);
