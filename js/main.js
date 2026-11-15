@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=21';
+import * as D from './data.js?v=22';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=21`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=22`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -475,6 +475,16 @@ const build = {
       rune.position.set(0, 0, 0.31); m.add(rune);
       g.add(m);
       prop(g, 'pillar', { h: h * 1.35, x: m.position.x, z: m.position.z, ry: m.rotation.y, replace: [m] }); // the pillars of Iram
+    });
+    // one pillar has fallen: the whole stands until one part gives way
+    prop(g, 'pillar', { h: 3.2, x: 2.2, z: 4.0, ry: -0.25, onLoad: (holder) => {
+      holder.rotation.order = 'YXZ'; holder.rotation.z = Math.PI / 2 - 0.06; holder.updateMatrixWorld(true);
+      const bb = new THREE.Box3().setFromObject(holder), lo = g.worldToLocal(bb.min.clone());
+      holder.position.y += 0.3 - lo.y;
+    } });
+    [[2.6, 4.6], [-1.1, 4.4], [1.1, 4.7]].forEach(([x, z], k) => { // broken pieces
+      const r = new THREE.Mesh(jitter(new THREE.DodecahedronGeometry(0.22 + k * 0.05), 0.08), stone(0xc0895a));
+      r.position.set(x, 0.42, z); r.castShadow = true; g.add(r);
     });
     const sword = new THREE.Group();
     const blade = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.08), glow(0xdfe8ff, 0.9, { metalness: 0.9 }));
@@ -667,6 +677,10 @@ const build = {
       r.position.set(Math.cos(a) * 3, Math.sin(a) * 3, 0); r.rotation.z = a;
       gate.add(r); oldGate.push(r);
     }
+    // a lone wolf on the rocks at the island's edge, howling at the crescent
+    const rock = new THREE.Mesh(jitter(new THREE.DodecahedronGeometry(0.9, 0), 0.2), stone(0x3d3a4a));
+    rock.scale.set(1.3, 0.7, 1); rock.position.set(-4.0, 0.55, 2.2); rock.castShadow = true; g.add(rock);
+    prop(g, 'wolf', { h: 1.7, x: -4.0, y: 1.1, z: 2.2, ry: 0.9 });
     prop(g, 'gate', { h: 6.8, lit: 0.12, replace: oldGate, onLoad: () => { gate.position.y = 3.75; gate.scale.setScalar(0.95); } });
     gate.userData.face = true;
   },
@@ -688,7 +702,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=21`;
+  img.src = `assets/logos/${file}?v=22`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -1174,7 +1188,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=21" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=22" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1211,12 +1225,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=21" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=22" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=21" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=22" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=21" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=22" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
