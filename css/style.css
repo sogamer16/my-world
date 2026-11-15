@@ -175,13 +175,15 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
 .pursuit p { font-size: 0.93rem; color: #d9cfba; }
 .pursuit p.extra { color: var(--dim); font-style: italic; margin-top: 3px; }
 
-.journey-map { width: 100%; height: auto; display: block; margin-top: 4px; overflow: visible;
-  background: radial-gradient(ellipse at 50% 60%, rgba(255, 255, 255, 0.04), transparent 70%), var(--geo); background-size: auto, 24px 24px; border: 1px solid var(--line); }
-.journey-map .arcs path { fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-dasharray: 4 4; animation: dash 18s linear infinite; }
+.journey-map { width: 100%; height: auto; display: block; margin-top: 4px; border: 1px solid var(--line); border-radius: 4px; }
+.journey-map .sea { fill: #0e1a2e; }
+.journey-map .land { fill: #3b4a3a; stroke: #6f7f62; stroke-width: 0.4; stroke-linejoin: round; }
+.journey-map .arcs path { fill: none; stroke: var(--gold); stroke-width: 1.6; stroke-dasharray: 4 4; animation: dash 18s linear infinite; }
 @keyframes dash { to { stroke-dashoffset: -200; } }
 .journey-map circle { fill: var(--c); }
 .journey-map .halo { fill: none; stroke: var(--c); opacity: 0.4; }
-.journey-map text { fill: var(--ink); font-family: var(--display); font-size: 11px; letter-spacing: 0.06em; }
+.journey-map text { fill: var(--ink); font-family: var(--display); font-size: 11px; letter-spacing: 0.06em; paint-order: stroke; stroke: rgba(8, 10, 20, 0.85); stroke-width: 3px; stroke-linejoin: round; }
+.journey-map .n { fill: var(--gold); font-weight: 700; }
 .journey-map text.sub { fill: var(--dim); font-family: var(--body); font-style: italic; font-size: 9.5px; letter-spacing: 0; }
 .journey-map .ar { font-family: 'Aref Ruqaa', serif; fill: var(--gold); }
 .jm-hejaz { --c: #f4b860; } .jm-gower { --c: #e8474f; } .jm-melbourne { --c: #c79bff; }

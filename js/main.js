@@ -5,7 +5,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=22';
+import * as D from './data.js?v=23';
+import { map as MAP } from './worldmap.js?v=23';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +422,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=22`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=23`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -702,7 +703,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=22`;
+  img.src = `assets/logos/${file}?v=23`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -1147,19 +1148,22 @@ const head = (r, title) => {
   const ch = ['الفصل الأول', 'الفصل الثاني', 'الفصل الثالث', 'الفصل الرابع', 'الفصل الخامس', 'الفصل السادس', 'الفصل السابع'][idx] || '';
   return `<p class="chapter"><span lang="ar">${ch}</span> · Chapter ${idx + 1} of ${D.realms.length}</p><p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
 };
-function journeyMap() { // three stops in the order I lived there, laid out left to right
-  const W = 380, H = 170, at = [[70, 72], [190, 34], [305, 104]];
-  const arcs = at.slice(1).map((b, i) => {
-    const a = at[i];
-    return `<path d="M${a[0]} ${a[1]} Q${(a[0] + b[0]) / 2} ${Math.min(a[1], b[1]) - 30} ${b[0]} ${b[1]}" />`;
+function journeyMap() { // a real map: the three places I have lived, joined in the order I lived there
+  const { W, H, land, at } = MAP;
+  const lab = { Makkah: [10, 16, 'start'], Swansea: [10, -2, 'start'], Melbourne: [-10, -22, 'end'] };
+  const pts = D.hero.journey.map((j) => at[j.place]);
+  const arcs = pts.slice(1).map((b, i) => {
+    const a = pts[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - Math.hypot(b[0] - a[0], b[1] - a[1]) * 0.28;
+    return `<path d="M${a[0]} ${a[1]} Q${mx} ${my} ${b[0]} ${b[1]}" />`;
   }).join('');
   const dots = D.hero.journey.map((j, i) => {
-    const [x, y] = at[i];
-    return `<g class="jm-${j.land}"><circle cx="${x}" cy="${y}" r="5" /><circle class="halo" cx="${x}" cy="${y}" r="10" />
-      <text x="${x}" y="${y + 26}" text-anchor="middle">${esc(j.place)} <tspan class="ar">${esc(j.ar)}</tspan></text>
-      <text class="sub" x="${x}" y="${y + 40}" text-anchor="middle">${esc(j.note)}</text></g>`;
+    const [x, y] = pts[i], [dx, dy, anchor] = lab[j.place] || [10, 0, 'start'];
+    return `<g class="jm-${j.land}"><circle class="halo" cx="${x}" cy="${y}" r="9" /><circle cx="${x}" cy="${y}" r="4.5" />
+      <text x="${x + dx}" y="${y + dy}" text-anchor="${anchor}"><tspan class="n">${i + 1}</tspan> ${esc(j.place)} <tspan class="ar">${esc(j.ar)}</tspan></text>
+      <text class="sub" x="${x + dx}" y="${y + dy + 13}" text-anchor="${anchor}">${esc(j.note)}</text></g>`;
   }).join('');
-  return `<svg class="journey-map" viewBox="0 0 ${W} ${H}" role="img" aria-label="Makkah, then Swansea, then Melbourne">
+  return `<svg class="journey-map" viewBox="0 0 ${W} ${H}" role="img" aria-label="A map: Makkah, then Swansea, then Melbourne">
+    <rect class="sea" width="${W}" height="${H}" rx="4" /><path class="land" d="${land}" />
     <g class="arcs">${arcs}</g>${dots}</svg>`;
 }
 
@@ -1188,7 +1192,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=22" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=23" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1225,12 +1229,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=22" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=23" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=22" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=23" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=22" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=23" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
