@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=27';
-import { map as MAP } from './worldmap.js?v=27';
+import * as D from './data.js?v=28';
+import { map as MAP } from './worldmap.js?v=28';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -228,30 +228,14 @@ tick.push((t, dt) => {
     const on = key === skillLit;
     const s = on ? 2.1 : lit ? 0.8 : 1;
     n.s += (s - n.s) * k; n.node.scale.setScalar(n.r * n.s);
-    const e = on ? n.base * 2.4 : lit && lit.bough !== n.bough ? n.base * 0.35 : n.base;
+    const e = on ? n.base * 2.4 : lit ? (lit.bough !== n.bough ? n.base * 0.35 : n.base) : n.bough === school ? n.base * 1.15 : n.base * 0.55;
     n.mat.emissiveIntensity += (e - n.mat.emissiveIntensity) * k;
   }
   skillBoughs.forEach((b, i) => {
-    const e = lit ? (lit.bough === i ? 1.1 : 0.2) : b.base;
+    const e = lit ? (lit.bough === i ? 1.1 : 0.2) : i === school ? 0.95 : 0.3;
     b.mat.emissiveIntensity += (e - b.mat.emissiveIntensity) * k;
   });
 });
-function textSprite(text, color) {
-  const c = document.createElement('canvas'); c.width = 512; c.height = 96;
-  const x = c.getContext('2d');
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const draw = () => {
-    x.clearRect(0, 0, 512, 96);
-    x.font = '700 54px Cinzel, Georgia, serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
-    x.lineJoin = 'round'; x.lineWidth = 10; x.strokeStyle = 'rgba(10, 8, 24, 0.85)'; x.strokeText(text.toUpperCase(), 256, 50);
-    x.fillStyle = color; x.fillText(text.toUpperCase(), 256, 50);
-    tex.needsUpdate = true;
-  };
-  draw(); document.fonts.load('700 54px Cinzel').then(draw).catch(() => {});
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
-  sp.scale.set(3.2, 0.6, 1);
-  return sp;
-}
 
 const glow = (color, intensity = 1.6, opts = {}) =>
   new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: intensity, roughness: 0.35, metalness: 0.2, flatShading: true, ...opts });
@@ -490,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=27`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=28`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -587,9 +571,9 @@ const build = {
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.5, 3.4, 6), stone(0x4d4168));
     trunk.position.y = 1.9; g.add(trunk);
     prop(g, 'tree', { h: 5, replace: [trunk] });
-    // Three glowing boughs fan out of the crown, one per school: left, up and right.
+    // Three glowing boughs fan out of the crown, one per school (left, up, right), in the colours of the panel's tabs.
     // Along each bough the strongest skills sit nearest the heart; novice ones are hollow.
-    const heartAt = new THREE.Vector3(0, 5.2, -0.4);
+    const heartAt = new THREE.Vector3(0, 4.7, -0.4);
     const heart = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 0), glow(0xffffff, 0.9));
     heart.position.copy(heartAt); g.add(heart); spin.push({ o: heart, y: 0.8, x: 0.4 });
     const nb = D.skillTree.length;
@@ -600,7 +584,7 @@ const build = {
       const order = b.skills.map((s, si) => ({ s, si })).sort((p, q) => q.s.rank - p.s.rank || p.si - q.si);
       const pts = [heartAt.clone()];
       order.forEach(({ s, si }, k) => {
-        const along = 0.95 + k * 0.52;
+        const along = 0.85 + k * 0.45;
         const a = lean + Math.sign(lean) * k * 0.025 + Math.sin(k * 1.4 + bi) * 0.06; // the bough curls outward as it grows
         const p = new THREE.Vector3(Math.sin(a) * along, heartAt.y + Math.cos(a) * along * 0.9, heartAt.z + Math.sin(k * 1.7 + bi) * 0.3);
         pts.push(p);
@@ -620,12 +604,8 @@ const build = {
       const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, pts.length * 10, 0.04, 6), boughMat);
       g.add(tube);
       skillBoughs.push({ mat: boughMat, base: 0.55 });
-      // the school's name floats past the tip of its bough
-      const tip = pts[pts.length - 1], dir = tip.clone().sub(pts[pts.length - 2]).normalize();
-      const label = textSprite(b.branch, b.color);
-      label.position.copy(tip).addScaledVector(dir, 1.1); label.position.y += 0.3;
-      g.add(label);
     });
+    abqarWisps(g, heartAt);
   },
 
   trophies(g, color) {
@@ -817,7 +797,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=27`;
+  img.src = `assets/logos/${file}?v=28`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -1049,6 +1029,65 @@ function verseTablet(g, { x, z, ry = 0, w = 1.9, h = 1.15 }) {
   g.add(slab, foot);
 }
 
+// The jinn of Wadi Abqar: wisps that spiral round the skill tree. When a skill is pointed at,
+// the first of them flies over and circles it.
+function abqarWisps(g, heartAt) {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,240,210,0.65)'); gr.addColorStop(1, 'rgba(255,220,180,0)');
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(c);
+  const TRAIL = 16, tints = [0xffe2a8, 0xc9b5ff, 0xa8e8ff];
+  const wisps = tints.map((tint, w) => {
+    const dots = [...Array(TRAIL)].map((_, j) => {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: tint, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.9 * (1 - j / TRAIL) }));
+      sp.scale.setScalar(0.42 * (1 - j / TRAIL) + 0.06); g.add(sp); return sp;
+    });
+    return { dots, trail: [], at: new THREE.Vector3(), w, visit: 0 };
+  });
+  const spot = new THREE.Vector3();
+  tick.push((t, dt) => {
+    const time = reduceMotion ? 2 : t;
+    for (const s of wisps) {
+      const a = time * (0.55 + s.w * 0.12) + s.w * 2.1, rise = (Math.sin(time * 0.23 + s.w * 1.7) + 1) / 2;
+      spot.set(Math.cos(a) * (1.7 + rise * 1.4), 1.0 + rise * (heartAt.y + 1.5), Math.sin(a) * (1.7 + rise * 1.4) - 0.3);
+      const lit = s.w === 0 && skillLit && skillNodes.get(skillLit);
+      s.visit += ((lit ? 1 : 0) - s.visit) * (1 - Math.exp(-dt * 3));
+      if (lit) {
+        const p = lit.node.position, b = time * 4;
+        s.target = (s.target || new THREE.Vector3()).set(p.x + Math.cos(b) * 0.38, p.y + Math.sin(b * 0.7) * 0.15, p.z + Math.sin(b) * 0.38);
+      }
+      if (s.target) spot.lerp(s.target, s.visit);
+      s.at.copy(spot);
+      s.trail.unshift(s.at.clone()); if (s.trail.length > TRAIL * 2) s.trail.pop();
+      s.dots.forEach((d, j) => d.position.copy(s.trail[Math.min(j * 2, s.trail.length - 1)]));
+    }
+  });
+}
+
+// A boulder at the mouth of the valley, carved with its name.
+function nameStone(g, { x, z, ry = 0, ar, en }) {
+  const c = document.createElement('canvas'); c.width = 768; c.height = 320;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const draw = () => {
+    const k = c.getContext('2d'), W = c.width, H = c.height;
+    k.fillStyle = '#a58a66'; k.fillRect(0, 0, W, H);
+    for (let i = 0; i < 700; i++) { k.fillStyle = `rgba(${80 + Math.random() * 60},${60 + Math.random() * 40},36,0.09)`; k.fillRect(Math.random() * W, Math.random() * H, 3 + Math.random() * 9, 2 + Math.random() * 6); }
+    k.textAlign = 'center'; k.direction = 'rtl'; k.fillStyle = '#3b2412'; k.font = '700 120px "Aref Ruqaa", serif';
+    k.fillText(ar, W / 2, H * 0.55);
+    k.direction = 'ltr'; k.font = '700 40px Cinzel, Georgia, serif'; k.fillStyle = '#5c3a1c'; k.fillText(en.toUpperCase(), W / 2, H * 0.86);
+    tex.needsUpdate = true;
+  };
+  draw(); document.fonts.load('700 120px "Aref Ruqaa"', ar).then(draw).catch(() => {});
+  const stoneM = flat(0x8f7656);
+  const face = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 });
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.62, 0.34), [stoneM, stoneM, stoneM, stoneM, face, stoneM]);
+  slab.position.set(x, 0.72, z); slab.rotation.set(-0.28, ry, 0.04);
+  const rock = new THREE.Mesh(jitter(new THREE.DodecahedronGeometry(0.62, 0), 0.12), stoneM);
+  rock.scale.set(1.35, 0.6, 0.8); rock.position.set(x, 0.4, z - 0.12); rock.rotation.y = ry;
+  [slab, rock].forEach((o) => { o.castShadow = true; o.receiveShadow = true; g.add(o); });
+}
+
 /* ---------- landmarks of the places I have lived ---------- */
 const landmarks = {
   hero(g) { // Makkah: a Hejazi house with roshan balconies, date palms, and the farm AquaFlow was built for
@@ -1078,9 +1117,10 @@ const landmarks = {
     lampLight(g, -4.85, 2.5, 3.1);
     prop(g, 'gum', { h: 4.2, x: -3.9, z: -3.9, replace: g.userData.trees });
   },
-  skills(g) { // Melbourne: the sandstone university arch
+  skills(g) { // Melbourne: the sandstone university arch, at the mouth of Wadi Abqar
     prop(g, 'arch', { h: 4.6, x: 0, z: -4.9, replace: g.userData.trees });
     signboard(g, { x: 2.6, z: 3.4, ry: -0.25, w: 1.9, h: 0.75, y: 0.9, logo: 'trinity.png', pad: 0.07 });
+    nameStone(g, { x: -2.5, z: 3.6, ry: 0.3, ar: D.folklore.abqar.ar[0], en: 'Wadi Abqar' });
     prop(g, 'gum', { h: 4.2, x: -4.5, z: -2.6, ry: 1.2 });
     prop(g, 'gum', { h: 3.6, x: 4.6, z: -2.2, ry: 2.6 });
   },
@@ -1263,6 +1303,39 @@ function journeyMap() { // a real map: the three places I have lived, joined in 
     <g class="arcs">${arcs}</g>${dots}</svg>`;
 }
 
+// One school of the skill tree, grown downward through its tiers: Seasoned, Adept, Novice.
+let school = 0;
+const findable = (u) => (D.quests.some((q) => q.name === u) ? 'quests' : D.pursuits.some((q) => q.name === u) ? 'pursuits' : '');
+function schoolPanel(bi) {
+  const b = D.skillTree[bi];
+  const proven = new Set(b.skills.flatMap((s) => s.used || []));
+  const top = b.skills.filter((s) => s.rank === 3).length;
+  const tile = (s) => `<div class="skill" data-skill="${bi}-${b.skills.indexOf(s)}" tabindex="0">
+      <span class="s-name">${esc(s.name)}</span>${s.used ? `<span class="s-used">${s.used.map((u) => {
+        const where = findable(u);
+        return where ? `<button type="button" data-goto="${where}" data-find="${esc(u)}">${esc(u)}</button>` : esc(u);
+      }).join(' · ')}</span>` : ''}</div>`;
+  return `<div class="school" style="--c:${b.color}">
+    <p class="school-sum">${b.skills.length} skills${top ? ` · ${top} seasoned` : ''}${proven.size ? ` · put to work in ${proven.size} ${proven.size === 1 ? 'project' : 'projects'}` : ''}</p>
+    <ol class="tiers">${[3, 2, 1].filter((rank) => b.skills.some((s) => s.rank === rank)).map((rank) => `
+      <li class="tier t${rank}"><h4><span class="pips">${[1, 2, 3].map((n) => `<i class="${n <= rank ? 'on' : ''}"></i>`).join('')}</span>${D.rankNames[rank]}</h4>
+        <div class="tiles">${b.skills.filter((s) => s.rank === rank).map(tile).join('')}</div></li>`).join('')}</ol>
+    <p class="school-hint">${matchMedia('(hover: hover)').matches ? 'Hover' : 'Tap'} a skill to find it in the tree; tap a project to see the proof.</p>
+  </div>`;
+}
+function pickSchool(bi, focus = false) {
+  school = ((bi % D.skillTree.length) + D.skillTree.length) % D.skillTree.length;
+  const body = panel.querySelector('#school');
+  if (!body) return;
+  body.innerHTML = schoolPanel(school);
+  body.setAttribute('aria-labelledby', `school-tab-${school}`);
+  panel.querySelectorAll('[data-school]').forEach((t) => {
+    const on = +t.dataset.school === school;
+    t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+    if (on && focus) t.focus();
+  });
+  lightSkill(null);
+}
 const panels = {
   hero: (r) => `${head(r, D.hero.title)}
     <p class="lore">${esc(D.hero.lore)}</p>
@@ -1288,7 +1361,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=27" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=28" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1296,21 +1369,11 @@ const panels = {
       </details>`).join('')}</section>`,
 
   skills: (r) => `${head(r, 'Skill Tree')}
-    <p class="lore">Three schools, one build: code that reads the world, hardware that touches it, and the engineering to make it hold.</p>
-    <p class="skill-key"><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i></span> Seasoned
-      <span class="pips"><i class="on"></i><i class="on"></i><i></i></span> Adept
-      <span class="pips"><i class="on"></i><i></i><i></i></span> Novice
-      <em>${matchMedia('(hover: hover)').matches ? 'Hover' : 'Tap'} a skill to find it in the tree.</em></p>
-    ${D.skillTree.map((b, bi) => `<section class="branch" style="--c:${b.color}">
-      <h3>${esc(b.branch)} <small>${esc(b.sub)}</small></h3>
-      ${b.skills.map((s, si) => `<div class="skill" data-skill="${bi}-${si}" tabindex="0">
-        <div class="s-main"><span class="s-name">${esc(s.name)}</span>${s.used ? `
-          <span class="s-used">Used in ${s.used.map((u) => {
-            const where = D.quests.some((q) => q.name === u) ? 'quests' : D.pursuits.some((q) => q.name === u) ? 'pursuits' : '';
-            return where ? `<button type="button" data-goto="${where}" data-find="${esc(u)}">${esc(u)}</button>` : esc(u);
-          }).join(', ')}</span>` : ''}</div>
-        <span class="pips" aria-label="${D.rankNames[s.rank]}">${[1, 2, 3].map((n) => `<i class="${n <= s.rank ? 'on' : ''}"></i>`).join('')}<em>${D.rankNames[s.rank]}</em></span></div>`).join('')}
-    </section>`).join('')}`,
+    <blockquote class="verse abqar"><p lang="ar" dir="rtl"><b>${esc(D.folklore.abqar.ar[0])}</b><br>${esc(D.folklore.abqar.ar[1])}</p><p>${esc(D.folklore.abqar.en)}</p></blockquote>
+    <div class="schools" role="tablist" aria-label="Schools of skill">${D.skillTree.map((b, bi) => `
+      <button type="button" role="tab" id="school-tab-${bi}" data-school="${bi}" aria-controls="school" aria-selected="${bi === school}" tabindex="${bi === school ? 0 : -1}" style="--c:${b.color}">
+        <b>${esc(b.branch)}</b><span>${esc(b.sub)}</span></button>`).join('')}</div>
+    <div id="school" role="tabpanel" aria-labelledby="school-tab-${school}">${schoolPanel(school)}</div>`,
 
   trophies: (r) => `${head(r, 'Deeds & Honours')}
     <section>${D.trophies.map((t) => `
@@ -1334,12 +1397,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=27" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=28" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=27" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=28" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=27" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=28" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1361,15 +1424,27 @@ hotbar.innerHTML = realms.map((r, i) =>
   `<button type="button" data-i="${i}" style="--c:${r.color}"><kbd>${i + 1}</kbd><span class="g">${r.glyph}</span>${r.name}</button>`).join('');
 hotbar.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); });
 panel.addEventListener('click', (e) => { if (e.target.closest('#loose')) loose(); });
+panel.addEventListener('keydown', (e) => {
+  const tab = e.target.closest('[data-school]');
+  if (!tab || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
+  e.preventDefault(); e.stopPropagation();
+  const n = D.skillTree.length;
+  pickSchool(e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : school + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1), true);
+});
 // Skills panel: pointing at a skill lights its node in the tree; "Used in" jumps to the proof.
 const skillOf = (e) => e.target.closest?.('.skill')?.dataset.skill;
 panel.addEventListener('pointerover', (e) => { if (e.pointerType === 'mouse') lightSkill(skillOf(e) || null); });
 panel.addEventListener('pointerleave', () => { if (!panel.contains(document.activeElement)) lightSkill(null); });
-panel.addEventListener('focusin', (e) => lightSkill(skillOf(e) || null));
+// keyboard focus lights a skill; a tap is handled by the click below (so it doesn't toggle twice)
+let tapping = false;
+panel.addEventListener('pointerdown', () => { tapping = true; });
+panel.addEventListener('focusin', (e) => { if (!tapping) lightSkill(skillOf(e) || null); });
 panel.addEventListener('click', (e) => {
+  const tab = e.target.closest('[data-school]');
+  if (tab) return pickSchool(+tab.dataset.school);
   const jump = e.target.closest('[data-goto]');
   if (jump) return showIn(jump.dataset.goto, jump.dataset.find);
-  const k = skillOf(e);
+  const k = skillOf(e); tapping = false;
   if (k) lightSkill(k === skillLit ? null : k);
 });
 function showIn(realmId, name) {
@@ -1480,6 +1555,7 @@ canvas.addEventListener('pointerup', (e) => {
   if (Math.abs(dx) + Math.abs(dy) < 8) {
     const hit = pickHit(e), h = hit ? hit.object.userData.realm : -1, k = skillAt(hit);
     if (k) { // show that skill in the panel
+      if (+k.split('-')[0] !== school) pickSchool(+k.split('-')[0]);
       lightSkill(k); skyLit = e.pointerType === 'mouse';
       if (document.body.classList.contains('panel-min')) toggle.click();
       panel.querySelector(`.skill[data-skill="${k}"]`)?.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });

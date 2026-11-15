@@ -246,6 +246,12 @@ export const folklore = {
     by: 'Antarah ibn Shaddad', byAr: 'عنترة بن شداد',
     note: 'The warrior-poet of pre-Islamic Arabia. The line is attributed to him; the translation is mine.',
   },
+  // Wadi Abqar: the valley of the jinn in old Arab lore. A poet too gifted to be merely human was said
+  // to have a companion from Abqar, and the word for genius, ʿabqarī, comes from the valley's name.
+  abqar: {
+    ar: ['وادي عبقر', 'ومنه قيل للنابغ: عبقري'],
+    en: 'The old Arabs told of Wadi Abqar, a valley of jinn. A poet too good to be merely human was said to have a companion from Abqar — and the word for genius, ʿabqarī, comes from its name. No jinn here: just practice, in three schools.',
+  },
   juha: [
     { tale: 'Juha lost his ring inside the house, but searched for it out in the street — "the light is better out here."', moral: 'Debug where the fault is, not where it is easy to look.' },
     { tale: 'Juha rode the donkey and people called him cruel; his son rode and they called him spoilt; they both walked and people laughed at them.', moral: 'You cannot please every critic. Build it, then listen to the people who use it.' },
@@ -371,7 +377,7 @@ export const realms = [
   { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
   { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
   { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
-  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'The Sandstone Grove', placeAr: 'بستان الحجر الرملي', color: '#7cc4ff' },
+  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'Wadi Abqar', placeAr: 'وادي عبقر', color: '#7cc4ff' },
   { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
   { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
   { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
