@@ -5,8 +5,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=24';
-import { map as MAP } from './worldmap.js?v=24';
+import * as D from './data.js?v=25';
+import { map as MAP } from './worldmap.js?v=25';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -422,7 +422,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=24`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=25`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -717,7 +717,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=24`;
+  img.src = `assets/logos/${file}?v=25`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -760,8 +760,8 @@ function hoodiePrint() {
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
   const draw = () => {
     const x = c.getContext('2d'); x.clearRect(0, 0, 1024, 1024);
-    x.fillStyle = '#f2efe8'; x.font = '600 112px Oswald, "Arial Narrow", Arial, sans-serif'; x.textBaseline = 'middle';
-    const text = [...'Sohaib the great'], R = 1700, cx = 512, cy = 250 + R;
+    x.fillStyle = '#ffffff'; x.font = '600 118px Oswald, "Arial Narrow", Arial, sans-serif'; x.textBaseline = 'middle';
+    const text = [...'Sohaib the great'], R = 1300, cx = 512, cy = 250 + R;
     const ws = text.map((ch) => x.measureText(ch).width), total = ws.reduce((a, b) => a + b, 0);
     let ang = -total / 2 / R;
     text.forEach((ch, i) => {
@@ -771,13 +771,13 @@ function hoodiePrint() {
     });
     // the 23 is filled with tiny lines, like the leavers' names printed inside it
     const o = document.createElement('canvas'); o.width = o.height = 1024; const q = o.getContext('2d');
-    q.font = '600px Graduate, "Arial Black", sans-serif'; q.textAlign = 'center'; q.fillStyle = '#fff'; q.fillText('23', 512, 930);
-    q.globalCompositeOperation = 'source-in'; q.fillStyle = '#151515'; q.fillRect(0, 0, 1024, 1024);
-    q.fillStyle = 'rgba(240, 236, 228, 0.9)';
-    for (let yy = 380; yy < 960; yy += 11) for (let xx = 60; xx < 980;) { const len = 14 + Math.random() * 46; q.fillRect(xx, yy, len, 4); xx += len + 7 + Math.random() * 8; }
+    q.font = '520px Graduate, "Arial Black", sans-serif'; q.textAlign = 'center'; q.fillStyle = '#fff'; q.fillText('23', 512, 800);
+    q.globalCompositeOperation = 'source-in'; q.fillStyle = '#8d8a84'; q.fillRect(0, 0, 1024, 1024);
+    q.fillStyle = 'rgba(245, 242, 235, 0.95)';
+    for (let yy = 380; yy < 820; yy += 7) for (let xx = 30; xx < 1000;) { const len = 12 + Math.random() * 40; q.fillRect(xx, yy, len, 4); xx += len + 5 + Math.random() * 6; }
     x.drawImage(o, 0, 0);
     x.font = q.font; x.textAlign = 'center'; x.lineJoin = 'round';
-    x.lineWidth = 14; x.strokeStyle = '#f2efe8'; x.strokeText('23', 512, 930);
+    x.lineWidth = 16; x.strokeStyle = '#ffffff'; x.strokeText('23', 512, 800);
     x.textAlign = 'start';
     tex.needsUpdate = true;
   };
@@ -790,13 +790,13 @@ function applyHoodiePrint(holder, g) {
   const meshes = []; holder.traverse((o) => o.isMesh && meshes.push(o));
   const box = new THREE.Box3().setFromObject(holder), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
   const back = new THREE.Vector3(0, 0, -1).applyQuaternion(holder.getWorldQuaternion(new THREE.Quaternion()));
-  const origin = ctr.clone().addScaledVector(back, size.length()); origin.y = box.min.y + size.y * 0.55;
+  const origin = ctr.clone().addScaledVector(back, size.length()); origin.y = box.min.y + size.y * 0.52;
   const hit = new THREE.Raycaster(origin, back.clone().negate()).intersectObjects(meshes, false)[0];
   if (!hit) return;
   const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
   const aim = new THREE.Object3D(); aim.position.copy(hit.point); aim.lookAt(hit.point.clone().add(n));
-  const w = size.x * 0.62;
-  const geo = new DecalGeometry(hit.object, hit.point, aim.rotation, new THREE.Vector3(w, w, w * 0.8));
+  const w = Math.max(size.x, size.z) * 0.95;
+  const geo = new DecalGeometry(hit.object, hit.point, aim.rotation, new THREE.Vector3(w, w, size.length()));
   geo.applyMatrix4(g.matrixWorld.clone().invert());
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: hoodiePrint(), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, roughness: 0.9 }));
   m.receiveShadow = true; g.add(m);
@@ -1188,7 +1188,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=24" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=25" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1225,12 +1225,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=24" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=25" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=24" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=25" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=24" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=25" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
