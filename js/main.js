@@ -816,7 +816,7 @@ const landmarks = {
   guilds(g) { // Melbourne: gum trees and a lamp by the camp
     prop(g, 'gum', { h: 4.2, x: -4.3, z: -3.3, replace: g.userData.trees });
     prop(g, 'gum', { h: 3.5, x: -1.2, z: -5.0, ry: 2 });
-    // my silver Astra, which has taken me (and its share of mud) to most of the bush around Melbourne
+    // my silver 2005 Holden Astra CD (AH hatchback), which has taken me and its share of mud around the bush outside Melbourne
     prop(g, 'car', { w: 3.6, x: 3.7, z: 3.3, ry: -0.75, onLoad: (holder) => holder.traverse((o) => {
       if (o.isMesh) o.material.color.setRGB(0.74, 0.76, 0.79);
     }) });
