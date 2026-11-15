@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=19';
+import * as D from './data.js?v=20';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=19`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=20`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -688,7 +688,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=19`;
+  img.src = `assets/logos/${file}?v=20`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -847,8 +847,7 @@ function saudiFlag(g, { x, z, h = 6.2, ry = 0, size = 1, fog = true, glowAmt = 0
 }
 
 /* ---------- things I watch ---------- */
-// A horseshoe arch of red brick and cream stone voussoirs, as in the Great Mosque of Córdoba,
-// for Hatem Ali's Andalusian trilogy.
+// A horseshoe arch of red brick and cream stone voussoirs, as in the Great Mosque of Córdoba.
 function andalusArch(g, { x, z, ry = 0 }) {
   const a = new THREE.Group(), R = 1.05, n = 17, red = flat(0x8a3a28), cream = flat(0xd6c49c), col = flat(0x9a8f80);
   const span = Math.PI * 1.3, start = -Math.PI * 0.15;
@@ -867,7 +866,7 @@ function andalusArch(g, { x, z, ry = 0 }) {
   a.children.forEach((o) => { o.castShadow = true; o.receiveShadow = true; });
   const holder = new THREE.Group(); holder.add(a); holder.position.set(x, 0.3, z); holder.rotation.y = ry; g.add(holder);
 }
-// A small table with a chess game in progress (Code Geass) and a black notebook beside a red apple (Death Note).
+// A small table with a chess game in progress, and a black notebook beside a red apple.
 function strategyTable(g, { x, z, ry = 0 }) {
   const t = new THREE.Group(), wood2 = flat(0x5a3b22);
   const top = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.08, 0.9), wood2); top.position.y = 0.82; t.add(top);
@@ -1077,8 +1076,7 @@ tick.push((t) => {
 });
 
 /* ---------- my companion ---------- */
-// A small fennec-fox spirit, after the summoned companions of Taran Matharu's Summoner books (my own
-// design). Each time you travel it is summoned onto the island you arrive at, through a glowing circle.
+// A small fennec-fox spirit companion (my own design). Each time you travel it is summoned onto the island you arrive at, through a glowing circle.
 const companion = new THREE.Group();
 const circleTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
@@ -1128,11 +1126,12 @@ function loose() {
 /*  Panels                                                             */
 /* ================================================================== */
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const thinker = (t) => `<blockquote class="verse"><p lang="ar" dir="rtl">${t.ar.map(esc).join('<br>')}</p>
-  <p>${esc(t.en)}</p><cite>${esc(t.by)} · <span lang="ar">${esc(t.byAr)}</span></cite><p class="verse-note">${esc(t.note)}</p></blockquote>`;
+const motto = (t) => `<blockquote class="verse"><p lang="ar" dir="rtl">${t.ar.map(esc).join('<br>')}</p><p>${esc(t.en)}</p></blockquote>`;
 const head = (r, title) => {
   const where = (D.lands[r.land] || {}).short;
-  return `<p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
+  const idx = D.realms.findIndex((x) => x.id === r.id);
+  const ch = ['الفصل الأول', 'الفصل الثاني', 'الفصل الثالث', 'الفصل الرابع', 'الفصل الخامس', 'الفصل السادس', 'الفصل السابع'][idx] || '';
+  return `<p class="chapter"><span lang="ar">${ch}</span> · Chapter ${idx + 1} of ${D.realms.length}</p><p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
 };
 function journeyMap() { // three stops in the order I lived there, laid out left to right
   const W = 380, H = 170, at = [[70, 72], [190, 34], [305, 104]];
@@ -1167,7 +1166,7 @@ const panels = {
 
   quests: (r) => `${head(r, 'Quest Log')}
     <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
-    ${thinker(D.thinkers.ghazali)}
+    ${motto(D.mottos.quests)}
     <section style="margin-top:16px">${D.quests.map((q, i) => `
       <details class="quest"${i === 0 ? ' open' : ''}>
         <summary>
@@ -1175,7 +1174,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=19" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=20" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1209,15 +1208,15 @@ const panels = {
         <div><strong>${esc(p.name)}</strong><p>${esc(p.detail)}</p>${p.extra ? `<p class="extra">${esc(p.extra)}</p>` : ''}</div></div>`).join('')}</section>`,
 
   guilds: (r) => `${head(r, 'Guilds & Academies')}
-    ${thinker(D.thinkers.khaldun)}
+    ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=19" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=20" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=19" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=20" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=19" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=20" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
