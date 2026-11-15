@@ -38,7 +38,6 @@ export const hero = {
 export const quests = [
   {
     name: 'Totex Energy',
-    logo: 'totex.svg',
     kind: 'Main Quest',
     plain: 'Internship',
     role: 'Engineering Intern · energy startup',
@@ -258,10 +257,10 @@ export const pursuits = [
 
 export const guilds = [
   {
-    name: 'Saudi Students Association (SAMU)',
-    logo: 'samu.png',
+    name: 'Saudi Students Association in Melbourne (SSAM)',
+    nameAr: 'نادي الطلبة السعودي في ملبورن',
     role: 'Event Coordinator',
-    place: 'University of Melbourne',
+    place: 'Melbourne',
     when: '2025',
     detail:
       'Planned and delivered events for 200+ attendees — volunteers, logistics, stakeholders — and co-organised a student hackathon from the ground up.',
@@ -294,9 +293,8 @@ export const academies = [
 export const badges = [
   { name: 'University of Melbourne', logo: 'unimelb.svg', note: 'Studying', href: 'https://www.unimelb.edu.au' },
   { name: 'Trinity College', logo: 'trinity.png', note: 'Foundation Studies', href: 'https://www.trinity.unimelb.edu.au' },
-  { name: 'Totex Energy', logo: 'totex.svg', note: 'Internship', href: 'https://www.totexenergy.com' },
   { name: 'CISSA', logo: 'cissa.svg', note: 'Codebrew', href: 'https://www.cissa.org.au' },
-  { name: 'SAMU', logo: 'samu.png', note: 'Event Coordinator', href: 'https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10065' },
+  { name: 'SSAM', ar: 'نادي الطلبة السعودي في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
   { name: 'Olchfa School', logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
 ];
 

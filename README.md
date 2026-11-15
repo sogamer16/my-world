@@ -27,4 +27,4 @@ Each realm has a link, e.g. `#quests`. `#summary` opens the plain one-page versi
 
 After changing any file in `js/` or `css/`, bump the `?v=` number in `index.html` and in the `data.js` imports at the top of `js/main.js` and `js/summary.js`, so browsers fetch the new version instead of a cached one.
 
-Logos in `assets/logos` belong to their organisations and are shown only to identify where I study, work and take part: University of Melbourne (Wikimedia), Trinity College, Olchfa School, CISSA and SAMU (their own websites). The Totex mark is redrawn from the company's site icon. The leavers-hoodie print is redrawn in code (`hoodiePrint` in `js/main.js`).
+Logos in `assets/logos` belong to their organisations and are shown only to identify where I study and take part: University of Melbourne (Wikimedia), Trinity College, Olchfa School and CISSA (their own websites). The Saudi Students Association in Melbourne (SSAM) is shown by name, as no logo file is published. The leavers-hoodie print is redrawn in code (`hoodiePrint` in `js/main.js`).
