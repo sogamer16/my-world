@@ -31,7 +31,7 @@ export const hero = {
   tongues: [
     { name: 'Arabic', rank: 'Native', hello: 'أهلاً' },
     { name: 'English', rank: 'IELTS 8.0', hello: 'Hello' },
-    { name: 'Welsh', rank: 'Beginner', hello: 'Croeso' },
+    { name: 'Welsh', rank: 'Beginner', hello: 'Shwmae' },
   ],
 };
 

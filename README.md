@@ -29,7 +29,7 @@ After changing any file in `js/` or `css/`, bump the `?v=` number in `index.html
 
 Logos in `assets/logos` belong to their organisations and are shown only to identify where I study and take part: University of Melbourne (Wikimedia), Trinity College, Olchfa School and CISSA (their own websites). The Saudi Students Association in Melbourne (SSAM) logo is the club's official logo, supplied by me. The leavers-hoodie print is redrawn in code (`hoodiePrint` in `js/main.js`).
 
-The hero figure (`assets/models/me.glb`) was generated with Meshy from a photo of me; the lower thobe and trainers are added in code.
+The hero figure (`assets/models/me.glb`) is a stylised likeness of me generated with Meshy from a description.
 
 The car at the camp (`assets/models/car.glb`) is my silver 2005 Holden Astra CD hatchback, generated with Meshy; its number plates are left blank.
 
