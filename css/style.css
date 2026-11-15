@@ -111,19 +111,6 @@ p.lore { color: #d9cfba; font-size: 1.02rem; }
 .meta dt { color: var(--dim); }
 
 /* attributes */
-.stats { display: grid; gap: 6px; }
-.stat { display: flex; align-items: center; gap: 14px; padding: 7px 12px 7px 9px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(227, 184, 102, 0.16); }
-.medallion { flex: none; width: 46px; height: 52px; display: grid; place-items: center; align-content: center; gap: 0;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: linear-gradient(160deg, #f3d48f, #a87a30 55%, #6e4c18);
-  position: relative; animation: rise 0.5s ease both 0.25s; }
-.medallion::before { content: ''; position: absolute; inset: 2px; clip-path: inherit; background: radial-gradient(circle at 50% 35%, #2a2140, #120e22 75%); }
-.medallion b, .medallion span { position: relative; font-family: var(--display); font-variant-numeric: tabular-nums; line-height: 1; }
-.medallion b { font-size: 1.18rem; font-weight: 700; color: #f6e3b4; }
-.medallion span { font-size: 0.68rem; color: var(--gold); margin-top: 3px; letter-spacing: 0.04em; }
-.stat-text { min-width: 0; }
-.stat-text strong { display: block; font-family: var(--display); font-size: 0.9rem; letter-spacing: 0.04em; color: var(--ink); }
-.stat-text abbr { text-decoration: none; font-size: 0.66rem; letter-spacing: 0.14em; color: var(--gold); margin-left: 4px; }
-.stat-text p { font-size: 0.82rem; line-height: 1.35; color: #cfc5b0; margin-top: 2px; }
 
 .journey { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.95rem; }
 .journey span:not(.arrow) { border: 1px solid var(--line); padding: 2px 10px; }
@@ -414,19 +401,8 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
 .r-list dt { font-family: var(--display); font-size: 0.8rem; color: var(--ink); white-space: nowrap; }
 .r-list dt abbr { text-decoration: none; color: var(--gold); font-size: 0.66rem; letter-spacing: 0.12em; margin-right: 4px; }
 .r-list dd { color: #cfc5b0; }
-/* ---------- attributes: pips ---------- */
-.pip-rows { display: grid; gap: 10px; }
-.pip-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.pip-head strong { font-family: var(--display); font-size: 0.88rem; letter-spacing: 0.04em; }
-.pip-head abbr { text-decoration: none; color: var(--gold); font-size: 0.64rem; letter-spacing: 0.14em; margin-left: 4px; }
-.gems { display: flex; align-items: center; gap: 4px; flex: none; }
-.gems i { width: 9px; height: 9px; transform: rotate(45deg); border: 1px solid rgba(227, 184, 102, 0.5); }
-.gems i.on { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 6px rgba(227, 184, 102, 0.6); }
-.gems i.half { background: linear-gradient(135deg, var(--gold) 50%, transparent 50%); border-color: var(--gold); }
-.gems b { font-family: var(--display); font-size: 0.85rem; width: 22px; text-align: right; margin-left: 4px; }
-.pip-row p { font-size: 0.82rem; color: #cfc5b0; margin-top: 2px; }
-/* ---------- attributes: evidence only ---------- */
-.traits { list-style: none; display: grid; gap: 8px; }
-.traits li { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); }
-.traits strong { font-family: var(--display); font-size: 0.86rem; letter-spacing: 0.04em; color: var(--gold); }
-.traits span { font-size: 0.9rem; color: var(--ink); }
+@media (max-width: 520px) {
+  .radar { width: min(250px, 100%); }
+  .r-list { grid-template-columns: 1fr; gap: 0; }
+  .r-list dd { margin-bottom: 8px; }
+}
