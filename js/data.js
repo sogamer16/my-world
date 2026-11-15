@@ -340,11 +340,11 @@ export const lands = {
 
 // Ordered as the journey runs: Makkah, then Swansea, then Melbourne.
 export const realms = [
-  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', color: '#f4b860' },
-  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', color: '#e8474f' },
-  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Laneway Workshop', color: '#c79bff' },
-  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'The Sandstone Grove', color: '#7cc4ff' },
-  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Gathering Camp', color: '#8dffb0' },
-  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', color: '#5ee6d6' },
-  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', color: '#ff7ad9' },
+  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
+  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
+  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Laneway Workshop', placeAr: 'ورشة الأزقّة', color: '#c79bff' },
+  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'The Sandstone Grove', placeAr: 'بستان الحجر الرملي', color: '#7cc4ff' },
+  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
+  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
+  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
 ];
