@@ -150,7 +150,21 @@ details.quest summary:hover { background: rgba(255, 255, 255, 0.04); }
 .branch { margin-bottom: 6px; }
 .branch h3 { color: var(--c); }
 .branch h3 small { font-family: var(--body); letter-spacing: 0; text-transform: none; color: var(--dim); font-style: italic; font-size: 0.85rem; }
-.skill { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.07); font-size: 0.95rem; }
+.skill { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 8px; margin: 0 -8px; border-bottom: 1px dashed rgba(255, 255, 255, 0.07); font-size: 0.95rem; border-radius: 3px; cursor: default; transition: background 0.2s; }
+.skill:focus { outline: none; }
+.skill:focus-visible { outline: 1px solid var(--c); outline-offset: -1px; }
+.skill.lit { background: color-mix(in srgb, var(--c) 14%, transparent); }
+.skill.lit .s-name { color: #fff; text-shadow: 0 0 10px var(--c); }
+.s-main { display: flex; flex-direction: column; min-width: 0; }
+.s-used { font-size: 0.78rem; font-style: italic; color: var(--dim); line-height: 1.35; }
+.s-used button { font: inherit; font-style: normal; color: var(--c); background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dotted currentColor; }
+.s-used button:hover, .s-used button:focus-visible { color: #fff; outline: none; }
+.skill-key { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 0.78rem; color: var(--dim); margin: 10px 0 4px; --c: var(--gold); }
+.skill-key .pips { margin-left: 4px; }
+.skill-key .pips i { width: 7px; height: 7px; }
+.skill-key em { flex-basis: 100%; }
+.flash { animation: flash 1.6s ease; }
+@keyframes flash { 0%, 30% { box-shadow: 0 0 0 1px var(--gold), 0 0 18px rgba(227, 184, 102, 0.45); } 100% { box-shadow: 0 0 0 1px transparent; } }
 .pips { display: flex; align-items: center; gap: 4px; flex: none; }
 .pips i { width: 9px; height: 9px; transform: rotate(45deg); border: 1px solid var(--c); }
 .pips i.on { background: var(--c); box-shadow: 0 0 8px var(--c); }

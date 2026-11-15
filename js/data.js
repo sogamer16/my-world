@@ -158,21 +158,22 @@ export const quests = [
 ];
 
 // rank: 1 Novice · 2 Adept · 3 Seasoned
+// used: where the skill was put to work — names of quests or pursuits; the Skills panel links to them
 export const skillTree = [
   {
     branch: 'Spellcraft',
     sub: 'Programming & tools',
     color: '#7cc4ff',
     skills: [
-      { name: 'Python', rank: 3 },
-      { name: 'C / C++', rank: 3 },
-      { name: 'JavaScript', rank: 2 },
-      { name: 'C#', rank: 2 },
+      { name: 'Python', rank: 3, used: ['Sentinel'] },
+      { name: 'C / C++', rank: 3, used: ['AquaFlow'] },
+      { name: 'JavaScript', rank: 2, used: ['ABAAD Robotics'] },
+      { name: 'C#', rank: 2, used: ['The Game Forge'] },
       { name: 'Bash', rank: 2 },
-      { name: 'Linux / WSL', rank: 2 },
+      { name: 'Linux / WSL', rank: 2, used: ['Totex Energy'] },
       { name: 'Git / GitHub', rank: 2 },
-      { name: 'Full-stack web', rank: 2 },
-      { name: 'ML · Isolation Forest', rank: 2 },
+      { name: 'Full-stack web', rank: 2, used: ['Sirius'] },
+      { name: 'ML · Isolation Forest', rank: 2, used: ['Sentinel'] },
     ],
   },
   {
@@ -180,10 +181,10 @@ export const skillTree = [
     sub: 'Engineering & CAD',
     color: '#ffb454',
     skills: [
-      { name: 'Fluid mechanics', rank: 2 },
-      { name: 'CFD · SimScale', rank: 2 },
+      { name: 'Fluid mechanics', rank: 2, used: ['The Flow Trials'] },
+      { name: 'CFD · SimScale', rank: 2, used: ['The Flow Trials'] },
       { name: 'MATLAB', rank: 2 },
-      { name: 'Blender', rank: 2 },
+      { name: 'Blender', rank: 2, used: ['Design & 3D'] },
       { name: 'SolidWorks', rank: 1 },
       { name: 'AutoCAD', rank: 1 },
     ],
@@ -193,14 +194,14 @@ export const skillTree = [
     sub: 'Hardware & IoT',
     color: '#8dffb0',
     skills: [
-      { name: 'Arduino', rank: 3 },
-      { name: 'Sensor systems', rank: 3 },
-      { name: 'Raspberry Pi', rank: 2 },
-      { name: 'Modbus', rank: 2 },
+      { name: 'Arduino', rank: 3, used: ['AquaFlow'] },
+      { name: 'Sensor systems', rank: 3, used: ['AquaFlow', 'Sentinel'] },
+      { name: 'Raspberry Pi', rank: 2, used: ['Totex Energy'] },
+      { name: 'Modbus', rank: 2, used: ['Totex Energy'] },
       { name: 'GPIO', rank: 2 },
-      { name: 'HVAC wiring', rank: 2 },
-      { name: 'Robot platforms', rank: 2 },
-      { name: 'Gesture recognition', rank: 1 },
+      { name: 'HVAC wiring', rank: 2, used: ['Totex Energy'] },
+      { name: 'Robot platforms', rank: 2, used: ['ABAAD Robotics'] },
+      { name: 'Gesture recognition', rank: 1, used: ['ABAAD Robotics'] },
     ],
   },
 ];
