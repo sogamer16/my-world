@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=14';
+import * as D from './data.js?v=15';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=14`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=15`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -474,6 +474,7 @@ const build = {
       const rune = new THREE.Mesh(new THREE.BoxGeometry(0.16, h * 0.5, 0.04), glow(q.status === 'Active' ? 0x8dffb0 : color, 0.9));
       rune.position.set(0, 0, 0.31); m.add(rune);
       g.add(m);
+      prop(g, 'pillar', { h: h * 1.35, x: m.position.x, z: m.position.z, ry: m.rotation.y, replace: [m] }); // the pillars of Iram
     });
     const sword = new THREE.Group();
     const blade = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.08), glow(0xdfe8ff, 0.9, { metalness: 0.9 }));
@@ -576,6 +577,7 @@ const build = {
       a.position.set(3.55 + (i - 1.5) * 0.09, 1.5, 1.6); g.add(a);
     }
     lanterns(g, [[-4.4, 2.6, -1.6], [4.4, 2.6, -1.4]], 0xffb060);
+    verseTablet(g, { x: 1.4, z: 3.9, ry: -0.15 });
     g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     range.group = g; range.color = color;
     [[0.5, 0.42], [-0.62, -0.2]].forEach(([x, y]) => { const a = arrow(color); stick(a, x, y); g.add(a); });
@@ -684,7 +686,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=14`;
+  img.src = `assets/logos/${file}?v=15`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -832,28 +834,70 @@ function saduRug(g, { x, z, w = 2.6, d = 1.6, ry = 0 }) {
   return rug;
 }
 // The Saudi flag, flying properly on both sides (never mirrored), on a tall pole.
-function saudiFlag(g, { x, z, h = 6.2, ry = 0 }) {
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, h, 8), new THREE.MeshStandardMaterial({ color: 0xd9d9dc, metalness: 0.7, roughness: 0.3 }));
+function saudiFlag(g, { x, z, h = 6.2, ry = 0, size = 1, fog = true, glowAmt = 0 }) {
+  const pr = Math.max(1, size * 0.45);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * pr, 0.08 * pr, h, 8), new THREE.MeshStandardMaterial({ color: 0xd9d9dc, metalness: 0.7, roughness: 0.3 }));
   pole.position.set(x, 0.3 + h / 2, z); pole.castShadow = true;
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8), new THREE.MeshStandardMaterial({ color: 0xd9b064, metalness: 0.8, roughness: 0.3 }));
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.11 * pr, 12, 8), new THREE.MeshStandardMaterial({ color: 0xd9b064, metalness: 0.8, roughness: 0.3 }));
   cap.position.set(x, 0.3 + h + 0.08, z);
   g.add(pole, cap);
   let backTex;
   const tex = logoTexture('saudi-flag.svg', { w: 900, h: 600, bg: '#006c35', pad: 0, onReady: () => { if (backTex) backTex.needsUpdate = true; } });
-  const geo = new THREE.PlaneGeometry(2.4, 1.6, 16, 8); geo.translate(1.2, 0, 0);
+  const geo = new THREE.PlaneGeometry(2.4 * size, 1.6 * size, 16, 8); geo.translate(1.2 * size, 0, 0);
   const base = geo.attributes.position.array.slice();
-  const flagG = new THREE.Group(); flagG.position.set(x + 0.05, 0.3 + h - 0.9, z); flagG.rotation.y = ry;
-  const front = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, side: THREE.FrontSide }));
+  const flagG = new THREE.Group(); flagG.position.set(x + 0.05, 0.3 + h - 0.9 * size, z); flagG.rotation.y = ry;
+  const front = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, side: THREE.FrontSide, fog, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: glowAmt }));
   backTex = tex.clone(); backTex.wrapS = THREE.RepeatWrapping; backTex.repeat.x = -1; backTex.offset.x = 1; backTex.needsUpdate = true;
-  const back = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.85, side: THREE.BackSide }));
+  const back = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.85, side: THREE.BackSide, fog, emissive: 0xffffff, emissiveMap: backTex, emissiveIntensity: glowAmt }));
   [front, back].forEach((m) => { m.castShadow = true; flagG.add(m); });
   g.add(flagG);
+  g.userData.flagY = 0.3 + h - 0.9 * size;
   tick.push((t) => {
     if (reduceMotion) return;
     const p = geo.attributes.position;
-    for (let k = 0; k < p.count; k++) { const px = base[k * 3]; p.setZ(k, Math.sin(px * 2.4 - t * 2.6) * 0.09 * px); }
+    for (let k = 0; k < p.count; k++) { const px = base[k * 3] / size; p.setZ(k, Math.sin(px * 2.4 - t * 2.6) * 0.09 * px * size); }
     p.needsUpdate = true; geo.computeVertexNormals();
   });
+}
+
+/* ---------- Arab folklore ---------- */
+// A stone tablet carved with a line of poetry.
+function verseTablet(g, { x, z, ry = 0, w = 1.9, h = 1.15 }) {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = Math.round(1024 * h / w);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const draw = () => {
+    const x = c.getContext('2d'), W = c.width, H = c.height, v = D.folklore.antarah;
+    x.fillStyle = '#b89a72'; x.fillRect(0, 0, W, H);
+    for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(${90 + Math.random() * 60},${70 + Math.random() * 40},40,0.08)`; x.fillRect(Math.random() * W, Math.random() * H, 3 + Math.random() * 9, 2 + Math.random() * 6); }
+    x.strokeStyle = 'rgba(70,45,20,0.6)'; x.lineWidth = 8; x.strokeRect(22, 22, W - 44, H - 44);
+    x.textAlign = 'center'; x.direction = 'rtl'; x.fillStyle = '#3b2412'; x.font = '700 74px "Aref Ruqaa", serif';
+    x.fillText(v.ar[0], W / 2, H * 0.34); x.fillText(v.ar[1], W / 2, H * 0.58);
+    x.font = '700 46px "Aref Ruqaa", serif'; x.fillStyle = '#5c3a1c'; x.fillText('— ' + v.byAr, W / 2, H * 0.84);
+    tex.needsUpdate = true;
+  };
+  draw(); document.fonts.load('700 74px "Aref Ruqaa"', 'عنترة').then(draw).catch(() => {});
+  const stoneM = flat(0x9c8462);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.18), [stoneM, stoneM, stoneM, stoneM, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }), stoneM]);
+  slab.position.set(x, 0.3 + h / 2 + 0.25, z); slab.rotation.set(-0.12, ry, 0); slab.castShadow = true; slab.receiveShadow = true;
+  const foot = new THREE.Mesh(new THREE.BoxGeometry(w * 1.1, 0.28, 0.5), stoneM); foot.position.set(x, 0.42, z); foot.rotation.y = ry; foot.castShadow = true;
+  g.add(slab, foot);
+}
+// The Rukh's egg, from Sinbad's second voyage: a huge pale egg in a nest of driftwood.
+function rukhEgg(g, { x, z }) {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const q = c.getContext('2d');
+  q.fillStyle = '#f1ece0'; q.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 260; i++) { q.fillStyle = `rgba(120,95,70,${0.15 + Math.random() * 0.35})`; q.beginPath(); q.arc(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 4, 0, 7); q.fill(); }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const egg = new THREE.Mesh(new THREE.SphereGeometry(0.62, 28, 20), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55 }));
+  egg.scale.set(1, 1.35, 1); egg.position.set(x, 1.05, z); egg.rotation.z = 0.12; egg.castShadow = true; egg.receiveShadow = true;
+  const nest = new THREE.Group();
+  for (let i = 0; i < 26; i++) {
+    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.1 + Math.random() * 0.6, 5), flat(i % 3 ? 0x6b4a2e : 0x8a6a44));
+    const a = (i / 26) * TAU; s.position.set(Math.cos(a) * 0.62, 0.2 + (i % 3) * 0.08, Math.sin(a) * 0.62);
+    s.rotation.set(Math.PI / 2 + (Math.random() - 0.5) * 0.4, 0, a + Math.PI / 2 + (Math.random() - 0.5) * 0.5); s.castShadow = true; nest.add(s);
+  }
+  nest.position.set(x, 0.3, z);
+  g.add(egg, nest);
 }
 
 /* ---------- landmarks of the places I have lived ---------- */
@@ -864,7 +908,6 @@ const landmarks = {
     prop(g, 'palms', { h: 3.1, x: -1.2, z: -5.0, ry: 2.2 });
     prop(g, 'farm', { w: 2.7, x: -2.4, z: 3.1, ry: 0.35 });
     lanterns(g, [[-2.4, 2.6, -2.2], [0.6, 2.4, -3.6]], 0xffb050);
-    saudiFlag(g, { x: -1.6, z: -4.3, h: 6.4, ry: 0.25 });
     saduRug(g, { x: 1.7, z: 3.4, w: 2.8, d: 1.7, ry: -0.2 });
     prop(g, 'majlis', { w: 2.6, x: 1.75, y: 0.35, z: 3.2, ry: -0.2 + Math.PI });
     prop(g, 'dallah', { w: 0.9, x: 1.5, y: 0.36, z: 3.75, ry: 0.4, onLoad: brass });
@@ -875,6 +918,7 @@ const landmarks = {
     prop(g, 'lighthouse', { h: 5.4, x: -4.1, z: -3.5, ry: 0.5, replace: g.userData.trees });
     prop(g, 'castle', { h: 3.8, x: 4.0, z: -3.6, ry: -0.6 });
     prop(g, 'dragon', { h: 2.1, x: 5.0, z: 2.3, ry: -1.0 });
+    rukhEgg(g, { x: 2.3, z: 3.1 });
     hoodieStand(g, -3.4, 2.2, Math.PI + 0.45); // back to the viewer, so the print shows
     signboard(g, { x: -1.6, z: 3.9, ry: 0.15, w: 1.5, h: 0.5, y: 0.55, logo: 'olchfa.svg', pad: 0.08 });
     rain(g);
@@ -963,6 +1007,38 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+/* ---------- the flag at the heart of the world ---------- */
+// The Saudi flag flies from a rock at the centre of the ring. Every view looks inward across one
+// island, so the centre is always straight behind it; each frame the rock is raised or lowered so the
+// flag sits in the upper part of the screen, above the island, and turned to face the viewer.
+const heart = island('#c9a06a', 'hejaz', 77);
+heart.scale.setScalar(0.55);
+heart.userData.trees.forEach((o) => heart.remove(o));
+saudiFlag(heart, { x: 0, z: 0, h: 24, size: 5.6, fog: false, glowAmt: 0.45 });
+scene.add(heart);
+const heartFlagY = heart.userData.flagY * 0.55;
+const _p = new THREE.Vector3();
+function placeHeart(ease) {
+  const ndcAt = (y) => _p.set(0, y + heartFlagY, 0).project(camera).y;
+  const a = ndcAt(0), b = ndcAt(10) - a;
+  const want = ((playing ? 0.56 : 0.9) - a) / (b / 10);
+  heart.position.y += (want - heart.position.y) * ease;
+  heart.rotation.y = Math.PI / 2 - camAngle - 0.35;
+}
+
+// The Rukh of Sinbad's voyages circles high above the islands.
+const rukh = new THREE.Group(); scene.add(rukh);
+loadModel('roc').then((res) => {
+  const m = res.scene.clone(), box = new THREE.Box3().setFromObject(m), size = box.getSize(new THREE.Vector3());
+  m.position.sub(box.getCenter(new THREE.Vector3())); m.traverse((o) => { if (o.isMesh) { o.material.metalness = 0; o.material.roughness = 0.9; } });
+  const k = 9 / Math.max(size.x, size.z); m.scale.setScalar(k); rukh.add(m);
+}).catch(() => {});
+tick.push((t) => {
+  const a = t * 0.045;
+  rukh.position.set(Math.cos(a) * 30, 14 + Math.sin(t * 0.4) * 1.5, Math.sin(a) * 30);
+  rukh.rotation.set(0, -a, 0.25);
+});
+
 let best = 0, shots = 0;
 try { best = +localStorage.getItem('best-shot') || 0; } catch { /* storage unavailable */ }
 function loose() {
@@ -1022,7 +1098,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=14" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=15" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1044,6 +1120,8 @@ const panels = {
     <section><h3>Scrolls of Certification</h3><ul class="scrolls">${D.scrolls.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`,
 
   pursuits: (r) => `${head(r, 'Beyond the Workshop')}
+    <blockquote class="verse"><p lang="ar" dir="rtl">${D.folklore.antarah.ar.map(esc).join('<br>')}</p>
+      <p>${esc(D.folklore.antarah.en)}</p><cite>${esc(D.folklore.antarah.by)} · <span lang="ar">${esc(D.folklore.antarah.byAr)}</span></cite></blockquote>
     <p class="lore">What I do when nobody is marking it.</p>
     <div class="range">
       <button type="button" id="loose">Loose an arrow</button>
@@ -1056,12 +1134,12 @@ const panels = {
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=14" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=15" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=14" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=15" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=14" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=15" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1115,6 +1193,19 @@ function start() {
   layout();
 }
 document.getElementById('start').addEventListener('click', start);
+
+// a tale of Juha, the folk trickster, on the title screen, changing every few seconds
+const juhaEl = document.getElementById('juha');
+if (juhaEl) {
+  let ji = Math.floor(Math.random() * D.folklore.juha.length);
+  const showJuha = () => {
+    const j = D.folklore.juha[ji % D.folklore.juha.length]; ji++;
+    juhaEl.classList.remove('in'); void juhaEl.offsetWidth;
+    juhaEl.innerHTML = `<b><span lang="ar">حكاية جحا</span> · A tale of Juha</b>${esc(j.tale)}<em>${esc(j.moral)}</em>`;
+    juhaEl.classList.add('in');
+  };
+  showJuha(); setInterval(() => { if (!playing) showJuha(); }, 11000);
+}
 
 const toggle = document.getElementById('panel-toggle');
 toggle.addEventListener('click', () => {
@@ -1236,6 +1327,8 @@ function frame() {
   camera.position.set(Math.cos(camAngle) * (RING + d) - Math.sin(camAngle) * pointer.x * 1.2, camY + pointer.y * 0.8 + (playing ? 0 : 5), Math.sin(camAngle) * (RING + d) + Math.cos(camAngle) * pointer.x * 1.2);
   look.set(Math.cos(camAngle) * RING, camY - 3, Math.sin(camAngle) * RING);
   camera.lookAt(look);
+  camera.updateMatrixWorld();
+  placeHeart(playing ? ease : 1);
 
   // the sun sits off to one side of the view and slightly behind the island, so shapes read in 3D
   const out = new THREE.Vector3(Math.cos(camAngle), 0, Math.sin(camAngle)), side = new THREE.Vector3(-out.z, 0, out.x);

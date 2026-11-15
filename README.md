@@ -33,4 +33,6 @@ The hero figure (`assets/models/me.glb`) was generated with Meshy from a photo o
 
 The car at the camp (`assets/models/car.glb`) is my silver 2005 Holden Astra CD hatchback, generated with Meshy; its number plates are left blank.
 
-Saudi touches: the Saudi flag (Wikimedia Commons) flies over the Makkah island with a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.
+Saudi touches: the Saudi flag (Wikimedia Commons) flies from a rock at the centre of the ring, repositioned each frame so it is always in view; the Makkah island has a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.
+
+Arab folklore: the Quests stones are the pillars of Iram (إرم ذات العماد); Sinbad's Rukh circles the islands and its egg sits on the Swansea island; a verse attributed to Antarah ibn Shaddad is carved by the archery range; tales of Juha rotate on the title screen. Content is in `folklore` in `js/data.js`.

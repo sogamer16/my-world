@@ -225,6 +225,21 @@ export const scrolls = [
   'Introduction to Cybersecurity Fundamentals',
 ];
 
+// Arab folklore and poetry woven through the world.
+export const folklore = {
+  antarah: {
+    ar: ['لا يَحمِلُ الحِقدَ مَن تَعلو بِهِ الرُتَبُ', 'وَلا يَنالُ العُلا مَن طَبعُهُ الغَضَبُ'],
+    en: 'No one raised high carries a grudge, and no one ruled by anger reaches the heights.',
+    by: 'Antarah ibn Shaddad', byAr: 'عنترة بن شداد',
+    note: 'The warrior-poet of pre-Islamic Arabia. The line is attributed to him; the translation is mine.',
+  },
+  juha: [
+    { tale: 'Juha lost his ring inside the house, but searched for it out in the street — "the light is better out here."', moral: 'Debug where the fault is, not where it is easy to look.' },
+    { tale: 'Juha rode the donkey and people called him cruel; his son rode and they called him spoilt; they both walked and people laughed at them.', moral: 'You cannot please every critic. Build it, then listen to the people who use it.' },
+    { tale: "Juha told his neighbour his borrowed pot had given birth to a little pot. The neighbour happily took both — but when Juha said the pot had died, he refused to believe it.", moral: 'A test you only believe when it passes is not a test.' },
+  ],
+};
+
 export const pursuits = [
   {
     name: 'Compound archery',
@@ -342,7 +357,7 @@ export const lands = {
 export const realms = [
   { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
   { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
-  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Laneway Workshop', placeAr: 'ورشة الأزقّة', color: '#c79bff' },
+  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
   { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'The Sandstone Grove', placeAr: 'بستان الحجر الرملي', color: '#7cc4ff' },
   { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
   { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
