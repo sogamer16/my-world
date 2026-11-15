@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=16';
+import * as D from './data.js?v=17';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=16`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=17`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -686,7 +686,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=16`;
+  img.src = `assets/logos/${file}?v=17`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -777,9 +777,9 @@ function hoodieStand(g, x, z, ry) {
   prop(g, 'hoodie', { h: 3.0, x, y: 1.3, z, ry, onLoad: (holder) => applyHoodiePrint(holder, g) });
 }
 
-// Me, as a stylised figure in shemagh, vest and thobe (generated with Meshy to match the world's style).
+// Me, generated with Meshy from a full-length photo of me in a suit.
 function meFigure(g, x, z, ry) {
-  prop(g, 'me', { h: 3.7, x, z, ry });
+  prop(g, 'me', { h: 3.6, x, z, ry });
 }
 
 /* ---------- Saudi touches ---------- */
@@ -991,36 +991,35 @@ for (let i = 0; i < N; i++) {
   }
 }
 
-/* ---------- the flag at the heart of the world ---------- */
-// The Saudi flag flies from a rock at the centre of the ring. Every view looks inward across one
-// island, so the centre is always straight behind it; each frame the rock is raised or lowered so the
-// flag sits in the upper part of the screen, above the island, and turned to face the viewer.
-const heart = island('#c9a06a', 'hejaz', 77);
-heart.scale.setScalar(0.55);
-heart.userData.trees.forEach((o) => heart.remove(o));
-saudiFlag(heart, { x: 0, z: 0, h: 24, size: 5.6, fog: false, glowAmt: 0.45 });
-scene.add(heart);
-const heartFlagY = heart.userData.flagY * 0.55;
-const _p = new THREE.Vector3();
-function placeHeart(ease) {
-  const ndcAt = (y) => _p.set(0, y + heartFlagY, 0).project(camera).y;
-  const a = ndcAt(0), b = ndcAt(10) - a;
-  const want = ((playing ? 0.56 : 0.9) - a) / (b / 10);
-  heart.position.y += (want - heart.position.y) * ease;
-  heart.rotation.y = Math.PI / 2 - camAngle - 0.35;
-}
-
 // The Rukh of Sinbad's voyages circles high above the islands.
 const rukh = new THREE.Group(); scene.add(rukh);
+const flapT = { value: 0 };
 loadModel('roc').then((res) => {
   const m = res.scene.clone(), box = new THREE.Box3().setFromObject(m), size = box.getSize(new THREE.Vector3());
-  m.position.sub(box.getCenter(new THREE.Vector3())); m.traverse((o) => { if (o.isMesh) { o.material.metalness = 0; o.material.roughness = 0.9; } });
+  m.position.sub(box.getCenter(new THREE.Vector3()));
+  m.traverse((o) => {
+    if (!o.isMesh) return;
+    o.material = o.material.clone(); o.material.metalness = 0; o.material.roughness = 0.9;
+    // flap: bend the wings up and down around the body, more strongly towards the tips
+    o.geometry.computeBoundingBox();
+    const bb = o.geometry.boundingBox, sz = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3());
+    const alongX = sz.x >= sz.z, half = (alongX ? sz.x : sz.z) / 2, mid = alongX ? c.x : c.z;
+    o.material.onBeforeCompile = (sh) => {
+      sh.uniforms.flapT = flapT;
+      sh.vertexShader = 'uniform float flapT;\n' + sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+        float d = (transformed.${alongX ? 'x' : 'z'} - ${mid.toFixed(4)}) / ${half.toFixed(4)};
+        float w = smoothstep(0.12, 1.0, abs(d));
+        transformed.y += sin(flapT * 4.2) * w * w * ${(half * 0.55).toFixed(4)} + w * ${(half * 0.06).toFixed(4)};`);
+    };
+  });
   const k = 9 / Math.max(size.x, size.z); m.scale.setScalar(k); rukh.add(m);
 }).catch(() => {});
 tick.push((t) => {
   const a = t * 0.045;
   rukh.position.set(Math.cos(a) * 30, 14 + Math.sin(t * 0.4) * 1.5, Math.sin(a) * 30);
   rukh.rotation.set(0, -a, 0.25);
+  flapT.value = reduceMotion ? 0 : t;
+  rukh.position.y += Math.sin(t * 4.2 + 1.2) * 0.25;
 });
 
 let best = 0, shots = 0;
@@ -1082,7 +1081,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=16" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=17" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1118,12 +1117,12 @@ const panels = {
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=16" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=17" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=16" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=17" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=16" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=17" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1312,7 +1311,6 @@ function frame() {
   look.set(Math.cos(camAngle) * RING, camY - 3, Math.sin(camAngle) * RING);
   camera.lookAt(look);
   camera.updateMatrixWorld();
-  placeHeart(playing ? ease : 1);
 
   // the sun sits off to one side of the view and slightly behind the island, so shapes read in 3D
   const out = new THREE.Vector3(Math.cos(camAngle), 0, Math.sin(camAngle)), side = new THREE.Vector3(-out.z, 0, out.x);

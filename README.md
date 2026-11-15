@@ -29,10 +29,10 @@ After changing any file in `js/` or `css/`, bump the `?v=` number in `index.html
 
 Logos in `assets/logos` belong to their organisations and are shown only to identify where I study and take part: University of Melbourne (Wikimedia), Trinity College, Olchfa School and CISSA (their own websites). The Saudi Students Association in Melbourne (SSAM) logo is the club's official logo, supplied by me. The leavers-hoodie print is redrawn in code (`hoodiePrint` in `js/main.js`).
 
-The hero figure (`assets/models/me.glb`) is a stylised likeness of me generated with Meshy from a description.
+The hero figure (`assets/models/me.glb`) was generated with Meshy from a full-length photo of me.
 
 The car at the camp (`assets/models/car.glb`) is my silver 2005 Holden Astra CD hatchback, generated with Meshy; its number plates are left blank.
 
-Saudi touches: the Saudi flag (Wikimedia Commons) flies from a rock at the centre of the ring, repositioned each frame so it is always in view; the Makkah island has a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.
+Saudi touches: the Makkah island has a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.
 
-Arab folklore: the Quests stones are the pillars of Iram (إرم ذات العماد); Sinbad's Rukh circles the islands and its egg sits on the Swansea island; a verse attributed to Antarah ibn Shaddad is carved by the archery range; tales of Juha rotate on the title screen. Content is in `folklore` in `js/data.js`.
+Arab folklore: the Quests stones are the pillars of Iram (إرم ذات العماد); Sinbad's Rukh circles the islands, flapping its wings, and its egg sits on the Swansea island; a verse attributed to Antarah ibn Shaddad is carved by the archery range; tales of Juha rotate on the title screen. Content is in `folklore` in `js/data.js`.
