@@ -216,6 +216,8 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
 .verse p:not([lang]) { font-style: italic; color: #d9cfba; font-size: 0.93rem; margin-top: 6px; }
 .verse cite { display: block; font-style: normal; color: var(--dim); font-size: 0.8rem; margin-top: 4px; }
 .verse cite span { font-family: 'Aref Ruqaa', serif; }
+.chapter { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 2px; }
+.chapter span { font-family: 'Aref Ruqaa', serif; letter-spacing: 0; text-transform: none; font-size: 0.95rem; color: var(--gold); }
 .verse .verse-note { font-style: normal; color: var(--ink); font-size: 0.86rem; margin-top: 8px; opacity: 0.85; }
 .juha { max-width: 520px; margin: 1.6rem auto 0; font-size: 0.9rem; line-height: 1.5; color: var(--ink); opacity: 0; transition: opacity 0.8s; }
 .juha.in { opacity: 0.85; }
