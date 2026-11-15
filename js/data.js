@@ -7,6 +7,8 @@ export const hero = {
   klass: 'Mechanical Engineering Systems',
   guild: 'University of Melbourne',
   realm: 'Melbourne, VIC',
+  seeking: 'Open to learning opportunities: a chance to work alongside engineers, learn how real systems are built, and be useful while I do it.',
+  updated: 'November 2026', // shown on the CV view; change it when you update this file
   year: 1,
   years: 3,
   lore:
@@ -40,10 +42,10 @@ export const quests = [
     name: 'Totex Energy',
     kind: 'Main Quest',
     plain: 'Internship',
-    role: 'Engineering Intern · energy startup',
+    role: 'Engineering Intern · energy startup · Canberra',
     when: 'Jul – Sep 2026',
     status: 'Complete',
-    summary: 'Hands-on work across live HVAC and electrical systems.',
+    summary: 'Tasked with installing an HVAC system in Canberra: hands-on work across live HVAC and electrical systems.',
     objectives: [
       'Commissioned an HVAC outdoor unit from wiring to running condition',
       'Cross-referenced live wiring against documentation and troubleshot faults methodically',
@@ -54,6 +56,7 @@ export const quests = [
   },
   {
     name: 'AquaFlow',
+    featured: true, // marked "Start here" on the Quests panel
     flow: ['Flow sensors on each branch', 'Arduino branch node', 'Central server', 'Alert on flow drop'],
     kind: 'Epic Quest',
     plain: 'Ongoing project',
@@ -91,6 +94,7 @@ export const quests = [
   },
   {
     name: 'Sentinel',
+    featured: true, // marked "Start here" on the Quests panel
     flow: ['Command to field device', 'Check against thermal, vibration, humidity', 'Isolation Forest verdict', 'Execute or quarantine'],
     kind: 'Raid',
     plain: 'Competition build',
@@ -109,6 +113,7 @@ export const quests = [
   },
   {
     name: 'Sirius',
+    featured: true, // marked "Start here" on the Quests panel
     flow: ['A date in history', 'Distance light has travelled since', 'Stars at that distance', '3D sky map'],
     kind: 'Raid',
     plain: 'Competition build',
@@ -332,6 +337,9 @@ export const badges = [
   { name: 'Saudi Students Association in Melbourne', logo: 'ssam.webp', ar: 'نادي الطلبة السعوديين في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
   { name: 'Olchfa School', logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
 ];
+
+// email is stored in two parts and joined in the browser, so simple scrapers do not pick it up
+export const email = ['sogamer16', 'gmail.com'];
 
 export const portals = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Message me here' },

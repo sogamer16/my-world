@@ -16,7 +16,7 @@ To publish, enable GitHub Pages for the repository (Settings → Pages → deplo
 
 ## Edit
 
-All content lives in `js/data.js`. A quest can list links to its code, demo or photos: `links: [{ label: 'Code', href: 'https://…' }]`; they show on the Quests panel and in the plain view. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
+All content lives in `js/data.js`. `hero.seeking` is the line about what I'm looking for (Portal and CV); `hero.updated` is the date shown on the CV; `email` is stored in two parts. Quests with `featured: true` are marked "Start here". A quest can list links to its code, demo or photos: `links: [{ label: 'Code', href: 'https://…' }]`; they show on the Quests panel and in the plain view. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
 three.js r170 is vendored in `vendor/three` (MIT).
 The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform (`gltf-transform draco in.glb out.glb`; WebP textures). The Draco decoder is vendored in `vendor/three/addons/libs/draco`. Models load a few at a time, the island in view and its neighbours first, with a progress bar on the title screen.
 
@@ -24,7 +24,7 @@ The islands are grouped by the places I have lived, in order: Makkah (Hejaz cour
 
 Controls: scroll, swipe, arrow keys, `1`–`7`, the hotbar, or click an island. On the Archery Range, click the target (or press space) to shoot.
 The header has **CV** (the plain one-page version, printable to PDF) and **Contact** (jumps to the Portal). A one-time hint explains the Archery Range on first visit.
-Each realm has a link, e.g. `#quests`. `#summary` opens the plain one-page version, which also prints cleanly to PDF and is shown automatically when WebGL is unavailable.
+Each realm has a link, e.g. `#quests`, and so does each quest or pursuit, e.g. `#quests/sentinel` (opening one puts its link in the address bar). Every panel ends with a "Next chapter" button. `#summary` opens the plain one-page version, which also prints cleanly to PDF and is shown automatically when WebGL is unavailable.
 
 After changing any file in `js/` or `css/`, bump the `?v=` number in `index.html` and in the `data.js` imports at the top of `js/main.js` and `js/summary.js`, so browsers fetch the new version instead of a cached one.
 
