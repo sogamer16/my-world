@@ -258,7 +258,9 @@ export const pursuits = [
 export const guilds = [
   {
     name: 'Saudi Students Association in Melbourne (SSAM)',
-    nameAr: 'نادي الطلبة السعودي في ملبورن',
+    nameAr: 'نادي الطلبة السعوديين في ملبورن',
+    logo: 'ssam.png',
+    logoBg: '#006c35',
     role: 'Event Coordinator',
     place: 'Melbourne',
     when: '2025',
@@ -294,7 +296,7 @@ export const badges = [
   { name: 'University of Melbourne', logo: 'unimelb.svg', note: 'Studying', href: 'https://www.unimelb.edu.au' },
   { name: 'Trinity College', logo: 'trinity.png', note: 'Foundation Studies', href: 'https://www.trinity.unimelb.edu.au' },
   { name: 'CISSA', logo: 'cissa.svg', note: 'Codebrew', href: 'https://www.cissa.org.au' },
-  { name: 'SSAM', ar: 'نادي الطلبة السعودي في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
+  { name: 'Saudi Students Association in Melbourne', logo: 'ssam.png', bg: '#006c35', ar: 'نادي الطلبة السعوديين في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
   { name: 'Olchfa School', logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
 ];
 
