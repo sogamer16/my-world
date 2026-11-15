@@ -32,3 +32,5 @@ Logos in `assets/logos` belong to their organisations and are shown only to iden
 The hero figure (`assets/models/me.glb`) was generated with Meshy from a photo of me; the lower thobe and trainers are added in code.
 
 The car at the camp (`assets/models/car.glb`) is my silver 2005 Holden Astra CD hatchback, generated with Meshy; its number plates are left blank.
+
+Saudi touches: the Saudi flag (Wikimedia Commons) flies over the Makkah island with a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.

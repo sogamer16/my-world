@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=13';
+import * as D from './data.js?v=14';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -192,7 +192,16 @@ for (let i = 0; i < 70; i++) {
 }
 scene.add(clouds);
 
-const moon = new THREE.Mesh(new THREE.SphereGeometry(26, 32, 32), new THREE.MeshBasicMaterial({ color: 0xe9e2ff, fog: false, transparent: true }));
+// a crescent (hilal) rather than a full moon over the night islands
+const moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
+  x.shadowColor = 'rgba(255,248,220,0.9)'; x.shadowBlur = 24; x.fillStyle = '#fff6dc';
+  x.beginPath(); x.arc(128, 128, 84, 0, Math.PI * 2); x.fill();
+  x.globalCompositeOperation = 'destination-out'; x.shadowBlur = 0;
+  x.beginPath(); x.arc(162, 104, 78, 0, Math.PI * 2); x.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})(), transparent: true, fog: false, depthWrite: false }));
+moon.scale.setScalar(70);
 moon.position.set(-150, 150, -300);
 scene.add(moon);
 
@@ -412,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=13`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=14`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -614,6 +623,9 @@ const build = {
       tent.position.set(x, 1.2, z); tent.rotation.y = Math.PI / 4; g.add(tent); old.push(tent);
     });
     prop(g, 'camp', { w: 6.4, z: 1.7, ry: -0.5, replace: old });
+    // a kashta: a Sadu rug and a dallah of Arabic coffee by the fire
+    saduRug(g, { x: -3.3, z: 3.6, w: 2.2, d: 1.4, ry: 0.5 });
+    prop(g, 'dallah', { w: 0.8, x: -3.2, y: 0.36, z: 3.6, ry: -0.3, onLoad: brass });
     void color;
   },
 
@@ -658,7 +670,7 @@ const build = {
 
 /* ---------- logos, signs and banners ---------- */
 // Draws an organisation's logo onto a canvas texture once it has loaded.
-function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra } = {}) {
+function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, onReady } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d');
   x.fillStyle = bg; x.fillRect(0, 0, w, h);
@@ -670,8 +682,9 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     x.drawImage(img, bx + (bw - iw * k) / 2, by + (bh - ih * k) / 2, iw * k, ih * k);
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
+    if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=13`;
+  img.src = `assets/logos/${file}?v=14`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -783,14 +796,80 @@ function meFigure(g, x, z, ry) {
   } });
 }
 
+/* ---------- Saudi touches ---------- */
+// Al Sadu: the Bedouin weave of bands, triangles and diamonds in red, black, white and natural wool.
+function saduTexture(w = 512, h = 512) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+  const red = '#9e1b1b', black = '#1a1412', white = '#efe6d2', wool = '#c79a5b', green = '#1b6136';
+  const bands = [[black, 14], [white, 4], [red, 40], [white, 4], [black, 10], [wool, 36], [black, 10], [white, 4], [red, 40], [white, 4], [black, 14], [green, 12]];
+  let y = 0, k = 0;
+  while (y < h) {
+    const [col, bh] = bands[k % bands.length]; x.fillStyle = col; x.fillRect(0, y, w, bh);
+    if (bh >= 36) { // a row of motifs inside the wide bands
+      const tw = bh, alt = col === red ? white : black;
+      for (let i = 0; i * tw < w; i++) {
+        x.fillStyle = alt; const cx = i * tw + tw / 2, cy = y + bh / 2, s = bh * 0.36;
+        x.beginPath(); x.moveTo(cx, cy - s); x.lineTo(cx + s, cy); x.lineTo(cx, cy + s); x.lineTo(cx - s, cy); x.fill();
+        x.fillStyle = col === red ? black : red;
+        x.beginPath(); x.moveTo(cx, cy - s * 0.4); x.lineTo(cx + s * 0.4, cy); x.lineTo(cx, cy + s * 0.4); x.lineTo(cx - s * 0.4, cy); x.fill();
+        x.fillStyle = alt;
+        x.beginPath(); x.moveTo(i * tw, y); x.lineTo(i * tw + tw * 0.18, y); x.lineTo(i * tw, y + bh * 0.25); x.fill();
+        x.beginPath(); x.moveTo(i * tw, y + bh); x.lineTo(i * tw + tw * 0.18, y + bh); x.lineTo(i * tw, y + bh * 0.75); x.fill();
+      }
+    } else if (bh >= 10) { // small teeth
+      x.fillStyle = col === black ? white : black;
+      for (let i = 0; i * 12 < w; i++) { x.beginPath(); x.moveTo(i * 12, y + bh); x.lineTo(i * 12 + 6, y + 2); x.lineTo(i * 12 + 12, y + bh); x.fill(); }
+    }
+    y += bh; k++;
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
+  return t;
+}
+const brass = (h) => h.traverse((o) => { if (o.isMesh) { o.material.color.setRGB(1.0, 0.82, 0.5); o.material.metalness = 0.75; o.material.roughness = 0.32; } });
+function saduRug(g, { x, z, w = 2.6, d = 1.6, ry = 0 }) {
+  const rug = new THREE.Mesh(new THREE.BoxGeometry(w, 0.04, d), [flat(0x9e1b1b), flat(0x9e1b1b), new THREE.MeshStandardMaterial({ map: saduTexture(), roughness: 1 }), flat(0x1a1412), flat(0x9e1b1b), flat(0x9e1b1b)]);
+  rug.position.set(x, 0.33, z); rug.rotation.y = ry; rug.receiveShadow = true; g.add(rug);
+  return rug;
+}
+// The Saudi flag, flying properly on both sides (never mirrored), on a tall pole.
+function saudiFlag(g, { x, z, h = 6.2, ry = 0 }) {
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, h, 8), new THREE.MeshStandardMaterial({ color: 0xd9d9dc, metalness: 0.7, roughness: 0.3 }));
+  pole.position.set(x, 0.3 + h / 2, z); pole.castShadow = true;
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8), new THREE.MeshStandardMaterial({ color: 0xd9b064, metalness: 0.8, roughness: 0.3 }));
+  cap.position.set(x, 0.3 + h + 0.08, z);
+  g.add(pole, cap);
+  let backTex;
+  const tex = logoTexture('saudi-flag.svg', { w: 900, h: 600, bg: '#006c35', pad: 0, onReady: () => { if (backTex) backTex.needsUpdate = true; } });
+  const geo = new THREE.PlaneGeometry(2.4, 1.6, 16, 8); geo.translate(1.2, 0, 0);
+  const base = geo.attributes.position.array.slice();
+  const flagG = new THREE.Group(); flagG.position.set(x + 0.05, 0.3 + h - 0.9, z); flagG.rotation.y = ry;
+  const front = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, side: THREE.FrontSide }));
+  backTex = tex.clone(); backTex.wrapS = THREE.RepeatWrapping; backTex.repeat.x = -1; backTex.offset.x = 1; backTex.needsUpdate = true;
+  const back = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.85, side: THREE.BackSide }));
+  [front, back].forEach((m) => { m.castShadow = true; flagG.add(m); });
+  g.add(flagG);
+  tick.push((t) => {
+    if (reduceMotion) return;
+    const p = geo.attributes.position;
+    for (let k = 0; k < p.count; k++) { const px = base[k * 3]; p.setZ(k, Math.sin(px * 2.4 - t * 2.6) * 0.09 * px); }
+    p.needsUpdate = true; geo.computeVertexNormals();
+  });
+}
+
 /* ---------- landmarks of the places I have lived ---------- */
 const landmarks = {
   hero(g) { // Makkah: a Hejazi house with roshan balconies, date palms, and the farm AquaFlow was built for
     prop(g, 'roshan', { h: 4.8, x: 2.6, z: -4.1, ry: -0.45, replace: g.userData.trees });
     prop(g, 'palms', { h: 3.6, x: -4.3, z: -2.4, ry: 0.6 });
     prop(g, 'palms', { h: 3.1, x: -1.2, z: -5.0, ry: 2.2 });
-    prop(g, 'farm', { w: 3.0, x: -3.1, z: 2.5, ry: 0.35 });
+    prop(g, 'farm', { w: 2.7, x: -2.4, z: 3.1, ry: 0.35 });
     lanterns(g, [[-2.4, 2.6, -2.2], [0.6, 2.4, -3.6]], 0xffb050);
+    saudiFlag(g, { x: -1.6, z: -4.3, h: 6.4, ry: 0.25 });
+    saduRug(g, { x: 1.7, z: 3.4, w: 2.8, d: 1.7, ry: -0.2 });
+    prop(g, 'majlis', { w: 2.6, x: 1.75, y: 0.35, z: 3.2, ry: -0.2 + Math.PI });
+    prop(g, 'dallah', { w: 0.9, x: 1.5, y: 0.36, z: 3.75, ry: 0.4, onLoad: brass });
+    prop(g, 'camel', { w: 2.6, x: -4.6, z: 0.4, ry: 1.1 });
+    prop(g, 'falcon', { h: 1.7, x: 4.7, z: -0.9, ry: -1.1 });
   },
   trophies(g) { // Swansea: a lighthouse, a castle ruin, the red dragon, and Welsh drizzle
     prop(g, 'lighthouse', { h: 5.4, x: -4.1, z: -3.5, ry: 0.5, replace: g.userData.trees });
@@ -901,7 +980,7 @@ function loose() {
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const head = (r, title) => {
   const where = (D.lands[r.land] || {}).short;
-  return `<p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}</p><h2>${esc(title)}</h2>`;
+  return `<p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
 };
 function journeyMap() { // three stops in the order I lived there, laid out left to right
   const W = 380, H = 170, at = [[70, 72], [190, 34], [305, 104]];
@@ -943,7 +1022,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=13" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=14" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -977,12 +1056,12 @@ const panels = {
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=13" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=14" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=13" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=14" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=13" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=14" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1015,7 +1094,7 @@ function go(i) {
   targetAngle += d;
   current = i;
   document.documentElement.style.setProperty('--accent', r.color);
-  place.textContent = r.place;
+  place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;
   panel.classList.remove('swap');
   panel.innerHTML = panels[r.id](r);
   panel.scrollTop = 0;
