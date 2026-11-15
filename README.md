@@ -18,9 +18,9 @@ To publish, enable GitHub Pages for the repository (Settings → Pages → deplo
 
 All content lives in `js/data.js`. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
 three.js r170 is vendored in `vendor/three` (MIT).
-The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform.
+The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform (`gltf-transform draco in.glb out.glb`; WebP textures). The Draco decoder is vendored in `vendor/three/addons/libs/draco`. Models load a few at a time, the island in view and its neighbours first, with a progress bar on the title screen.
 
-The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle) and Melbourne (tram, sandstone arch, gum trees, laneway lamps). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
+The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle) and Melbourne (tram, sandstone arch, gum trees, laneway lamps, and Wadi Abqar, where the skill tree grows). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
 
 Controls: scroll, swipe, arrow keys, `1`–`7`, the hotbar, or click an island. On the Archery Range, click the target (or press space) to shoot.
 Each realm has a link, e.g. `#quests`. `#summary` opens the plain one-page version, which also prints cleanly to PDF and is shown automatically when WebGL is unavailable.
@@ -35,6 +35,6 @@ The car at the camp (`assets/models/car.glb`) is my silver 2005 Holden Astra CD 
 
 Saudi touches: the Makkah island has a camel, a falcon, a majlis with dallah and dates (Meshy models); Al Sadu weave is drawn in code for the rugs and the panel trim; the Melbourne camp is a kashta; every place has its Arabic name; a crescent replaces the full moon.
 
-Arab folklore: the Quests stones are the pillars of Iram (إرم ذات العماد); Sinbad's Rukh circles the islands, flapping its wings; a verse attributed to Antarah ibn Shaddad is carved by the archery range; tales of Juha rotate on the title screen. Content is in `folklore` in `js/data.js`.
+Arab folklore: the Quests stones are the pillars of Iram (إرم ذات العماد); Sinbad's Rukh circles the islands, flapping its wings; a verse attributed to Antarah ibn Shaddad is carved by the archery range; the skill tree grows in Wadi Abqar (وادي عبقر), the valley of the jinn who inspired poets, where the word for genius comes from, and its jinn drift round the tree as wisps; tales of Juha rotate on the title screen. Content is in `folklore` in `js/data.js`.
 
 The journey is told as one story in seven chapters. Short lines in Arabic and English on the Quests and Guilds panels (`mottos` in `js/data.js`); a fox-spirit companion summoned on each island; a Córdoba-style arch and a chess table on the archery island.

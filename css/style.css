@@ -24,6 +24,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   transition: opacity 0.9s ease, visibility 0.9s;
 }
 #title-screen.gone { opacity: 0; visibility: hidden; }
+
+/* ---------- model loading progress ---------- */
+#loading {
+  --p: 0; position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 25; transform: translateX(-50%);
+  width: min(220px, 60vw); text-align: center; pointer-events: none; transition: opacity 0.8s ease 0.4s, visibility 0.8s 0.4s;
+}
+#loading span { display: block; font-family: var(--display); font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+#loading i { display: block; height: 2px; background: var(--line); border-radius: 1px; overflow: hidden; }
+#loading i::before { content: ''; display: block; height: 100%; width: 100%; background: var(--gold); transform-origin: left; transform: scaleX(var(--p)); transition: transform 0.4s ease; }
+#loading.done { opacity: 0; visibility: hidden; }
+body.playing #loading { bottom: auto; top: calc(10px + env(safe-area-inset-top)); }
+body.playing #loading span { display: none; }
+body.no-webgl #loading { display: none; }
 .eyebrow { font-family: var(--display); letter-spacing: 0.4em; text-transform: uppercase; font-size: 0.75rem; color: var(--gold); }
 #title-screen h1 {
   font-family: var(--display); font-weight: 900; font-size: clamp(2.6rem, 9vw, 6.5rem); line-height: 1.05; margin: 0.25em 0 0.1em;
@@ -134,10 +147,41 @@ details.quest summary:hover { background: rgba(255, 255, 255, 0.04); }
 .q-body li::before { content: '◆'; position: absolute; left: 0; top: 0.25em; font-size: 0.6rem; color: var(--gold); }
 
 /* skills */
-.branch { margin-bottom: 6px; }
-.branch h3 { color: var(--c); }
-.branch h3 small { font-family: var(--body); letter-spacing: 0; text-transform: none; color: var(--dim); font-style: italic; font-size: 0.85rem; }
-.skill { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.07); font-size: 0.95rem; }
+.abqar p[lang='ar'] b { font-size: 1.6rem; font-weight: 700; }
+.schools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 16px 0 4px; }
+.schools button { --c: var(--gold); display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; text-align: left; cursor: pointer;
+  min-width: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-top: 2px solid color-mix(in srgb, var(--c) 35%, transparent); color: var(--dim); font: inherit; transition: background 0.2s, border-color 0.2s, color 0.2s; }
+.schools button b { font-family: var(--display); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c); font-weight: 700; }
+.schools button span { font-size: 0.74rem; font-style: italic; line-height: 1.25; }
+@media (max-width: 520px) { .schools button { padding: 7px 8px; } .schools button b { font-size: 0.68rem; letter-spacing: 0.06em; } .schools button span { font-size: 0.68rem; } }
+.schools button:hover { background: rgba(255, 255, 255, 0.06); }
+.schools button[aria-selected='true'] { background: color-mix(in srgb, var(--c) 12%, transparent); border-color: color-mix(in srgb, var(--c) 45%, transparent); border-top-color: var(--c); color: var(--ink); }
+.schools button:focus-visible { outline: 1px solid var(--c); outline-offset: 2px; }
+.school { animation: rise 0.35s ease; }
+.school-sum { font-size: 0.82rem; color: var(--dim); margin: 10px 0 12px; }
+.tiers { list-style: none; position: relative; margin-left: 6px; padding-left: 20px; }
+.tiers::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 26px; width: 2px; border-radius: 1px;
+  background: linear-gradient(to bottom, var(--c), color-mix(in srgb, var(--c) 15%, transparent)); box-shadow: 0 0 8px color-mix(in srgb, var(--c) 50%, transparent); }
+.tier { position: relative; padding-bottom: 14px; }
+.tier::before { content: ''; position: absolute; left: -25px; top: 6px; width: 10px; height: 10px; transform: rotate(45deg); background: var(--c); box-shadow: 0 0 10px var(--c); }
+.tier.t1::before { background: var(--bg); border: 1.5px solid var(--c); box-shadow: none; }
+.tier h4 { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); font-weight: 600; margin-bottom: 7px; }
+.tier .pips i { width: 7px; height: 7px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 6px; }
+.skill { display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--c) 30%, transparent); background: rgba(255, 255, 255, 0.03); border-radius: 3px; cursor: default; transition: background 0.2s, border-color 0.2s, box-shadow 0.2s; }
+.t3 .skill { border-color: color-mix(in srgb, var(--c) 60%, transparent); background: color-mix(in srgb, var(--c) 8%, transparent); }
+.t1 .skill { border-style: dashed; }
+.s-name { font-size: 0.95rem; line-height: 1.3; }
+.t3 .s-name { font-weight: 600; }
+.skill:focus { outline: none; }
+.skill:focus-visible, .skill.lit { border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); box-shadow: 0 0 14px color-mix(in srgb, var(--c) 35%, transparent); }
+.skill.lit .s-name { color: #fff; }
+.s-used { font-size: 0.74rem; color: var(--dim); line-height: 1.35; }
+.s-used button { font: inherit; color: var(--c); background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dotted currentColor; }
+.s-used button:hover, .s-used button:focus-visible { color: #fff; outline: none; }
+.school-hint { font-size: 0.76rem; font-style: italic; color: var(--dim); margin-top: 2px; }
+.flash { animation: flash 1.6s ease; }
+@keyframes flash { 0%, 30% { box-shadow: 0 0 0 1px var(--gold), 0 0 18px rgba(227, 184, 102, 0.45); } 100% { box-shadow: 0 0 0 1px transparent; } }
 .pips { display: flex; align-items: center; gap: 4px; flex: none; }
 .pips i { width: 9px; height: 9px; transform: rotate(45deg); border: 1px solid var(--c); }
 .pips i.on { background: var(--c); box-shadow: 0 0 8px var(--c); }

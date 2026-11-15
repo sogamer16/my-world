@@ -158,21 +158,22 @@ export const quests = [
 ];
 
 // rank: 1 Novice · 2 Adept · 3 Seasoned
+// used: where the skill was put to work — names of quests or pursuits; the Skills panel links to them
 export const skillTree = [
   {
     branch: 'Spellcraft',
     sub: 'Programming & tools',
     color: '#7cc4ff',
     skills: [
-      { name: 'Python', rank: 3 },
-      { name: 'C / C++', rank: 3 },
-      { name: 'JavaScript', rank: 2 },
-      { name: 'C#', rank: 2 },
+      { name: 'Python', rank: 3, used: ['Sentinel'] },
+      { name: 'C / C++', rank: 3, used: ['AquaFlow'] },
+      { name: 'JavaScript', rank: 2, used: ['ABAAD Robotics'] },
+      { name: 'C#', rank: 2, used: ['The Game Forge'] },
       { name: 'Bash', rank: 2 },
-      { name: 'Linux / WSL', rank: 2 },
+      { name: 'Linux / WSL', rank: 2, used: ['Totex Energy'] },
       { name: 'Git / GitHub', rank: 2 },
-      { name: 'Full-stack web', rank: 2 },
-      { name: 'ML · Isolation Forest', rank: 2 },
+      { name: 'Full-stack web', rank: 2, used: ['Sirius'] },
+      { name: 'ML · Isolation Forest', rank: 2, used: ['Sentinel'] },
     ],
   },
   {
@@ -180,10 +181,10 @@ export const skillTree = [
     sub: 'Engineering & CAD',
     color: '#ffb454',
     skills: [
-      { name: 'Fluid mechanics', rank: 2 },
-      { name: 'CFD · SimScale', rank: 2 },
+      { name: 'Fluid mechanics', rank: 2, used: ['The Flow Trials'] },
+      { name: 'CFD · SimScale', rank: 2, used: ['The Flow Trials'] },
       { name: 'MATLAB', rank: 2 },
-      { name: 'Blender', rank: 2 },
+      { name: 'Blender', rank: 2, used: ['Design & 3D'] },
       { name: 'SolidWorks', rank: 1 },
       { name: 'AutoCAD', rank: 1 },
     ],
@@ -193,14 +194,14 @@ export const skillTree = [
     sub: 'Hardware & IoT',
     color: '#8dffb0',
     skills: [
-      { name: 'Arduino', rank: 3 },
-      { name: 'Sensor systems', rank: 3 },
-      { name: 'Raspberry Pi', rank: 2 },
-      { name: 'Modbus', rank: 2 },
+      { name: 'Arduino', rank: 3, used: ['AquaFlow'] },
+      { name: 'Sensor systems', rank: 3, used: ['AquaFlow', 'Sentinel'] },
+      { name: 'Raspberry Pi', rank: 2, used: ['Totex Energy'] },
+      { name: 'Modbus', rank: 2, used: ['Totex Energy'] },
       { name: 'GPIO', rank: 2 },
-      { name: 'HVAC wiring', rank: 2 },
-      { name: 'Robot platforms', rank: 2 },
-      { name: 'Gesture recognition', rank: 1 },
+      { name: 'HVAC wiring', rank: 2, used: ['Totex Energy'] },
+      { name: 'Robot platforms', rank: 2, used: ['ABAAD Robotics'] },
+      { name: 'Gesture recognition', rank: 1, used: ['ABAAD Robotics'] },
     ],
   },
 ];
@@ -245,6 +246,12 @@ export const folklore = {
     by: 'Antarah ibn Shaddad', byAr: 'عنترة بن شداد',
     note: 'The warrior-poet of pre-Islamic Arabia. The line is attributed to him; the translation is mine.',
   },
+  // Wadi Abqar: the valley of the jinn in old Arab lore. A poet too gifted to be merely human was said
+  // to have a companion from Abqar, and the word for genius, ʿabqarī, comes from the valley's name.
+  abqar: {
+    ar: ['وادي عبقر', 'ومنه قيل للنابغ: عبقري'],
+    en: 'The old Arabs told of Wadi Abqar, a valley of jinn. A poet too good to be merely human was said to have a companion from Abqar — and the word for genius, ʿabqarī, comes from its name. No jinn here: just practice, in three schools.',
+  },
   juha: [
     { tale: 'Juha lost his ring inside the house, but searched for it out in the street — "the light is better out here."', moral: 'Debug where the fault is, not where it is easy to look.' },
     { tale: 'Juha rode the donkey and people called him cruel; his son rode and they called him spoilt; they both walked and people laughed at them.', moral: 'You cannot please every critic. Build it, then listen to the people who use it.' },
@@ -286,7 +293,7 @@ export const guilds = [
   {
     name: 'Saudi Students Association in Melbourne (SSAM)',
     nameAr: 'نادي الطلبة السعوديين في ملبورن',
-    logo: 'ssam.png',
+    logo: 'ssam.webp',
     role: 'Event Coordinator',
     place: 'Melbourne',
     when: '2025',
@@ -322,7 +329,7 @@ export const badges = [
   { name: 'University of Melbourne', logo: 'unimelb.svg', note: 'Studying', href: 'https://www.unimelb.edu.au' },
   { name: 'Trinity College', logo: 'trinity.png', note: 'Foundation Studies', href: 'https://www.trinity.unimelb.edu.au' },
   { name: 'CISSA', logo: 'cissa.svg', note: 'Codebrew', href: 'https://www.cissa.org.au' },
-  { name: 'Saudi Students Association in Melbourne', logo: 'ssam.png', ar: 'نادي الطلبة السعوديين في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
+  { name: 'Saudi Students Association in Melbourne', logo: 'ssam.webp', ar: 'نادي الطلبة السعوديين في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
   { name: 'Olchfa School', logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
 ];
 
@@ -370,7 +377,7 @@ export const realms = [
   { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
   { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
   { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
-  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'The Sandstone Grove', placeAr: 'بستان الحجر الرملي', color: '#7cc4ff' },
+  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'Wadi Abqar', placeAr: 'وادي عبقر', color: '#7cc4ff' },
   { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
   { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
   { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
