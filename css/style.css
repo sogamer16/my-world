@@ -24,6 +24,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   transition: opacity 0.9s ease, visibility 0.9s;
 }
 #title-screen.gone { opacity: 0; visibility: hidden; }
+
+/* ---------- model loading progress ---------- */
+#loading {
+  --p: 0; position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 25; transform: translateX(-50%);
+  width: min(220px, 60vw); text-align: center; pointer-events: none; transition: opacity 0.8s ease 0.4s, visibility 0.8s 0.4s;
+}
+#loading span { display: block; font-family: var(--display); font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+#loading i { display: block; height: 2px; background: var(--line); border-radius: 1px; overflow: hidden; }
+#loading i::before { content: ''; display: block; height: 100%; width: 100%; background: var(--gold); transform-origin: left; transform: scaleX(var(--p)); transition: transform 0.4s ease; }
+#loading.done { opacity: 0; visibility: hidden; }
+body.playing #loading { bottom: auto; top: calc(10px + env(safe-area-inset-top)); }
+body.playing #loading span { display: none; }
+body.no-webgl #loading { display: none; }
 .eyebrow { font-family: var(--display); letter-spacing: 0.4em; text-transform: uppercase; font-size: 0.75rem; color: var(--gold); }
 #title-screen h1 {
   font-family: var(--display); font-weight: 900; font-size: clamp(2.6rem, 9vw, 6.5rem); line-height: 1.05; margin: 0.25em 0 0.1em;

@@ -4,9 +4,10 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=25';
-import { map as MAP } from './worldmap.js?v=25';
+import * as D from './data.js?v=26';
+import { map as MAP } from './worldmap.js?v=26';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -420,9 +421,53 @@ const localTree = {
 /* ---------- generated models ---------- */
 // Each prop loads on top of a hand-built stand-in, which it replaces once ready.
 // If a model fails to load, the stand-in simply stays.
-const gltf = new GLTFLoader();
-const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=25`));
+// The models are Draco-compressed; the decoder (wasm) is vendored next to three.js.
+const draco = new DRACOLoader().setDecoderPath('vendor/three/addons/libs/draco/').setDecoderConfig({ type: 'wasm' });
+draco.preload(); // fetch the decoder now, alongside the first models
+const gltf = new GLTFLoader().setDRACOLoader(draco);
+// Staged loading: models are fetched a few at a time, those for the island in view
+// (and its neighbours) first. `where` is a realm index, or { hops } for things that
+// are not on one island (the companion fox, the Rukh).
+const models = {}, wants = {}, queue = [];
+const LOAD_AT_ONCE = 3;
+let active = 0, done = 0, pumpSoon = 0;
+const loadBar = document.getElementById('loading');
+const hops = (w) => {
+  if (typeof w !== 'number') return w.hops;
+  const here = Math.max(current, 0), d = Math.abs(w - here);
+  return Math.min(d, N - d);
+};
+const priority = (name) => Math.min(...[...wants[name]].map(hops));
+function showProgress() {
+  if (!loadBar) return;
+  const total = Object.keys(models).length;
+  loadBar.style.setProperty('--p', total ? done / total : 0);
+  loadBar.setAttribute('aria-valuenow', String(Math.round((done / Math.max(total, 1)) * 100)));
+  if (total && done === total) loadBar.classList.add('done');
+}
+function pump() {
+  pumpSoon = 0;
+  queue.sort((a, b) => priority(a.name) - priority(b.name));
+  while (active < LOAD_AT_ONCE && queue.length) {
+    const job = queue.shift(); active++;
+    // The next download starts as soon as this one arrives, while it is still being decoded.
+    const bytes = fetch(`assets/models/${job.name}.glb?v=26`)
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
+      .finally(() => { active--; pump(); });
+    bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
+      .then(job.resolve, (err) => { console.warn(`model ${job.name} failed to load; keeping its stand-in`, err); job.reject(err); })
+      .finally(() => { done++; showProgress(); });
+  }
+}
+// Re-sort the queue (e.g. after travelling) on the next tick; also defers the first
+// fetch until the whole scene, and `current`, exist.
+const schedulePump = () => { pumpSoon ||= setTimeout(pump, 0); };
+function loadModel(name, where = { hops: 2 }) {
+  (wants[name] ||= new Set()).add(where);
+  models[name] ||= new Promise((resolve, reject) => queue.push({ name, resolve, reject }));
+  schedulePump();
+  return models[name];
+}
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -431,7 +476,7 @@ const blobTex = (() => {
   return new THREE.CanvasTexture(c);
 })();
 function prop(g, name, { h, w, x = 0, y = 0.3, z = 0, ry = 0, lit = 0, replace = [], onLoad } = {}) {
-  loadModel(name).then((res) => {
+  loadModel(name, g.userData.realm).then((res) => {
     const m = res.scene.clone();
     const box = new THREE.Box3().setFromObject(m);
     const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
@@ -717,7 +762,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=25`;
+  img.src = `assets/logos/${file}?v=26`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -735,7 +780,7 @@ function signboard(g, { x, z, ry = 0, w = 1.6, h = 0.7, y = 1.1, logo, bg = '#ff
 }
 // The Saudi Students Association in Melbourne: its full logo on a white banner.
 function ssamBanner() {
-  return logoTexture('ssam-full.png', { w: 340, h: 520, bg: '#ffffff', box: [26, 40, 288, 440], extra: (x) => {
+  return logoTexture('ssam-full.webp', { w: 340, h: 520, bg: '#ffffff', box: [26, 40, 288, 440], extra: (x) => {
     x.strokeStyle = '#1b6136'; x.lineWidth = 6; x.strokeRect(10, 10, 320, 500);
   } });
 }
@@ -1058,7 +1103,7 @@ for (let i = 0; i < N; i++) {
 // The Rukh of Sinbad's voyages circles high above the islands.
 const rukh = new THREE.Group(); scene.add(rukh);
 const flapT = { value: 0 };
-loadModel('roc').then((res) => {
+loadModel('roc', { hops: 3 }).then((res) => {
   const m = res.scene.clone(), box = new THREE.Box3().setFromObject(m), size = box.getSize(new THREE.Vector3());
   m.position.sub(box.getCenter(new THREE.Vector3()));
   m.traverse((o) => {
@@ -1101,7 +1146,7 @@ const circleTex = (() => {
 const circle = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.MeshBasicMaterial({ map: circleTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 }));
 circle.rotation.x = -Math.PI / 2; circle.position.y = 0.34;
 const foxHolder = new THREE.Group(); companion.add(circle, foxHolder);
-loadModel('fox').then((res) => {
+loadModel('fox', { hops: 1 }).then((res) => {
   const m = res.scene.clone(), box = new THREE.Box3().setFromObject(m), size = box.getSize(new THREE.Vector3());
   m.position.set(-box.getCenter(new THREE.Vector3()).x, -box.min.y, -box.getCenter(new THREE.Vector3()).z);
   m.traverse((o) => { if (o.isMesh) { o.material.metalness = 0; o.material.roughness = 0.9; o.castShadow = true; } });
@@ -1188,7 +1233,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=25" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=26" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1225,12 +1270,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=25" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=26" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=25" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=26" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=25" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=26" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1261,7 +1306,7 @@ function go(i) {
   let d = r.angle - (targetAngle % TAU);
   d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
   targetAngle += d;
-  current = i;
+  current = i; schedulePump();
   summon(i);
   document.documentElement.style.setProperty('--accent', r.color);
   place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;

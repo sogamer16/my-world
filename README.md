@@ -18,7 +18,7 @@ To publish, enable GitHub Pages for the repository (Settings → Pages → deplo
 
 All content lives in `js/data.js`. The scene and navigation are in `js/main.js`, styling in `css/style.css`.
 three.js r170 is vendored in `vendor/three` (MIT).
-The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform.
+The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform (`gltf-transform draco in.glb out.glb`; WebP textures). The Draco decoder is vendored in `vendor/three/addons/libs/draco`. Models load a few at a time, the island in view and its neighbours first, with a progress bar on the title screen.
 
 The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle) and Melbourne (tram, sandstone arch, gum trees, laneway lamps). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
 
