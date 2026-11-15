@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=30';
-import { map as MAP } from './worldmap.js?v=30';
+import * as D from './data.js?v=31';
+import { map as MAP } from './worldmap.js?v=31';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=30`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=31`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -797,7 +797,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=30`;
+  img.src = `assets/logos/${file}?v=31`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -886,6 +886,71 @@ function hoodieStand(g, x, z, ry) {
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.3, 8), flat(0x2b2b30)); pole.position.set(x, 1.0, z);
   [base, pole].forEach((o) => { o.castShadow = true; o.receiveShadow = true; g.add(o); });
   prop(g, 'hoodie', { h: 3.0, x, y: 1.3, z, ry, onLoad: (holder) => applyHoodiePrint(holder, g) });
+}
+
+// The Duke of Edinburgh Bronze Award: a cast bronze medal on a ribbon, hanging from a little
+// wooden stand. Drawn in code (laurel ring and lettering), not the award's own logo.
+function medalFace(top, mid, bottom) {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const draw = () => {
+    const x = c.getContext('2d'), R = 256;
+    const gr = x.createRadialGradient(R * 0.8, R * 0.7, 20, R, R, R);
+    gr.addColorStop(0, '#f6c896'); gr.addColorStop(0.6, '#cf8a4e'); gr.addColorStop(1, '#8a4c22');
+    x.fillStyle = gr; x.fillRect(0, 0, 512, 512);
+    x.lineWidth = 10; x.strokeStyle = 'rgba(60, 30, 10, 0.55)';
+    x.beginPath(); x.arc(R, R, R - 18, 0, Math.PI * 2); x.stroke();
+    x.lineWidth = 3; x.beginPath(); x.arc(R, R, R - 92, 0, Math.PI * 2); x.stroke();
+    // laurel: two branches of leaves curving up each side of the centre
+    x.fillStyle = 'rgba(70, 36, 12, 0.7)';
+    for (const side of [-1, 1]) for (let k = 0; k < 9; k++) {
+      const a = Math.PI / 2 + side * (0.35 + k * 0.27), r = R - 122;
+      x.save(); x.translate(R + Math.cos(a) * r, R + Math.sin(a) * r); x.rotate(a + side * 0.6);
+      x.beginPath(); x.ellipse(0, 0, 15, 6, 0, 0, Math.PI * 2); x.fill(); x.restore();
+    }
+    // lettering around the top edge, then the centre
+    x.fillStyle = '#2e1405'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.font = '700 34px Cinzel, Georgia, serif';
+    const letters = top.toUpperCase().split(''), span = 2.3, r = R - 55;
+    letters.forEach((ch, k) => {
+      const a = -Math.PI / 2 - span / 2 + (k + 0.5) * (span / letters.length);
+      x.save(); x.translate(R + Math.cos(a) * r, R + Math.sin(a) * r); x.rotate(a + Math.PI / 2); x.fillText(ch, 0, 0); x.restore();
+    });
+    x.font = '900 92px Cinzel, Georgia, serif'; x.fillText(mid.toUpperCase(), R, R - 8);
+    x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(bottom, R, R + 70);
+    tex.needsUpdate = true;
+  };
+  draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
+  return tex;
+}
+function bronzeMedal(g, { x, z, ry = 0, scale = 1 }) {
+  const stand = new THREE.Group(); stand.position.set(x, 0.3, z); stand.rotation.y = ry; stand.scale.setScalar(scale); g.add(stand);
+  const w = wood();
+  const base = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.14, 0.5), w); base.position.y = 0.07;
+  const postL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 2.2, 0.09), w); postL.position.set(-0.55, 1.17, 0);
+  const postR = postL.clone(); postR.position.x = 0.55;
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.1, 0.12), w); bar.position.y = 2.25;
+  [base, postL, postR, bar].forEach((o) => { o.castShadow = true; o.receiveShadow = true; stand.add(o); });
+  // the medal swings from the bar
+  const hang = new THREE.Group(); hang.position.y = 2.2; stand.add(hang);
+  const ribbonTex = (() => {
+    const c = document.createElement('canvas'); c.width = 64; c.height = 8;
+    const k = c.getContext('2d');
+    [['#7a1420', 0, 64], ['#d9a441', 22, 6], ['#d9a441', 36, 6]].forEach(([col, at, wd]) => { k.fillStyle = col; k.fillRect(at, 0, wd, 8); });
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })();
+  const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.9, 0.02), new THREE.MeshStandardMaterial({ map: ribbonTex, roughness: 0.8 }));
+  ribbon.position.y = -0.45; ribbon.castShadow = true; hang.add(ribbon);
+  const clasp = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.07, 0.05), new THREE.MeshStandardMaterial({ color: 0xc8844a, metalness: 0.4, roughness: 0.35 }));
+  clasp.position.y = -0.9; hang.add(clasp);
+  // only half metallic: there is no environment map, so a fully metallic medal would look nearly black
+  const bronze = new THREE.MeshStandardMaterial({ color: 0xc8844a, metalness: 0.4, roughness: 0.38 });
+  const face = new THREE.MeshStandardMaterial({ map: medalFace("Duke of Edinburgh's", 'Bronze', '2023'), metalness: 0.3, roughness: 0.45, emissive: 0x3a1c08, emissiveIntensity: 0.25 });
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.07, 48), [bronze, face, face]);
+  disc.rotation.set(Math.PI / 2, Math.PI / 2, 0); // face the viewer, lettering upright
+  disc.position.y = -1.41; disc.castShadow = true; hang.add(disc);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.035, 8, 48), bronze); ring.position.copy(disc.position); hang.add(ring);
+  tick.push((t) => { if (!reduceMotion) hang.rotation.z = Math.sin(t * 1.1 + x) * 0.06; });
 }
 
 // Me, generated with Meshy from a full-length photo of me in a suit.
@@ -1108,6 +1173,7 @@ const landmarks = {
     prop(g, 'dragon', { h: 2.1, x: 5.0, z: 2.3, ry: -1.0 });
     hoodieStand(g, -3.4, 2.2, Math.PI + 0.45); // back to the viewer, so the print shows
     signboard(g, { x: -1.6, z: 3.9, ry: 0.15, w: 1.5, h: 0.5, y: 0.55, logo: 'olchfa.svg', pad: 0.08 });
+    bronzeMedal(g, { x: 2.3, z: 3.9, ry: -0.3, scale: 1.35 }); // Duke of Edinburgh Bronze Award, 2023
     rain(g);
   },
   quests(g) { // Melbourne: the city tram and a laneway lamp
@@ -1361,7 +1427,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=30" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=31" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1398,12 +1464,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=30" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=31" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=30" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=31" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=30" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=31" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>

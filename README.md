@@ -20,7 +20,7 @@ All content lives in `js/data.js`. `hero.seeking` is the line about what I'm loo
 three.js r170 is vendored in `vendor/three` (MIT).
 The 3D props in `assets/models` were generated with Meshy and compressed with gltf-transform (`gltf-transform draco in.glb out.glb`; WebP textures). The Draco decoder is vendored in `vendor/three/addons/libs/draco`. Models load a few at a time, the island in view and its neighbours first, with a progress bar on the title screen.
 
-The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle) and Melbourne (tram, sandstone arch, gum trees, laneway lamps, and Wadi Abqar, where the skill tree grows). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
+The islands are grouped by the places I have lived, in order: Makkah (Hejaz courtyard, date palms, roshan house, the farm), Swansea (lighthouse, castle ruin, red dragon, drizzle, and the Duke of Edinburgh Bronze Award medal, drawn in code) and Melbourne (tram, sandstone arch, gum trees, laneway lamps, and Wadi Abqar, where the skill tree grows). Each land sets its own sky, fog and light; see `lands` in `js/data.js`.
 
 Controls: scroll, swipe, arrow keys, `1`–`7`, the hotbar, or click an island. On the Archery Range, click the target (or press space) to shoot.
 The header has **CV** (the plain one-page version, printable to PDF) and **Contact** (jumps to the Portal). A one-time hint explains the Archery Range on first visit.
