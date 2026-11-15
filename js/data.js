@@ -282,6 +282,13 @@ export const pursuits = [
     extra: "And the classics: al-Ghazali's Tahafut al-Falasifa and Ibn Khaldun's Muqaddimah.",
   },
   {
+    name: 'Watching',
+    glyph: '♚',
+    detail:
+      "Hatem Ali's Andalusian trilogy — Saqr Quraysh, Rabi' Qurtuba and Muluk al-Tawa'if — the rise and fall of al-Andalus, which reads like Ibn Khaldun's cycles of ʿasabiyya on screen.",
+    extra: 'And anime built on battles of wits: Death Note and Code Geass, where every move is planned several turns ahead.',
+  },
+  {
     name: 'Debating',
     glyph: '❝',
     detail: 'Second place at Trinity College. Arguing a side I was handed five minutes ago.',
