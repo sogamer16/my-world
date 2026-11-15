@@ -5,7 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=15';
+import * as D from './data.js?v=16';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -421,7 +421,7 @@ const localTree = {
 // If a model fails to load, the stand-in simply stays.
 const gltf = new GLTFLoader();
 const models = {};
-const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=15`));
+const loadModel = (name) => (models[name] ||= gltf.loadAsync(`assets/models/${name}.glb?v=16`));
 const blobTex = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64;
   const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -686,7 +686,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=15`;
+  img.src = `assets/logos/${file}?v=16`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -777,25 +777,9 @@ function hoodieStand(g, x, z, ry) {
   prop(g, 'hoodie', { h: 3.0, x, y: 1.3, z, ry, onLoad: (holder) => applyHoodiePrint(holder, g) });
 }
 
-// Me: generated from a photo of me in shemagh, vest and thobe. The photo stops at the knees,
-// so the rest of the black thobe and white trainers are built here underneath.
+// Me, as a stylised figure in shemagh, vest and thobe (generated with Meshy to match the world's style).
 function meFigure(g, x, z, ry) {
-  const ROBE = 1.15;
-  prop(g, 'me', { h: 2.85, x, y: 0.3 + ROBE, z, ry, onLoad: (holder) => {
-    g.updateMatrixWorld(true);
-    const box = new THREE.Box3().setFromObject(holder);
-    const lo = g.worldToLocal(box.min.clone()), hi = g.worldToLocal(box.max.clone());
-    const w = Math.min(Math.abs(hi.x - lo.x), Math.abs(hi.z - lo.z));
-    const top = w * 0.42, bot = top * 1.18;
-    const robe = new THREE.Mesh(new THREE.CylinderGeometry(top, bot, ROBE + 0.06, 20, 1, true), new THREE.MeshStandardMaterial({ color: 0x151518, roughness: 0.85, side: THREE.DoubleSide }));
-    robe.position.set(x, 0.3 + ROBE / 2 + 0.02, z); robe.castShadow = true; robe.receiveShadow = true;
-    const shoe = new THREE.MeshStandardMaterial({ color: 0xf0f0ec, roughness: 0.6 });
-    [-1, 1].forEach((sd) => {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.13, 0.42), shoe);
-      s.position.set(x + sd * top * 0.45, 0.37, z + bot * 0.65); s.rotation.y = ry; s.castShadow = true; g.add(s);
-    });
-    g.add(robe);
-  } });
+  prop(g, 'me', { h: 3.7, x, z, ry });
 }
 
 /* ---------- Saudi touches ---------- */
@@ -1098,7 +1082,7 @@ const panels = {
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=15" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=16" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1134,12 +1118,12 @@ const panels = {
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=15" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=16" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=15" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=16" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=15" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=16" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
