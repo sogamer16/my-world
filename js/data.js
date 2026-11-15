@@ -285,25 +285,35 @@ export const portals = [
 
 // The three places that shaped me; each island belongs to one of them.
 export const lands = {
-  hejaz: {
+  // sky: [horizon, middle, zenith, haze] in linear RGB. sun: [colour, strength, elevation°, side].
+  // clouds: [colour, cover 0–1]. stars: 0 day … 1 night. below: what lies under the islands.
+  hejaz: { // late golden afternoon
     short: 'Makkah',
-    sky: [[0.30, 0.13, 0.07], [0.12, 0.05, 0.07], [0.02, 0.015, 0.04], [0.45, 0.2, 0.08]],
-    fog: '#1a0d10', hemi: ['#ffb27a', '#2a1a10'], ground: '#b08455', rock: '#6b4a35',
+    sky: [[0.95, 0.52, 0.26], [0.42, 0.36, 0.42], [0.10, 0.17, 0.36], [1.0, 0.62, 0.30]],
+    sun: ['#ffc78e', 3.4, 18, -0.8], hemi: ['#ffd9b8', '#6b4a35', 1.0], fog: ['#c99a72', 0.0045],
+    clouds: ['#ffd2a6', 0.3], disc: 1, stars: 0.05, exposure: 0.95,
+    ground: '#c9a06a', rock: '#9a6a44', below: 0,
   },
-  gower: {
+  gower: { // soft overcast sea light
     short: 'Swansea',
-    sky: [[0.07, 0.13, 0.16], [0.03, 0.06, 0.09], [0.01, 0.02, 0.035], [0.08, 0.2, 0.2]],
-    fog: '#081216', hemi: ['#9fd2e0', '#10201c'], ground: '#3f6b45', rock: '#4a4f58',
+    sky: [[0.50, 0.56, 0.58], [0.40, 0.47, 0.53], [0.24, 0.32, 0.42], [0.62, 0.66, 0.66]],
+    sun: ['#e9f0f4', 1.6, 52, -0.4], hemi: ['#d6e4ec', '#3c4a3c', 1.7], fog: ['#7f9198', 0.0075],
+    clouds: ['#dfe6ea', 0.92], disc: 0, stars: 0, exposure: 1.0,
+    ground: '#5d8a4c', rock: '#6b6e72', below: 1,
   },
-  melbourne: {
+  melbourne: { // blue hour, city lights coming on
     short: 'Melbourne',
-    sky: [[0.10, 0.05, 0.18], [0.04, 0.03, 0.10], [0.012, 0.012, 0.04], [0.25, 0.12, 0.12]],
-    fog: '#0b0a1c', hemi: ['#a08fff', '#1a1430'], ground: '#4a5a3c', rock: '#3b3555',
+    sky: [[0.48, 0.25, 0.28], [0.09, 0.11, 0.28], [0.015, 0.03, 0.10], [0.85, 0.42, 0.26]],
+    sun: ['#a6b6ff', 1.7, 26, -0.7], hemi: ['#7f8fd8', '#2a2230', 0.95], fog: ['#1b1b36', 0.005],
+    clouds: ['#6f5f92', 0.3], disc: 0, stars: 0.6, exposure: 1.1,
+    ground: '#55703f', rock: '#6b5a50', below: 2,
   },
-  neutral: {
+  neutral: { // night at the edge of the world
     short: '',
-    sky: [[0.075, 0.035, 0.16], [0.035, 0.025, 0.09], [0.012, 0.01, 0.035], [0.20, 0.07, 0.22]],
-    fog: '#0a0718', hemi: ['#8f7dff', '#1a0f2e'], ground: null, rock: '#3b3555',
+    sky: [[0.13, 0.06, 0.24], [0.05, 0.035, 0.13], [0.012, 0.01, 0.04], [0.32, 0.10, 0.30]],
+    sun: ['#c8d0ff', 1.7, 38, -0.6], hemi: ['#9f8dff', '#2a1f3e', 1.15], fog: ['#120a24', 0.006],
+    clouds: ['#6a4fc4', 0.18], disc: 0, stars: 1, exposure: 1.1,
+    ground: '#3f6650', rock: '#4f4866', below: 3,
   },
 };
 

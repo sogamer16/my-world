@@ -57,7 +57,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .hud { position: fixed; z-index: 10; opacity: 0; transition: opacity 0.8s ease 0.3s; pointer-events: none; }
 body.playing .hud { opacity: 1; pointer-events: auto; }
 
-#hud-top { top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; pointer-events: none !important; }
+#hud-top { background: linear-gradient(180deg, rgba(8, 6, 18, 0.62), rgba(8, 6, 18, 0)); padding-bottom: 28px !important; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; pointer-events: none !important; }
 .crest { display: flex; align-items: center; gap: 12px; }
 .crest-mark {
   width: 44px; height: 44px; display: grid; place-items: center; font-family: var(--display); font-weight: 700; color: var(--gold);
