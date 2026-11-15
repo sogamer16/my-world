@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=7';
+import * as D from './data.js?v=8';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -16,6 +16,7 @@ el.innerHTML = `
       <p class="s-role">${esc(D.hero.klass)} student · ${esc(D.hero.guild)} · ${esc(D.hero.realm)}</p>
       <p class="s-links">${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.lore)}</p>
+      <div class="s-logos">${D.badges.map((b) => `<img src="assets/logos/${esc(b.logo)}?v=8" alt="${esc(b.name)}" title="${esc(b.name)}">`).join('')}</div>
     </header>
 
     <h2>Experience and projects</h2>

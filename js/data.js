@@ -38,6 +38,7 @@ export const hero = {
 export const quests = [
   {
     name: 'Totex Energy',
+    logo: 'totex.svg',
     kind: 'Main Quest',
     plain: 'Internship',
     role: 'Engineering Intern · energy startup',
@@ -211,6 +212,7 @@ export const trophies = [
   { name: 'McKinsey Forward', detail: 'McKinsey & Company professional development program', when: '2025', tier: 'gold' },
   { name: 'Silver Tongue', plain: 'Debating', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
   { name: 'Six Hackathons', plain: 'Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
+  { name: 'Sohaib the Great', plain: 'Leavers hoodie', detail: 'Olchfa School leavers hoodie — number 23', when: '2023', tier: 'silver' },
   { name: 'Duke of Edinburgh', detail: 'Bronze Award', when: '2023', tier: 'bronze' },
   { name: 'Way of the Empty Hand', plain: 'Karate', detail: 'Multiple regional karate medals', when: '', tier: 'gold' },
   { name: 'Twin Stars', plain: 'GCSEs', detail: 'A* in GCSE Mathematics and Physics', when: '2023', tier: 'gold' },
@@ -256,7 +258,8 @@ export const pursuits = [
 
 export const guilds = [
   {
-    name: 'Saudi Student Club',
+    name: 'Saudi Students Association (SAMU)',
+    logo: 'samu.png',
     role: 'Event Coordinator',
     place: 'University of Melbourne',
     when: '2025',
@@ -264,18 +267,37 @@ export const guilds = [
       'Planned and delivered events for 200+ attendees — volunteers, logistics, stakeholders — and co-organised a student hackathon from the ground up.',
   },
   {
-    name: 'Olchfa Comprehensive',
+    name: 'CISSA',
+    logo: 'cissa.svg',
+    role: 'Codebrew hackathon',
+    place: 'University of Melbourne',
+    when: '2026',
+    detail: 'Built Sirius — a live 3D star map — in 60 hours at CISSA\'s Codebrew, leading the backend in a team of three.',
+  },
+  {
+    name: 'Olchfa School',
+    logo: 'olchfa.svg',
     role: 'Form Leader',
     place: 'Swansea, Wales',
     when: '2021 – 2023',
-    detail: 'Elected peer representative and trusted point of contact across the year group.',
+    detail: 'Elected peer representative and trusted point of contact across the year group. Left in 2023 as "Sohaib the great, 23".',
   },
 ];
 
 export const academies = [
-  { name: 'University of Melbourne', what: 'Bachelor of Design — Mechanical Engineering Systems', when: '2026 – 2029' },
-  { name: 'Trinity College', what: 'Foundation Studies — Physics, Maths, Chemistry · 78% overall', when: '2025' },
-  { name: 'Olchfa Comprehensive School', what: '9 GCSEs', when: '2023' },
+  { name: 'University of Melbourne', logo: 'unimelb.svg', what: 'Bachelor of Design — Mechanical Engineering Systems', when: '2026 – 2029' },
+  { name: 'Trinity College', logo: 'trinity.png', what: 'Foundation Studies — Physics, Maths, Chemistry · 78% overall', when: '2025' },
+  { name: 'Olchfa School', logo: 'olchfa.svg', what: '9 GCSEs, including A* in Maths and Physics', when: '2023' },
+];
+
+// Places I belong to, shown as a wall of logos. Logos belong to their organisations.
+export const badges = [
+  { name: 'University of Melbourne', logo: 'unimelb.svg', note: 'Studying', href: 'https://www.unimelb.edu.au' },
+  { name: 'Trinity College', logo: 'trinity.png', note: 'Foundation Studies', href: 'https://www.trinity.unimelb.edu.au' },
+  { name: 'Totex Energy', logo: 'totex.svg', note: 'Internship', href: 'https://www.totexenergy.com' },
+  { name: 'CISSA', logo: 'cissa.svg', note: 'Codebrew', href: 'https://www.cissa.org.au' },
+  { name: 'SAMU', logo: 'samu.png', note: 'Event Coordinator', href: 'https://umsu.unimelb.edu.au/buddy-up/clubs/clubs-listing/join/10065' },
+  { name: 'Olchfa School', logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
 ];
 
 export const portals = [
