@@ -211,6 +211,17 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
 .kicker-ar { font-family: 'Aref Ruqaa', serif; letter-spacing: 0; text-transform: none; font-size: 1rem; color: var(--gold); margin-inline-start: 0.6em; }
 .crest span#place i { font-family: 'Aref Ruqaa', serif; font-style: normal; color: var(--gold); margin-inline-start: 0.35em; }
 
+.verse { margin: 14px 0 4px; padding: 12px 14px; border-inline-start: 3px solid var(--gold); background: rgba(0, 0, 0, 0.25); }
+.verse p[lang='ar'] { font-family: 'Aref Ruqaa', serif; font-size: 1.25rem; line-height: 1.7; color: var(--gold); }
+.verse p:not([lang]) { font-style: italic; color: #d9cfba; font-size: 0.93rem; margin-top: 6px; }
+.verse cite { display: block; font-style: normal; color: var(--dim); font-size: 0.8rem; margin-top: 4px; }
+.verse cite span { font-family: 'Aref Ruqaa', serif; }
+.juha { max-width: 520px; margin: 1.6rem auto 0; font-size: 0.9rem; line-height: 1.5; color: var(--ink); opacity: 0; transition: opacity 0.8s; }
+.juha.in { opacity: 0.85; }
+.juha b { display: block; font-family: var(--display); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.7rem; color: var(--gold); margin-bottom: 4px; }
+.juha b span { font-family: 'Aref Ruqaa', serif; letter-spacing: 0; text-transform: none; font-size: 0.95rem; }
+.juha em { display: block; color: var(--dim); margin-top: 3px; }
+
 /* portal */
 a.gate {
   display: flex; justify-content: space-between; align-items: center; gap: 12px; text-decoration: none; color: var(--ink);
