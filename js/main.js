@@ -1376,6 +1376,43 @@ function pickSchool(bi, focus = false) {
   });
   lightSkill(null);
 }
+// The Character panel's attributes. Four styles to choose from (preview with ?attrs=1..4).
+const attrStyles = {
+  // 1. medallions: the score in a gold hexagon with its modifier, the evidence beside it
+  medallion: () => `<p class="note">Scores are for flavour; the evidence under each is real.</p>
+    <div class="stats">${D.hero.attributes.map((a) => {
+      const mod = Math.floor((a.value - 10) / 2), m = `${mod >= 0 ? '+' : ''}${mod}`;
+      return `<div class="stat"><div class="medallion" aria-label="${esc(a.label)} ${a.value}, modifier ${m}"><b>${a.value}</b><span>${m}</span></div>
+        <div class="stat-text"><strong>${esc(a.label)} <abbr>${esc(a.key)}</abbr></strong><p>${esc(a.note)}</p></div></div>`;
+    }).join('')}</div>`,
+  // 2. radar: the six scores as one shape, the evidence listed beneath
+  radar: () => {
+    const A = D.hero.attributes, n = A.length, C = 130, R = 92, lo = 8, hi = 20;
+    const pt = (i, r) => { const a = -Math.PI / 2 + (i / n) * TAU; return [C + Math.cos(a) * r, C + Math.sin(a) * r]; };
+    const ring = (f) => A.map((_, i) => pt(i, R * f).map((v) => v.toFixed(1)).join(',')).join(' ');
+    const shape = A.map((a, i) => pt(i, R * (a.value - lo) / (hi - lo)).map((v) => v.toFixed(1)).join(',')).join(' ');
+    return `<p class="note">Scores are for flavour; the evidence under each is real.</p>
+      <svg class="radar" viewBox="0 0 260 260" role="img" aria-label="${A.map((a) => `${a.label} ${a.value}`).join(', ')}">
+        ${[0.25, 0.5, 0.75, 1].map((f) => `<polygon class="r-ring" points="${ring(f)}"/>`).join('')}
+        ${A.map((_, i) => { const [x, y] = pt(i, R); return `<line class="r-axis" x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('')}
+        <polygon class="r-shape" points="${shape}"/>
+        ${A.map((a, i) => { const [x, y] = pt(i, R * (a.value - lo) / (hi - lo)); return `<circle class="r-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2"/>`; }).join('')}
+        ${A.map((a, i) => { const [x, y] = pt(i, R + 22); return `<text class="r-key" x="${x.toFixed(1)}" y="${(y - 2).toFixed(1)}">${esc(a.key)}</text><text class="r-val" x="${x.toFixed(1)}" y="${(y + 11).toFixed(1)}">${a.value}</text>`; }).join('')}
+      </svg>
+      <dl class="r-list">${A.map((a) => `<dt><abbr>${esc(a.key)}</abbr> ${esc(a.label)}</dt><dd>${esc(a.note)}</dd>`).join('')}</dl>`;
+  },
+  // 3. pips: ten gems per attribute, each worth two points, like the skill tree's rank pips
+  pips: () => `<p class="note">Scores are for flavour; the evidence under each is real.</p>
+    <div class="pip-rows">${D.hero.attributes.map((a) => `<div class="pip-row">
+      <div class="pip-head"><strong>${esc(a.label)} <abbr>${esc(a.key)}</abbr></strong>
+        <span class="gems" aria-label="${a.value} of 20">${[...Array(10)].map((_, k) => `<i class="${a.value >= (k + 1) * 2 ? 'on' : a.value >= k * 2 + 1 ? 'half' : ''}"></i>`).join('')}<b>${a.value}</b></span></div>
+      <p>${esc(a.note)}</p></div>`).join('')}</div>`,
+  // 4. evidence only: no numbers, just what each strength rests on
+  plain: () => `<ul class="traits">${D.hero.attributes.map((a) => `<li><strong>${esc(a.label)}</strong><span>${esc(a.note)}</span></li>`).join('')}</ul>`,
+};
+const attrPick = { 1: 'medallion', 2: 'radar', 3: 'pips', 4: 'plain' }[new URLSearchParams(location.search).get('attrs')] || 'medallion';
+const attributesSection = () => `<section><h3>Attributes</h3>${attrStyles[attrPick]()}</section>`;
+
 const panels = {
   hero: (r) => `${head(r, D.hero.title)}
     <p class="lore">${esc(D.hero.lore)}</p>
@@ -1384,14 +1421,7 @@ const panels = {
       <dt>Guild</dt><dd>${esc(D.hero.guild)}</dd>
       <dt>Realm</dt><dd>${esc(D.hero.realm)}</dd>
     </dl>
-    <section><h3>Attributes</h3><p class="note">Scores are for flavour; the evidence under each is real.</p>
-      <div class="stats">${D.hero.attributes.map((a) => {
-        const mod = Math.floor((a.value - 10) / 2);
-        return `<div class="stat">
-          <div class="medallion" aria-label="${esc(a.label)} ${a.value}, modifier ${mod >= 0 ? '+' : ''}${mod}"><b>${a.value}</b><span>${mod >= 0 ? '+' : ''}${mod}</span></div>
-          <div class="stat-text"><strong>${esc(a.label)} <abbr>${esc(a.key)}</abbr></strong><p>${esc(a.note)}</p></div>
-        </div>`;
-      }).join('')}</div></section>
+    ${attributesSection()}
     <section><h3>Journey</h3>${journeyMap()}</section>
     <section><h3>Tongues</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
 

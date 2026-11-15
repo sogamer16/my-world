@@ -401,3 +401,32 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
   background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); cursor: pointer; transition: background 0.2s, border-color 0.2s; }
 .next-ch i { font-family: var(--body); font-style: italic; letter-spacing: 0; text-transform: none; color: var(--dim); margin-left: 6px; }
 .next-ch:hover, .next-ch:focus-visible { border-color: var(--gold); background: rgba(227, 184, 102, 0.08); outline: none; }
+
+/* ---------- attributes: radar ---------- */
+.radar { display: block; width: min(300px, 100%); margin: 0 auto 6px; overflow: visible; }
+.r-ring { fill: none; stroke: rgba(227, 184, 102, 0.14); }
+.r-axis { stroke: rgba(227, 184, 102, 0.18); }
+.r-shape { fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: var(--gold); stroke-width: 1.6; stroke-linejoin: round; }
+.r-dot { fill: #f6e3b4; }
+.r-key { fill: var(--gold); font-family: var(--display); font-size: 10px; letter-spacing: 0.12em; text-anchor: middle; }
+.r-val { fill: var(--ink); font-family: var(--display); font-size: 12px; font-weight: 700; text-anchor: middle; }
+.r-list { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.84rem; }
+.r-list dt { font-family: var(--display); font-size: 0.8rem; color: var(--ink); white-space: nowrap; }
+.r-list dt abbr { text-decoration: none; color: var(--gold); font-size: 0.66rem; letter-spacing: 0.12em; margin-right: 4px; }
+.r-list dd { color: #cfc5b0; }
+/* ---------- attributes: pips ---------- */
+.pip-rows { display: grid; gap: 10px; }
+.pip-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.pip-head strong { font-family: var(--display); font-size: 0.88rem; letter-spacing: 0.04em; }
+.pip-head abbr { text-decoration: none; color: var(--gold); font-size: 0.64rem; letter-spacing: 0.14em; margin-left: 4px; }
+.gems { display: flex; align-items: center; gap: 4px; flex: none; }
+.gems i { width: 9px; height: 9px; transform: rotate(45deg); border: 1px solid rgba(227, 184, 102, 0.5); }
+.gems i.on { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 6px rgba(227, 184, 102, 0.6); }
+.gems i.half { background: linear-gradient(135deg, var(--gold) 50%, transparent 50%); border-color: var(--gold); }
+.gems b { font-family: var(--display); font-size: 0.85rem; width: 22px; text-align: right; margin-left: 4px; }
+.pip-row p { font-size: 0.82rem; color: #cfc5b0; margin-top: 2px; }
+/* ---------- attributes: evidence only ---------- */
+.traits { list-style: none; display: grid; gap: 8px; }
+.traits li { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); }
+.traits strong { font-family: var(--display); font-size: 0.86rem; letter-spacing: 0.04em; color: var(--gold); }
+.traits span { font-size: 0.9rem; color: var(--ink); }
