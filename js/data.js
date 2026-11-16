@@ -7,6 +7,8 @@ export const hero = {
   klass: 'Mechanical Engineering Systems',
   guild: 'University of Melbourne',
   realm: 'Melbourne, VIC',
+  // two lines for employers: the top of the Character panel and of the CV
+  summary: 'Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software, from wiring and commissioning HVAC hardware to anomaly-detection models and live web apps.',
   seeking: 'Open to learning opportunities: a chance to work alongside engineers, learn how real systems are built, and be useful while I do it.',
   updated: 'November 2026', // shown on the CV view; change it when you update this file
   year: 1,
@@ -40,6 +42,7 @@ export const hero = {
 export const quests = [
   {
     name: 'Totex Energy',
+    experience: true, // paid work: listed under Experience, apart from the projects
     kind: 'Main Quest',
     plain: 'Internship',
     role: 'Engineering Intern · energy startup · Canberra',
@@ -162,7 +165,7 @@ export const quests = [
   },
 ];
 
-// rank: 1 Novice · 2 Adept · 3 Seasoned
+// rank: 1 Novice · 2 Adept · 3 Seasoned (Novice skills show as "Familiar with" on the CV)
 // used: where the skill was put to work — names of quests or pursuits; the Skills panel links to them
 export const skillTree = [
   {
@@ -217,7 +220,7 @@ export const trophies = [
   { name: 'McKinsey Forward', detail: 'McKinsey & Company professional development program', when: '2025', tier: 'gold' },
   { name: 'Silver Tongue', plain: 'Debating', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
   { name: 'Six Hackathons', plain: 'Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
-  { name: 'Sohaib the Great', plain: 'Leavers hoodie', detail: 'Olchfa School leavers hoodie — number 23', when: '2023', tier: 'silver' },
+  { name: 'Sohaib the Great', plain: 'Leavers hoodie', cv: false, detail: 'Olchfa School leavers hoodie — number 23', when: '2023', tier: 'silver' },
   // medalLogo: put the official logo file in assets/logos and name it here (e.g. 'dofe.png') to show it on the 3D medal
   { name: 'Duke of Edinburgh', detail: 'Bronze Award', when: '2023', tier: 'bronze', medalLogo: 'dofe.webp' },
   { name: 'Way of the Empty Hand', plain: 'Karate', detail: 'Multiple regional karate medals', when: '', tier: 'gold' },
@@ -310,6 +313,7 @@ export const guilds = [
     name: 'CISSA',
     logo: 'cissa.svg',
     role: 'Codebrew hackathon',
+    cv: false, // the same event as the Sirius project, so the CV lists it once
     place: 'University of Melbourne',
     when: '2026',
     detail: 'Built Sirius — a live 3D star map — in 60 hours at CISSA\'s Codebrew, leading the backend in a team of three.',

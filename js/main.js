@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=34';
-import { map as MAP } from './worldmap.js?v=34';
+import * as D from './data.js?v=35';
+import { map as MAP } from './worldmap.js?v=35';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=34`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=35`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -793,7 +793,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=34`;
+  img.src = `assets/logos/${file}?v=35`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -925,7 +925,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=34`;
+    img.src = `assets/logos/${logo}?v=35`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1394,8 +1394,39 @@ const attributesSection = () => {
     <dl class="r-list">${A.map((a) => `<dt><abbr>${esc(a.key)}</abbr> ${esc(a.label)}</dt><dd>${esc(a.note)}</dd>`).join('')}</dl></section>`;
 };
 
+// The Quests panel lists paid work apart from projects, so an employer sees the job first.
+const questGroup = (title, list, first) => (list.length ? `<section class="q-group"><h3>${title}</h3>${list.map((q, i) => `
+      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 && first === 0 ? ' open' : ''}>
+        <summary>
+          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
+          <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
+          <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
+        </summary>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=35" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+          <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
+          ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
+          <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
+          ${q.links ? `<p class="q-links">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
+        </div>
+      </details>`).join('')}</section>` : '');
+
+// The first thing on the Character panel: who I am in two lines, for someone hiring.
+function glance() {
+  const job = D.quests.find((q) => q.experience), study = D.academies[0], mail = D.email.join('@');
+  return `<div class="glance">
+    <p class="glance-sum">${esc(D.hero.summary)}</p>
+    <dl>
+      <dt>Studying</dt><dd>${esc(study.what)}, ${esc(study.name)} <span>${esc(study.when)}</span></dd>
+      ${job ? `<dt>Experience</dt><dd>${esc(job.role.split(' · ')[0])}, ${esc(job.name)} <span>${esc(job.when)}</span></dd>` : ''}
+      <dt>Looking for</dt><dd>Learning opportunities: internships and placements</dd>
+    </dl>
+    <p class="glance-actions"><a href="mailto:${esc(mail)}">Email me</a><button type="button" data-open-summary>View CV</button><button type="button" data-go="quests">See my work</button></p>
+  </div>`;
+}
+
 const panels = {
   hero: (r) => `${head(r, D.hero.title)}
+    ${glance()}
     <p class="lore">${esc(D.hero.lore)}</p>
     <dl class="meta">
       <dt>Class</dt><dd>${esc(D.hero.klass)}</dd>
@@ -1409,20 +1440,8 @@ const panels = {
   quests: (r) => `${head(r, 'Quest Log')}
     <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
     ${motto(D.mottos.quests)}
-    <section style="margin-top:16px">${D.quests.map((q, i) => `
-      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 ? ' open' : ''}>
-        <summary>
-          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
-          <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
-          <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
-        </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=34" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
-          <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
-          ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
-          <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
-          ${q.links ? `<p class="q-links">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
-        </div>
-      </details>`).join('')}</section>`,
+    ${questGroup('Experience', D.quests.filter((q) => q.experience), 0)}
+    ${questGroup('Projects', D.quests.filter((q) => !q.experience), 1)}`,
 
   skills: (r) => `${head(r, 'Skill Tree')}
     <blockquote class="verse abqar"><p lang="ar" dir="rtl"><b>${esc(D.folklore.abqar.ar[0])}</b><br>${esc(D.folklore.abqar.ar[1])}</p><p>${esc(D.folklore.abqar.en)}</p></blockquote>
@@ -1453,12 +1472,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=34" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=35" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=34" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=35" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=34" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=35" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
