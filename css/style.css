@@ -353,17 +353,26 @@ body.no-webgl #title-screen, body.no-webgl #world { display: none; }
   *, *::before, *::after { animation: none !important; transition-duration: 0.01s !important; }
 }
 
+@page { margin: 13mm 14mm; }
 @media print {
   html, body { height: auto; overflow: visible; background: #fff; }
   body > *:not(#summary) { display: none !important; }
   #summary { position: static; display: block !important; overflow: visible; background: #fff; color: #111; padding: 0; }
-  #summary article { max-width: none; font-size: 10.5pt; line-height: 1.4; }
+  #summary article { max-width: none; font-size: 10pt; line-height: 1.33; }
   .s-bar { display: none; }
   #summary h1 { margin-top: 0; font-size: 22pt; }
-  #summary h2 { color: #111; border-color: #999; margin: 16pt 0 6pt; font-size: 10pt; }
+  #summary h2 { color: #111; border-color: #999; margin: 11pt 0 5pt; padding-bottom: 2pt; font-size: 10pt; }
+  #summary ul { margin-top: 2pt; }
+  #summary li { margin-bottom: 1pt; }
+  #summary p + p { margin-top: 4pt; }
+  .s-item { margin-bottom: 6pt !important; }
   .s-role, #summary a { color: #111; }
   #summary h3 span, .s-when, .s-sub, .s-flow { color: #444; }
   .s-item { margin-bottom: 9pt; break-inside: avoid; }
+  /* plain text for CV-parsing software: no spaced-out headings, no Arabic name, no logo row */
+  #summary h2 { letter-spacing: 0.04em; break-after: avoid; }
+  .s-ar, .s-logos { display: none !important; }
+  .s-updated { margin-top: 12pt; }
 }
 
 /* ---------- quest links and one-time hints ---------- */
@@ -405,4 +414,21 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
   .radar { width: min(250px, 100%); }
   .r-list { grid-template-columns: 1fr; gap: 0; }
   .r-list dd { margin-bottom: 8px; }
+}
+
+/* ---------- at a glance (Character panel) and quest groups ---------- */
+.glance { margin: 14px 0 16px; padding: 14px 16px; border: 1px solid var(--line); border-left: 3px solid var(--gold); background: rgba(255, 255, 255, 0.04); }
+.glance-sum { font-size: 1rem; line-height: 1.5; color: var(--ink); }
+.glance dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; margin-top: 10px; font-size: 0.9rem; }
+.glance dt { font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); padding-top: 3px; }
+.glance dd span { color: var(--dim); margin-left: 4px; font-size: 0.84rem; }
+.glance-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.glance-actions a, .glance-actions button { font: inherit; font-family: var(--display); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
+  color: var(--gold); background: none; border: 1px solid var(--line); padding: 0.55em 1em; cursor: pointer; }
+.glance-actions a { color: #1a1206; background: var(--gold); border-color: var(--gold); }
+.glance-actions a:hover, .glance-actions button:hover, .glance-actions a:focus-visible, .glance-actions button:focus-visible { border-color: #fff; outline: none; }
+.q-group { margin-top: 16px; }
+@media (max-width: 520px) {
+  .glance dl { grid-template-columns: 1fr; gap: 0; }
+  .glance dd { margin-bottom: 8px; }
 }
