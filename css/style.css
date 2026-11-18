@@ -174,7 +174,9 @@ details.quest summary:hover { background: rgba(255, 255, 255, 0.04); }
 .skill:focus-visible, .skill.lit { border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); box-shadow: 0 0 14px color-mix(in srgb, var(--c) 35%, transparent); }
 .skill.lit .s-name { color: #fff; }
 .s-used { font-size: 0.74rem; color: var(--dim); line-height: 1.35; }
-.s-used button { font: inherit; color: var(--c); background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dotted currentColor; }
+.s-used button { font: inherit; color: var(--c); background: none; border: 0; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px;
+  /* 24px tall so each project is easy to tap on a phone (WCAG 2.5.8), without spreading the lines apart */
+  display: inline-block; min-height: 24px; padding: 5px 0; margin: -5px 0; }
 .s-used button:hover, .s-used button:focus-visible { color: #fff; }
 .school-hint { font-size: 0.76rem; font-style: italic; color: var(--dim); margin-top: 2px; }
 .flash { animation: flash 1.6s ease; }

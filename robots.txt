@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sogamer16.github.io/my-world/sitemap.xml
