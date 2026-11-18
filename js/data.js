@@ -9,6 +9,8 @@ export const hero = {
   realm: 'Melbourne, VIC',
   // two lines for employers: the top of the Character panel and of the CV
   summary: 'Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software, from wiring and commissioning HVAC hardware to anomaly-detection models and live web apps.',
+  // one line under the name on the title screen
+  pitch: 'I build sensor systems, robotics and software.',
   seeking: 'Open to learning opportunities: a chance to work alongside engineers, learn how real systems are built, and be useful while I do it.',
   updated: 'November 2026', // shown on the CV view; change it when you update this file
   year: 1,
@@ -59,6 +61,7 @@ export const quests = [
   },
   {
     name: 'AquaFlow',
+    areas: ['hardware'],
     featured: true, // marked "Start here" on the Quests panel
     flow: ['Flow sensors on each branch', 'Arduino branch node', 'Central server', 'Alert on flow drop'],
     kind: 'Epic Quest',
@@ -79,6 +82,7 @@ export const quests = [
   },
   {
     name: 'ABAAD Robotics',
+    areas: ['hardware', 'software'], // a robot and its software: shown under both
     flow: ['Build the robot', 'Code it in Arabic blocks', 'Train the AI overnight', 'Showcase'],
     kind: 'Epic Quest',
     plain: 'Ongoing project',
@@ -97,6 +101,7 @@ export const quests = [
   },
   {
     name: 'Sentinel',
+    areas: ['software'],
     featured: true, // marked "Start here" on the Quests panel
     flow: ['Command to field device', 'Check against thermal, vibration, humidity', 'Isolation Forest verdict', 'Execute or quarantine'],
     kind: 'Raid',
@@ -116,6 +121,7 @@ export const quests = [
   },
   {
     name: 'Sirius',
+    areas: ['software'],
     featured: true, // marked "Start here" on the Quests panel
     flow: ['A date in history', 'Distance light has travelled since', 'Stars at that distance', '3D sky map'],
     kind: 'Raid',
@@ -132,9 +138,11 @@ export const quests = [
       'Deployed live and presented as a finished product',
     ],
     loot: ['Full-stack', 'Backend', '3D', 'Team lead'],
+    links: [{ label: 'Code', href: 'https://github.com/sogamer16/codebrew2026' }],
   },
   {
     name: 'The Flow Trials',
+    areas: ['hardware'],
     kind: 'Side Quest',
     plain: 'Side project',
     role: 'CFD guided project · SimScale / Coursera',
@@ -147,22 +155,142 @@ export const quests = [
     ],
     loot: ['CFD', 'SimScale', 'Fluid mechanics'],
   },
+  // Games: each one is its own entry under the Games tab. `play` is itch.io's direct game address
+  // (on the game's itch.io page, right-click the game → open frame in new tab); it opens the game straight
+  // to its menu. It changes when a new build is uploaded, so update `play` after re-uploading a game.
   {
-    name: 'The Game Forge',
-    kind: 'Side Quest',
-    plain: 'Side project',
-    role: 'Game jams and small games · C#',
-    when: '2025 – 2026',
+    name: 'Chimera Ants',
+    areas: ['games'],
+    award: "People's Choice",
+    kind: 'Raid',
+    plain: 'Game jam',
+    role: 'First-person action game · University of Melbourne GMC Game Jam 2026',
+    when: '2026',
     status: 'Complete',
-    summary: 'Games built for the fun of it and against the clock.',
+    summary: 'You wake up inside the chimera ant that ate a scientist, with his memories behind your eyes, four floors above a Queen who molts at dawn. A fast shooter inspired by Doom.',
     objectives: [
-      'Game Jam 2026 entry on the theme of ecosystems',
-      'Creep Crawlers — built in C#',
-      'Much Ado About Nothing — Shakespeare retold as a 2D game',
-      'Turbo Bros: Overdrive — game design',
+      "Won People's Choice at the University of Melbourne GMC Game Jam 2026",
+      'Eat what you kill, wear its power: what you defeat becomes your ability',
+      'Plays in the browser',
     ],
-    loot: ['C#', 'Game design', 'Game jams'],
+    loot: ['Game design', 'Action', 'Game jams'],
+    play: 'https://html-classic.itch.zone/html/18668009/index.html',
+    links: [{ label: 'itch.io page', href: 'https://sogamer16.itch.io/chimera-ants' }],
   },
+  {
+    name: 'Creep Crawlers',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game',
+    role: 'Action game · C#',
+    when: '2026',
+    status: 'Complete',
+    summary: 'A Doom-style shooter in an ant nest: hunt the ants and take their power-ups.',
+    objectives: [
+      'Kill ants to take their power-ups',
+      'Built in C#',
+    ],
+    loot: ['C#', 'Game design', 'Action'],
+  },
+  {
+    name: 'Riyma',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game jam · host',
+    role: 'Strategy game · SSAM Game Jam, which I hosted',
+    when: '2026',
+    status: 'Complete',
+    summary: 'A strategy game set in pre-Islamic Arabia. Historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played, but they shape how the game unfolds.',
+    objectives: [
+      'My entry to the SSAM Game Jam, which I hosted with a game-making workshop',
+      'Helped three students build and submit their own games',
+      'Set in pre-Islamic Arabia, with historical figures who steer the story',
+    ],
+    loot: ['Game design', 'Strategy', 'Workshop host'],
+    play: 'https://html-classic.itch.zone/html/19296473/index.html',
+    links: [{ label: 'itch.io page', href: 'https://sogamer16.itch.io/riyma' }],
+  },
+  {
+    name: 'JarBound',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game jam',
+    role: 'Card-based ecosystem strategy · Click & Claw Game Jam 2026 · with Abdullah',
+    when: '2026',
+    status: 'Complete',
+    summary: 'Keep a tiny living world in a glass jar alive by playing cards that change its fish, snails, algae, light and nitrates before it collapses.',
+    objectives: [
+      'A rolling three-card hand: play one card a day, then draw a replacement',
+      'Ecosystem simulation with reproduction, starvation, algae blooms and collapse',
+      'A 3D glass jar with water, gravel, plants and bubbles',
+    ],
+    loot: ['Unity', 'C#', 'Simulation', 'Game design'],
+    play: 'https://html-classic.itch.zone/html/16823019/game6/index.html',
+    links: [
+      { label: 'Code', href: 'https://github.com/sogamer16/gamejam-2026-ecosystem' },
+      { label: 'itch.io page', href: 'https://sogamer16.itch.io/jarbound' },
+    ],
+  },
+  {
+    name: 'Nuclear Robot',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game jam',
+    role: 'Team of four programmers · CISSA × UMGMC game jam',
+    when: '2026',
+    status: 'Complete',
+    summary: 'Keep a reactor from overheating: charge and send batteries, work the coolant and keep the heat down.',
+    objectives: [
+      'Built in a jam with three other programmers',
+      'Made in Unity',
+    ],
+    loot: ['Unity', 'Teamwork', 'Game jams'],
+    play: 'https://html-classic.itch.zone/html/13048570/index.html',
+    links: [{ label: 'itch.io page', href: 'https://sogamer16.itch.io/nuclear-robot-four-programmers-in-a-jam' }],
+  },
+  {
+    name: 'Much Ado About Nothing',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game',
+    role: "A Benedick's Tale · narrative stealth game · Unity",
+    when: '2025',
+    status: 'Complete',
+    summary: "Shakespeare's eavesdropping scene as a playable stealth game: you are Benedick, creeping through a garden of patrolling friends to overhear a conversation.",
+    objectives: [
+      'Don Pedro, Claudio and Leonato each patrol with their own detection pattern',
+      "How well you stay hidden decides Beatrice's reaction: several endings",
+      'Branching dialogue when you confront Beatrice',
+    ],
+    loot: ['Unity', 'C#', 'Narrative design'],
+    play: 'https://html-classic.itch.zone/html/15430996/New%20folder%20(2)/index.html',
+    links: [
+      { label: 'Code', href: 'https://github.com/sogamer16/game-2d-lit' },
+      { label: 'itch.io page', href: 'https://sogamer16.itch.io/proof-much-ado-about-nothing' },
+    ],
+  },
+  {
+    name: 'Saudi National Day VR Museum',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'VR project',
+    role: 'Virtual-reality museum · Saudi National Day',
+    when: '',
+    status: 'Complete',
+    summary: 'A virtual-reality museum for Saudi National Day, built in three days.',
+    objectives: [
+      'Built in three days',
+      'Coming to itch.io',
+    ],
+    loot: ['VR', '3D', 'Rapid prototyping'],
+  },
+];
+
+// The Projects realm splits into three islets; each project lists the ones it belongs to in `areas`.
+export const areas = [
+  { id: 'hardware', name: 'Hardware', fx: 'The Workshop', sub: 'Sensors, robots, HVAC and fluids', color: '#f4b860' },
+  { id: 'software', name: 'Software', fx: 'The Observatory', sub: 'Machine learning, web and security', color: '#7cc4ff' },
+  { id: 'games', name: 'Games', fx: 'The Arcade', sub: 'Game jams and games you can play', color: '#ff7ad9' },
 ];
 
 // rank: 1 Novice · 2 Adept · 3 Seasoned (Novice skills show as "Familiar with" on the CV)
@@ -176,7 +304,7 @@ export const skillTree = [
       { name: 'Python', rank: 3, used: ['Sentinel'] },
       { name: 'C / C++', rank: 3, used: ['AquaFlow'] },
       { name: 'JavaScript', rank: 2, used: ['ABAAD Robotics'] },
-      { name: 'C#', rank: 2, used: ['The Game Forge'] },
+      { name: 'C#', rank: 2, used: ['JarBound', 'Creep Crawlers'] },
       { name: 'Bash', rank: 2 },
       { name: 'Linux / WSL', rank: 2, used: ['Totex Energy'] },
       { name: 'Git / GitHub', rank: 2 },
@@ -219,6 +347,7 @@ export const rankNames = ['', 'Novice', 'Adept', 'Seasoned'];
 export const trophies = [
   { name: 'McKinsey Forward', detail: 'McKinsey & Company professional development program', when: '2025', tier: 'gold' },
   { name: 'Silver Tongue', plain: 'Debating', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
+  { name: 'Crowd Favourite', plain: "People's Choice", detail: "University of Melbourne GMC Game Jam 2026, for Chimera Ants", when: '2026', tier: 'gold' },
   { name: 'Six Hackathons', plain: 'Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
   { name: 'Sohaib the Great', plain: 'Leavers hoodie', cv: false, detail: 'Olchfa School leavers hoodie — number 23', when: '2023', tier: 'silver' },
   // medalLogo: put the official logo file in assets/logos and name it here (e.g. 'dofe.png') to show it on the 3D medal
@@ -284,7 +413,7 @@ export const pursuits = [
     name: 'Making games',
     glyph: '♞',
     flag: 'For Indianapolis, where I lived when I was very small',
-    detail: 'Game jams and small C# games — the fastest way to learn what "finished" means.',
+    detail: 'Game jams and small Unity and C# games, five of them playable on itch.io — the fastest way to learn what "finished" means.',
   },
   {
     name: 'Debating',
@@ -307,7 +436,7 @@ export const guilds = [
     place: 'Melbourne',
     when: '2025',
     detail:
-      'Planned and delivered events for 200+ attendees — volunteers, logistics, stakeholders — and co-organised a student hackathon from the ground up.',
+      'Planned and delivered events for 200+ attendees — volunteers, logistics, stakeholders — and co-organised a student hackathon from the ground up. Hosted the SSAM Game Jam with a game-making workshop: made my own entry, Riyma, and helped three students build and submit theirs.',
   },
   {
     name: 'CISSA',
@@ -349,6 +478,7 @@ export const email = ['sogamer16', 'gmail.com'];
 export const portals = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Message me here' },
   { name: 'GitHub', href: 'https://github.com/sogamer16', hint: 'See the code' },
+  { name: 'itch.io', href: 'https://sogamer16.itch.io/', hint: 'Play my games' },
 ];
 
 // The three places that shaped me; each island belongs to one of them.
@@ -386,12 +516,13 @@ export const lands = {
 };
 
 // Ordered as the journey runs: Makkah, then Swansea, then Melbourne.
+// name is the fantasy name (on the island); short is the plain hotbar label; heading tops the panel.
 export const realms = [
-  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
-  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
-  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
-  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'Wadi Abqar', placeAr: 'وادي عبقر', color: '#7cc4ff' },
-  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
-  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
-  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
+  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', short: 'About', heading: 'About me', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
+  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', short: 'Awards', heading: 'Awards & certifications', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
+  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', short: 'Projects', heading: 'Experience & projects', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
+  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', short: 'Skills', heading: 'Skills', place: 'Wadi Abqar', placeAr: 'وادي عبقر', color: '#7cc4ff' },
+  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', short: 'Clubs', heading: 'Clubs, leadership & education', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
+  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', short: 'Interests', heading: 'Interests', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
+  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', short: 'Contact', heading: 'Contact', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
 ];

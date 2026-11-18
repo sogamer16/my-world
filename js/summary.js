@@ -1,16 +1,20 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=35';
+import * as D from './data.js?v=49';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
+// a project line: plain text, or a game whose name opens it to play
+const objective = (o) => (typeof o === 'string' ? esc(o)
+  : `<a class="play" href="${esc(o.play)}" target="_blank" rel="noopener" title="Play ${esc(o.game)} in your browser">▶ ${esc(o.game)}</a> ${esc(o.text)}`);
+
 
 const job = (q) => `
       <section class="s-item">
         <h3>${esc(q.name)} <span>${esc(q.plain)} · ${esc(q.when)}</span></h3>
         <p class="s-sub">${esc(q.role)}</p>
         <p>${esc(q.summary)}</p>
-        <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
+        <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
         ${q.links ? `<p class="s-flow">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(' · ')}</p>` : ''}
       </section>`;
 const keep = (x) => x.cv !== false;
@@ -28,7 +32,7 @@ el.innerHTML = `
       <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.summary)}</p>
       <p class="s-seeking">${esc(D.hero.seeking)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=35" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=49" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Education</h2>
@@ -38,7 +42,13 @@ el.innerHTML = `
     ${D.quests.filter((q) => q.experience).map(job).join('')}
 
     <h2>Projects</h2>
-    ${D.quests.filter((q) => !q.experience).map(job).join('')}
+    ${D.areas.filter((a) => a.id !== 'games').map((a) => {
+      // a project in two areas (ABAAD) is listed once, under the first
+      const list = D.quests.filter((q) => (q.areas || [])[0] === a.id);
+      return list.length ? `<p class="s-group">${esc(a.name)}</p>${list.map(job).join('')}` : '';
+    }).join('')}
+    <p class="s-group">Games</p>
+    <ul class="s-games">${D.quests.filter((q) => (q.areas || []).includes('games')).map((q) => `<li><strong>${q.play ? `<a class="play" href="${esc(q.play)}" target="_blank" rel="noopener">${esc(q.name)}</a>` : esc(q.name)}</strong>${q.award ? ` (${esc(q.award)})` : ''} — ${esc(q.role)}${q.when ? `, ${esc(q.when)}` : ''}</li>`).join('')}</ul>
 
     <h2>Skills</h2>
     ${D.skillTree.map((b) => `<p><strong>${esc(b.sub)}:</strong> ${b.skills.filter((s) => s.rank > 1).map((s) => esc(s.name)).join(', ')}</p>`).join('')}

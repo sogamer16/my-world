@@ -14,19 +14,19 @@
 <meta property="og:image" content="https://sogamer16.github.io/my-world/assets/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Sohaib Qutub","url":"https://sogamer16.github.io/my-world/","description":"Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software.","alumniOf":{"@type":"CollegeOrUniversity","name":"University of Melbourne"},"sameAs":["https://www.linkedin.com/in/sohaibqutub","https://github.com/sogamer16"]}
+{"@context":"https://schema.org","@type":"Person","name":"Sohaib Qutub","url":"https://sogamer16.github.io/my-world/","description":"Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software.","alumniOf":{"@type":"CollegeOrUniversity","name":"University of Melbourne"},"sameAs":["https://www.linkedin.com/in/sohaibqutub","https://github.com/sogamer16","https://sogamer16.itch.io/"]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Graduate&family=Oswald:wght@500;600&family=Cinzel:wght@500;700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=35">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Cinzel:wght@500;700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=49">
 <script type="importmap">
 { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
 </script>
 <link rel="modulepreload" href="vendor/three/three.module.js">
 <link rel="modulepreload" href="vendor/three/addons/loaders/GLTFLoader.js">
-<link rel="modulepreload" href="js/worldmap.js?v=35">
-<link rel="modulepreload" href="js/data.js?v=35">
+<link rel="modulepreload" href="js/worldmap.js?v=49">
+<link rel="modulepreload" href="js/data.js?v=49">
 </head>
 <body>
 <canvas id="world" aria-hidden="true"></canvas>
@@ -37,13 +37,16 @@
     <p class="greet"><span lang="ar">أهلاً</span><i>·</i>Hello<i>·</i><span lang="cy">Shwmae</span></p>
     <p class="ar-name" lang="ar" dir="rtl">صهيب قطب</p>
     <h1>Sohaib Qutub</h1>
+    <p class="plain-role">Mechanical Engineering Systems student · University of Melbourne</p>
+    <p class="pitch" id="pitch"></p>
+    <div class="title-actions">
+      <button id="start" type="button">Explore the world</button>
+      <button id="cv-start" class="ghost" type="button" data-open-summary>View CV &amp; projects</button>
+    </div>
+    <p class="contact-strip" id="contact-strip"></p>
     <div class="geo-rule" aria-hidden="true"></div>
     <p class="subtitle">Artificer of Flow &amp; Circuit</p>
-    <p class="plain-role">Mechanical Engineering Systems student · University of Melbourne</p>
-    <p class="eyebrow">One story in seven chapters</p>
-    <p class="eyebrow route">Makkah <i>→</i> Swansea <i>→</i> Melbourne</p>
-    <button id="start" type="button">Begin Adventure</button>
-    <button class="plain-link" type="button" data-open-summary>Or read the plain one-page version</button>
+    <p class="eyebrow route">Makkah <i>→</i> Swansea <i>→</i> Melbourne <i>·</i> seven chapters</p>
     <p class="hint">Scroll, swipe or press 1–7 to travel</p>
     <p class="juha" id="juha" aria-live="polite"></p>
   </div>
@@ -59,7 +62,10 @@
   </div>
   <div class="hud-actions">
     <button class="plain-btn" type="button" data-open-summary title="The plain one-page version: print it or save it as a PDF">CV</button>
-    <button class="plain-btn" type="button" data-go="portal" title="LinkedIn and GitHub">Contact</button>
+    <div class="contact-menu">
+      <button class="plain-btn" id="contact-btn" type="button" aria-expanded="false" aria-controls="contact-pop">Contact</button>
+      <div id="contact-pop" hidden></div>
+    </div>
   </div>
   <div class="xp" title="Degree progress">
     <span>Year <b id="xp-year"></b> · Bachelor of Design</span>
@@ -77,7 +83,7 @@
 <p id="hint" class="hud" role="status" aria-live="polite"></p>
 
 <noscript><p style="position:relative;z-index:50;padding:2rem;color:#fff">Sohaib Qutub — Mechanical Engineering Systems student, University of Melbourne. This site needs JavaScript. Find me on <a style="color:#e3b866" href="https://www.linkedin.com/in/sohaibqutub">LinkedIn</a> or <a style="color:#e3b866" href="https://github.com/sogamer16">GitHub</a>.</p></noscript>
-<script type="module" src="js/summary.js?v=35"></script>
-<script type="module" src="js/main.js?v=35"></script>
+<script type="module" src="js/summary.js?v=49"></script>
+<script type="module" src="js/main.js?v=49"></script>
 </body>
 </html>

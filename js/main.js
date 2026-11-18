@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=35';
-import { map as MAP } from './worldmap.js?v=35';
+import * as D from './data.js?v=49';
+import { map as MAP } from './worldmap.js?v=49';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=35`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=49`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -533,8 +533,9 @@ const build = {
   },
 
   quests(g, color) {
-    D.quests.forEach((q, i) => {
-      const a = THREE.MathUtils.mapLinear(i, 0, D.quests.length - 1, -1.5, 1.5) + Math.PI / 2;
+    const pillared = D.quests.filter((q) => !(q.areas || []).includes('games')); // games have the Arcade
+    pillared.forEach((q, i) => {
+      const a = THREE.MathUtils.mapLinear(i, 0, pillared.length - 1, -1.5, 1.5) + Math.PI / 2;
       const h = 2.8 + (i % 2) * 0.9 + (i === 0 ? 1.2 : 0);
       const m = new THREE.Mesh(jitter(new THREE.BoxGeometry(0.95, h, 0.6, 2, 4, 2), 0.16), stone(0x8a8277));
       m.castShadow = true; m.receiveShadow = true;
@@ -779,21 +780,30 @@ const build = {
 
 /* ---------- logos, signs and banners ---------- */
 // Draws an organisation's logo onto a canvas texture once it has loaded.
-function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, onReady } = {}) {
+// Oswald and Graduate are painted only into two textures (the CISSA banner and the hoodie print),
+// so they load here, after the page, instead of holding up the first paint.
+let texFonts = null;
+const textureFonts = () => texFonts || (texFonts = new Promise((done) => {
+  const l = document.createElement('link'); l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Graduate&family=Oswald:wght@500;600&display=swap';
+  l.onload = () => Promise.all(['600px Graduate', '600 112px Oswald', '500 40px Oswald'].map((f) => document.fonts.load(f))).then(done, done);
+  l.onerror = done; document.head.append(l);
+}));
+function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, onReady, fonts } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d');
   x.fillStyle = bg; x.fillRect(0, 0, w, h);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   const img = new Image();
-  img.onload = () => {
+  img.onload = () => Promise.resolve(fonts).then(() => {
     const [bx, by, bw, bh] = box || [w * pad, h * pad, w * (1 - 2 * pad), h * (1 - 2 * pad)];
     const iw = img.naturalWidth || 300, ih = img.naturalHeight || 150, k = Math.min(bw / iw, bh / ih);
     x.drawImage(img, bx + (bw - iw * k) / 2, by + (bh - ih * k) / 2, iw * k, ih * k);
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
     if (onReady) onReady();
-  };
-  img.src = `assets/logos/${file}?v=35`;
+  });
+  img.src = `assets/logos/${file}?v=49`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -819,7 +829,7 @@ function ssamBanner() {
 function rollup(g, { x, z, ry = 0 }) {
   const b = new THREE.Group();
   const foot = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.09, 0.28), flat(0x2a2a2e)); foot.position.y = 0.05;
-  const tex = logoTexture('cissa.svg', { w: 512, h: 1280, bg: '#0b0b0e', box: [96, 150, 320, 320], extra: (c, w) => {
+  const tex = logoTexture('cissa.svg', { w: 512, h: 1280, bg: '#0b0b0e', box: [96, 150, 320, 320], fonts: textureFonts(), extra: (c, w) => {
     c.textAlign = 'center'; c.fillStyle = '#ffffff'; c.font = '600 132px Oswald, Arial, sans-serif'; c.fillText('CISSA', w / 2, 640);
     c.fillStyle = '#4fc3dc'; c.font = '500 40px Oswald, Arial, sans-serif'; c.fillText('COMPUTING AND INFORMATION', w / 2, 730); c.fillText('SYSTEMS STUDENT ASSOCIATION', w / 2, 782);
     c.fillStyle = '#ffffff'; c.font = '600 44px Oswald, Arial, sans-serif'; c.fillText('CODEBREW 2026', w / 2, 980);
@@ -858,7 +868,7 @@ function hoodiePrint() {
     tex.needsUpdate = true;
   };
   draw();
-  Promise.all([document.fonts.load('600px Graduate'), document.fonts.load('600 112px Oswald')]).then(draw).catch(() => {});
+  textureFonts().then(draw);
   return tex;
 }
 function applyHoodiePrint(holder, g) {
@@ -925,7 +935,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=35`;
+    img.src = `assets/logos/${logo}?v=49`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1242,6 +1252,368 @@ function rain(g) {
   });
 }
 
+
+/* ---------- the Projects islets: Hardware, Software and Games around the Pillars of Iram ---------- */
+// In the hub's own frame: +z faces the camera, x runs along the ring. The islets sit behind and to the sides,
+// clear of the stepping stones, and are joined by rope bridges.
+// islets are small islands, scaled down; the Arcade holds the most, so it is the biggest
+const isletScale = { hardware: 0.7, software: 0.62, games: 0.95 };
+const isletAt = {
+  hardware: new THREE.Vector3(-11, 1.6, -10),
+  software: new THREE.Vector3(-2, 4.8, -19),
+  games: new THREE.Vector3(12.5, 1.0, -12.5),
+};
+const isletGroups = {}; // area id → group, for the camera and the landmarks
+// where each project stands on its islet, in islet units (radius about 5.5)
+function slotsFor(n) {
+  if (n === 1) return [[0, 0.8]];
+  if (n <= 4) return Array.from({ length: n }, (_, k) => { // an arc across the front half
+    const a = Math.PI * (0.15 + 0.7 * (k / (n - 1)));
+    return [-Math.cos(a) * 3.4, Math.sin(a) * 2.2 + 0.3];
+  });
+  // more than four: one in the middle, the rest in a ring, the first of them at the front
+  return [[0, 0], ...Array.from({ length: n - 1 }, (_, k) => {
+    const a = Math.PI / 2 + (k / (n - 1)) * TAU;
+    return [Math.cos(a) * 3.7, Math.sin(a) * 3.7];
+  })];
+}
+// which projects stand on which islet: ABAAD is on the Workshop, and its robot crosses to the Observatory
+const isletProjects = (id) => D.quests.filter((q) => (id === 'hardware' && q.experience) || (q.areas || [])[0] === id);
+function isletSign(text, sub, color) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 160;
+  const x = c.getContext('2d');
+  x.fillStyle = 'rgba(14, 11, 28, 0.82)'; x.fillRect(0, 0, 512, 160);
+  x.strokeStyle = color; x.lineWidth = 6; x.strokeRect(6, 6, 500, 148);
+  x.textAlign = 'center'; x.fillStyle = color; x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(text.toUpperCase(), 256, 72);
+  x.fillStyle = '#efe6d2'; x.font = 'italic 36px Spectral, Georgia, serif'; x.fillText(sub, 256, 124);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(4.2, 1.31, 1);
+  document.fonts.ready.then(() => { // redraw once the fonts are in
+    x.clearRect(0, 0, 512, 160); x.fillStyle = 'rgba(14, 11, 28, 0.82)'; x.fillRect(0, 0, 512, 160);
+    x.strokeRect(6, 6, 500, 148); x.fillStyle = color; x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(text.toUpperCase(), 256, 72);
+    x.fillStyle = '#efe6d2'; x.font = 'italic 36px Spectral, Georgia, serif'; x.fillText(sub, 256, 124); tex.needsUpdate = true;
+  });
+  return sp;
+}
+// a rope bridge: planks hanging between two points, with a rope either side
+function ropeBridge(g, a, b, sag = 0.9) {
+  const n = Math.max(8, Math.round(a.distanceTo(b) / 0.42)), dir = b.clone().sub(a), side = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+  const at = (t, lift = 0) => a.clone().lerp(b, t).add(new THREE.Vector3(0, -Math.sin(t * Math.PI) * sag + lift, 0));
+  const plank = new THREE.InstancedMesh(new THREE.BoxGeometry(0.34, 0.07, 1.1), flat(0x7a5232), n - 1);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), tmp = new THREE.Object3D();
+  for (let k = 1; k < n; k++) {
+    const t = k / n, p = at(t), p2 = at(t + 0.01);
+    tmp.position.copy(p); tmp.lookAt(p.clone().add(side)); tmp.rotateZ(Math.atan2(p2.y - p.y, p2.clone().setY(0).distanceTo(p.clone().setY(0))) * 0);
+    tmp.updateMatrix(); plank.setMatrixAt(k - 1, tmp.matrix);
+  }
+  plank.castShadow = true; g.add(plank);
+  [-0.55, 0.55].forEach((o) => {
+    const pts = Array.from({ length: 13 }, (_, k) => at(k / 12, 0.55).addScaledVector(side, o));
+    const rope = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.03, 4), flat(0xc9a66b));
+    g.add(rope);
+    [0, 1].forEach((e) => { // posts at each end
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.9, 5), flat(0x5a3b22));
+      post.position.copy((e ? b : a).clone().addScaledVector(side, o)).add(new THREE.Vector3(0, 0.3, 0)); g.add(post);
+    });
+  });
+}
+
+/* ---------- a landmark for each project on its islet ---------- */
+// Each builder gets the project's spot (a group on the islet, in islet units; +z faces the camera).
+// Generated models load through spotProp; everything else is drawn here. Animations respect reduced motion.
+function spotProp(spot, name, opts = {}) {
+  prop(spot, name, { ...opts, onLoad: (h) => {
+    spot.traverse((o) => { o.userData.project = spot.userData.project; o.userData.area = spot.userData.area; o.userData.realm = spot.userData.realm; });
+    if (opts.onLoad) opts.onLoad(h);
+  } });
+}
+const mesh = (geo, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; return m; };
+const see = (color, opacity) => new THREE.MeshStandardMaterial({ color, transparent: true, opacity, roughness: 0.15, metalness: 0.1, depthWrite: false, side: THREE.DoubleSide });
+function textTex(lines, { w = 256, h = 128, bg = null, fg = '#efe6d2', font = '600 40px Spectral, Georgia, serif', dir = 'ltr' } = {}) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const draw = () => {
+    const x = c.getContext('2d'); x.clearRect(0, 0, w, h);
+    if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
+    x.fillStyle = fg; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = dir;
+    const fs = [].concat(font);
+    lines.forEach((t, k) => { x.font = fs[Math.min(k, fs.length - 1)]; x.fillText(t, w / 2, (h / (lines.length + 1)) * (k + 1)); });
+    tex.needsUpdate = true;
+  };
+  draw(); document.fonts.ready.then(draw);
+  return tex;
+}
+// a little blocky figure for the pixel stage: legs, body, head
+function voxelFigure(body, head = 0xe0b48a, k = 0.12) {
+  const f = new THREE.Group();
+  const cube = (c, x, y, sx = 1, sy = 1) => { const m = mesh(new THREE.BoxGeometry(k * sx, k * sy, k), flat(c)); m.position.set(x * k, y * k, 0); f.add(m); };
+  cube(0x3b2a1e, -0.5, 0.5); cube(0x3b2a1e, 0.5, 0.5); // legs
+  cube(body, 0, 1.75, 2, 1.5); cube(body, -1.25, 1.9, 0.5, 1.2); cube(body, 1.25, 1.9, 0.5, 1.2); // body and arms
+  cube(head, 0, 3.1, 1.2, 1.2); // head
+  return f;
+}
+// a soft round glow for star sprites
+const glowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+  const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.25, 'rgba(255,255,255,0.6)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+})();
+const landmarkOf = {
+  // a ruined station four floors deep, the chimera ant on its roof and a lone hunter at the door
+  'Chimera Ants'(spot) {
+    spotProp(spot, 'chimera-tower', { h: 4.4, onLoad: (h) => { h.scale.x *= 2; h.scale.z *= 2; } }); // the model is a thin shaft: give it some body
+    spotProp(spot, 'chimera-ant', { h: 1.2, y: 4.3, ry: 0.4 });
+    spotProp(spot, 'hunter', { h: 0.95, x: 0.9, z: 1.45, ry: Math.PI + 0.5 });
+    const hatch = mesh(new THREE.PlaneGeometry(0.5, 0.6), glow(0xff5a1f, 1.4), 0, 0.35, 1.02); spot.add(hatch);
+    tick.push((t) => { hatch.material.emissiveIntensity = 1.1 + Math.sin(t * 7) * 0.25 * (reduceMotion ? 0 : 1); });
+  },
+  // an ant nest: a mound, ants marching round it and power-ups hovering, waiting to be taken
+  'Creep Crawlers'(spot) {
+    const mound = mesh(jitter(new THREE.ConeGeometry(1.15, 1.1, 9, 3), 0.12), flat(0x7a5530), 0, 0.55, 0); spot.add(mound);
+    spot.add(mesh(new THREE.CircleGeometry(0.22, 10), flat(0x1a120c), 0, 0.42, 0.83));
+    spot.children.at(-1).rotation.x = -0.75;
+    const ants = Array.from({ length: 9 }, (_, k) => {
+      const a = new THREE.Group();
+      [0, 0.14, 0.27].forEach((dx, j) => a.add(mesh(new THREE.SphereGeometry(j === 1 ? 0.06 : 0.08, 6, 5), flat(0x1b1210), dx - 0.13, 0.08, 0)));
+      spot.add(a); return { a, r: 1.25 + (k % 3) * 0.12, speed: 0.35 + (k % 4) * 0.05, phase: (k / 9) * TAU };
+    });
+    const ups = [0xff4a4a, 0x56ff9a, 0x52d4ff].map((c, k) => { const o = mesh(new THREE.IcosahedronGeometry(0.17, 0), glow(c, 1.6), -0.6 + k * 0.6, 1.55, 0.2); spot.add(o); spin.push({ o, y: 1.2, x: 0.6 }); return o; });
+    tick.push((t) => {
+      const m = reduceMotion ? 0 : 1;
+      ants.forEach(({ a, r, speed, phase }) => { const ang = phase + t * speed * m; a.position.set(Math.cos(ang) * r, 0.02, Math.sin(ang) * r); a.rotation.y = -ang; });
+      ups.forEach((o, k) => { o.position.y = 1.55 + Math.sin(t * 1.6 + k * 2) * 0.12 * m; });
+    });
+  },
+  // نار القِرى, the fire of hospitality: a fire on the sand by a Bedouin tent, and stones for Antarah and Hatim
+  'Riyma'(spot) {
+    const dune = mesh(new THREE.SphereGeometry(1.6, 16, 8), flat(0xd9b77a), 0, -0.55, 0); dune.scale.set(1, 0.42, 0.9); spot.add(dune);
+    spotProp(spot, 'bedouin-tent', { w: 2.0, x: -0.25, z: -0.55, y: 0.05, ry: 0.15 });
+    [[-0.2, 0.3], [0.2, -0.3]].forEach(([r, o]) => { const log = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.7, 6), flat(0x4a2f1c), 0.75, 0.1, 0.85); log.rotation.set(Math.PI / 2, 0, r + o); spot.add(log); });
+    const flames = [0xffd34a, 0xff8a1f, 0xff4a1a].map((c, k) => { const f = mesh(new THREE.ConeGeometry(0.2 - k * 0.04, 0.6 - k * 0.1, 6), glow(c, 2), 0.75 + (k - 1) * 0.08, 0.38, 0.85); f.castShadow = false; spot.add(f); return f; });
+    tick.push((t) => { const m = reduceMotion ? 0 : 1; flames.forEach((f, k) => { const s = 1 + Math.sin(t * (9 + k * 3) + k) * 0.18 * m; f.scale.set(1, s, 1); }); });
+    [['عنترة', 'Antarah', -0.95], ['حاتم الطائي', 'Hatim al-Ta\'i', 1.55]].forEach(([ar, en, x]) => {
+      const tex = textTex([ar, en], { w: 160, h: 256, bg: '#8f7458', fg: '#2a1c10', font: ['700 40px "Aref Ruqaa", serif', 'italic 26px Spectral, serif'], dir: 'rtl' });
+      const st = mesh(new THREE.BoxGeometry(0.42, 1.05, 0.2), [flat(0x8f7458), flat(0x8f7458), flat(0x8f7458), flat(0x8f7458), new THREE.MeshStandardMaterial({ map: tex, roughness: 1 }), flat(0x8f7458)], x, 0.5, 0.35);
+      st.rotation.y = x < 0 ? 0.35 : -0.35; spot.add(st);
+    });
+  },
+  // a world in a glass jar: gravel, weed, fish, a snail and rising bubbles
+  'JarBound'(spot) {
+    const H = 1.8, R0 = 0.78;
+    spot.add(mesh(new THREE.CylinderGeometry(R0 * 1.02, R0 * 1.02, 0.08, 28), see(0xcfe8ff, 0.35), 0, 0.04, 0));
+    const water = mesh(new THREE.CylinderGeometry(R0 * 0.97, R0 * 0.97, H * 0.72, 28), see(0x3d8fd6, 0.32), 0, H * 0.36 + 0.08, 0); water.castShadow = false; spot.add(water);
+    const glass = mesh(new THREE.CylinderGeometry(R0, R0, H, 28, 1, true), see(0xdff2ff, 0.18), 0, H / 2 + 0.04, 0); glass.castShadow = false; spot.add(glass);
+    spot.add(mesh(new THREE.TorusGeometry(R0 * 0.82, 0.07, 6, 24), see(0xdff2ff, 0.4), 0, H + 0.04, 0)); spot.children.at(-1).rotation.x = Math.PI / 2;
+    spot.add(mesh(new THREE.CylinderGeometry(R0 * 0.72, R0 * 0.78, 0.22, 16), flat(0xb08355), 0, H + 0.16, 0)); // cork
+    const gravel = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(0.07, 0), flat(0xffffff), 60), m4 = new THREE.Matrix4();
+    for (let k = 0; k < 60; k++) { const a = hash3(k, 1, 7) * TAU, r = Math.sqrt(hash3(k, 2, 7)) * R0 * 0.88; m4.makeTranslation(Math.cos(a) * r, 0.12 + hash3(k, 3, 7) * 0.08, Math.sin(a) * r); gravel.setMatrixAt(k, m4); gravel.setColorAt(k, new THREE.Color().setHSL(0.08, 0.25, 0.4 + hash3(k, 4, 7) * 0.3)); }
+    spot.add(gravel);
+    const weeds = [[-0.35, -0.2], [0.3, -0.35], [0.05, 0.3]].map(([x, z], k) => { const w = mesh(new THREE.ConeGeometry(0.08, 0.7 + k * 0.15, 5), flat(0x2f9a4a), x, 0.5 + k * 0.07, z); spot.add(w); return w; });
+    const fish = [0xff8a2a, 0xffd23a, 0xff5a7a].map((c, k) => { const f = new THREE.Group(); const b = mesh(new THREE.SphereGeometry(0.1, 8, 6), flat(c)); b.scale.set(1.6, 1, 0.7); const tail = mesh(new THREE.ConeGeometry(0.07, 0.14, 4), flat(c), -0.2, 0, 0); tail.rotation.z = Math.PI / 2; f.add(b, tail); spot.add(f); return f; });
+    const snail = mesh(new THREE.TorusGeometry(0.07, 0.04, 6, 10), flat(0xc98c4a), R0 * 0.93, 0.6, 0.15); snail.rotation.y = Math.PI / 2; spot.add(snail);
+    const bubbles = Array.from({ length: 7 }, (_, k) => { const b = mesh(new THREE.SphereGeometry(0.035, 6, 4), see(0xffffff, 0.6), 0, 0, 0); b.castShadow = false; spot.add(b); return { b, x: (hash3(k, 9, 2) - 0.5) * 0.9, z: (hash3(k, 8, 2) - 0.5) * 0.9, sp: 0.25 + hash3(k, 7, 2) * 0.2, off: hash3(k, 6, 2) }; });
+    tick.push((t) => {
+      const m = reduceMotion ? 0 : 1;
+      fish.forEach((f, k) => { const a = t * (0.5 + k * 0.15) * m + k * 2.1, r = 0.38 + k * 0.08; f.position.set(Math.cos(a) * r, 0.65 + k * 0.22 + Math.sin(t * 1.3 + k) * 0.05 * m, Math.sin(a) * r); f.rotation.y = -a - Math.PI / 2; });
+      weeds.forEach((w, k) => { w.rotation.z = Math.sin(t * 1.2 + k) * 0.12 * m; });
+      bubbles.forEach((q) => { const y = ((t * q.sp + q.off) % 1) * m; q.b.position.set(q.x, 0.25 + y * 1.0, q.z); q.b.visible = m === 1; });
+      snail.position.y = 0.6 + Math.sin(t * 0.2) * 0.25 * m;
+    });
+  },
+  // a reactor running hot and a robot ferrying charged batteries to it from the charger
+  'Nuclear Robot'(spot) {
+    spotProp(spot, 'reactor', { h: 1.7, x: -0.55, z: -0.1 });
+    const ring = mesh(new THREE.TorusGeometry(0.85, 0.05, 6, 28), glow(0xff5a2a, 1.5), -0.55, 0.06, -0.1); ring.rotation.x = Math.PI / 2; spot.add(ring);
+    const pad = mesh(new THREE.BoxGeometry(0.55, 0.08, 0.55), glow(0x5aff8a, 0.9), 1.25, 0.04, 0.35); spot.add(pad);
+    let bot = null; spotProp(spot, 'battery-robot', { h: 0.7, x: 1.2, z: 0.35, ry: -Math.PI / 2, onLoad: (h) => { bot = h; } });
+    const hot = new THREE.Color(0xff3a1a), cool = new THREE.Color(0x3affb0);
+    tick.push((t) => {
+      const m = reduceMotion ? 0 : 1, u = (Math.sin(t * 0.5) + 1) / 2; // the robot shuttles; the reactor cools when it arrives
+      if (bot && m) { bot.position.x = THREE.MathUtils.lerp(1.2, 0.35, u); bot.rotation.y = Math.cos(t * 0.5) > 0 ? -Math.PI / 2 : Math.PI / 2; }
+      ring.material.emissive.copy(hot).lerp(cool, m ? u : 0.5); ring.material.color.copy(ring.material.emissive);
+    });
+  },
+  // Much Ado About Nothing on a little stage: a side-on, pixel-built garden; Benedick hides while three friends patrol
+  'Much Ado About Nothing'(spot) {
+    spot.add(mesh(new THREE.BoxGeometry(2.7, 0.4, 1.5), flat(0x5a3a22), 0, 0.2, 0));
+    const back = mesh(new THREE.PlaneGeometry(2.5, 1.5), new THREE.MeshStandardMaterial({ color: 0x8cc4e8, roughness: 1 }), 0, 1.15, -0.7); back.castShadow = false; spot.add(back);
+    [[-1.3, 1], [1.3, -1]].forEach(([x]) => spot.add(mesh(new THREE.BoxGeometry(0.22, 1.75, 0.3), flat(0x9e1b2a), x, 1.25, 0.55)));
+    spot.add(mesh(new THREE.BoxGeometry(2.8, 0.3, 0.3), flat(0x9e1b2a), 0, 2.05, 0.55));
+    spot.add(mesh(new THREE.BoxGeometry(2.9, 0.08, 0.34), glow(0xe3b866, 0.5), 0, 2.22, 0.55));
+    const v = 0.14, hedge = (x0, z, n, h = 3) => { for (let i = 0; i < n; i++) for (let j = 0; j < h - (i % 2); j++) spot.add(mesh(new THREE.BoxGeometry(v, v, v), flat(j === h - 1 ? 0x4caa4c : 0x2f7a35), x0 + i * v, 0.47 + j * v, z)); };
+    hedge(-1.05, -0.45, 15, 4); hedge(-0.95, 0.35, 5, 3); hedge(0.35, 0.35, 5, 3);
+    const ben = voxelFigure(0x2d5aa8); ben.scale.y = 0.75; ben.position.set(-0.55, 0.4, 0.15); spot.add(ben); // crouched behind the front hedge
+    const walkers = [[0xa8322d, -0.1], [0x7a3aa8, -0.25], [0xc9963f, 0.05]].map(([c, z], k) => {
+      const f = voxelFigure(c); f.position.set(0, 0.4, z); spot.add(f);
+      const cone = mesh(new THREE.ConeGeometry(0.28, 0.9, 3), see(0xfff19a, 0.28), 0, 0.85, 0); cone.rotation.z = -Math.PI / 2; cone.castShadow = false; f.add(cone); cone.position.x = 0.55;
+      return { f, cone, sp: 0.35 + k * 0.12, ph: k * 2 };
+    });
+    tick.push((t) => {
+      const m = reduceMotion ? 0 : 1;
+      walkers.forEach(({ f, cone, sp, ph }) => { const u = Math.sin(t * sp * m + ph); f.position.x = u * 0.95; const dir = Math.cos(t * sp * m + ph) >= 0 ? 1 : -1; cone.position.x = 0.55 * dir; cone.rotation.z = -Math.PI / 2 * dir; });
+    });
+  },
+  // a small gallery for Saudi National Day: a VR headset on a plinth under a green banner, opening soon
+  'Saudi National Day VR Museum'(spot) {
+    spot.add(mesh(new THREE.BoxGeometry(2.3, 0.16, 1.7), flat(0xf1ece2), 0, 0.08, 0));
+    [[-1, -0.7], [1, -0.7], [-1, 0.7], [1, 0.7]].forEach(([x, z]) => spot.add(mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.7, 8), flat(0xf1ece2), x, 0.95, z)));
+    spot.add(mesh(new THREE.BoxGeometry(2.4, 0.14, 1.8), flat(0xf1ece2), 0, 1.85, 0));
+    const banner = textTex(['اليوم الوطني', 'Saudi National Day'], { w: 512, h: 256, bg: '#0b6b3a', fg: '#ffffff', font: ['700 74px "Aref Ruqaa", serif', '600 40px Spectral, serif'] });
+    spot.add(mesh(new THREE.PlaneGeometry(1.9, 0.95), new THREE.MeshStandardMaterial({ map: banner, roughness: 1, side: THREE.DoubleSide }), 0, 1.05, -0.78));
+    spotProp(spot, 'vr-headset', { h: 1.0, y: 0.16 });
+    const soon = textTex(['Coming soon'], { w: 256, h: 64, bg: '#0e0b1c', fg: '#e3b866', font: 'italic 34px Spectral, serif' });
+    spot.add(mesh(new THREE.PlaneGeometry(0.8, 0.2), new THREE.MeshBasicMaterial({ map: soon }), 0, 0.32, 0.86));
+  },
+
+  /* the Workshop */
+  // the HVAC outdoor unit commissioned in Canberra, wired to a Raspberry Pi cabinet on Modbus
+  'Totex Energy'(spot) {
+    spotProp(spot, 'hvac-unit', { h: 1.15, x: -0.35, ry: 0.2 });
+    const cab = mesh(new THREE.BoxGeometry(0.5, 0.75, 0.32), flat(0x9aa0a6), 0.85, 0.38, 0.25); spot.add(cab);
+    spot.add(mesh(new THREE.BoxGeometry(0.34, 0.24, 0.02), flat(0x1e7a3a), 0.85, 0.5, 0.42)); // the Pi's green board behind the door
+    const led = mesh(new THREE.SphereGeometry(0.035, 6, 4), glow(0x5aff7a, 2), 0.95, 0.66, 0.43); spot.add(led);
+    const cable = new THREE.CatmullRomCurve3([new THREE.Vector3(0.62, 0.25, 0.25), new THREE.Vector3(0.35, 0.05, 0.35), new THREE.Vector3(0.1, 0.25, 0.3)]);
+    spot.add(mesh(new THREE.TubeGeometry(cable, 12, 0.025, 5), flat(0x2a2a2a)));
+    tick.push((t) => { led.visible = reduceMotion || Math.sin(t * 6) > -0.3; });
+  },
+  // a crop bed with drip lines: water pulses along each branch, and a blocked branch is caught and flagged red
+  'AquaFlow'(spot) {
+    spot.add(mesh(new THREE.BoxGeometry(2.0, 0.22, 1.3), flat(0x5b3a22), 0, 0.11, 0.1));
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) spot.add(mesh(new THREE.ConeGeometry(0.07, 0.28, 5), flat(0x4fae46), -0.8 + c * 0.32, 0.36, -0.28 + r * 0.38));
+    spotProp(spot, 'solar-panel', { h: 0.9, x: 0.15, z: -0.85, ry: 0 });
+    const lines = [0, 1, 2].map((r) => {
+      const z = -0.17 + r * 0.38;
+      const pipe = mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.9, 6), flat(0x1f1f24), 0, 0.25, z); pipe.rotation.z = Math.PI / 2; spot.add(pipe);
+      spot.add(mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), glow(0x52d4ff, 0.8), -1.0, 0.26, z)); // a flow-sensor node at the head of each branch
+      const drops = [0, 1, 2].map(() => { const d = mesh(new THREE.SphereGeometry(0.045, 6, 4), glow(0x52b4ff, 2)); d.castShadow = false; spot.add(d); return d; });
+      return { z, pipe, drops };
+    });
+    tick.push((t) => {
+      const m = reduceMotion ? 0 : 1, blocked = Math.floor(t / 6) % 3; // every few seconds a different branch is blocked
+      lines.forEach(({ z, pipe, drops }, r) => {
+        const bad = r === blocked;
+        pipe.material.color.setHex(bad && Math.sin(t * 8) > 0 ? 0xff3a2a : 0x1f1f24);
+        drops.forEach((d, k) => { const u = ((t * 0.35 * m + k / 3) % 1); d.position.set(-0.95 + u * (bad ? 0.6 : 1.9), 0.27, z); d.visible = !bad || u < 0.95; });
+      });
+    });
+  },
+  // Al-Anqa, the course's robot, driving laps of a practice mat
+  'ABAAD Robotics'(spot) {
+    const mat = textTex(['', 'ABAAD · أبعاد', ''], { w: 256, h: 256, bg: '#173a5e', fg: '#e3b866', font: '600 26px Spectral, serif' });
+    const ctx = mat.image.getContext('2d'); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10; ctx.beginPath(); ctx.ellipse(128, 128, 96, 72, 0, 0, TAU); ctx.stroke(); mat.needsUpdate = true;
+    document.fonts.ready.then(() => { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10; ctx.beginPath(); ctx.ellipse(128, 128, 96, 72, 0, 0, TAU); ctx.stroke(); mat.needsUpdate = true; });
+    const base = mesh(new THREE.BoxGeometry(1.8, 0.05, 1.8), [flat(0x173a5e), flat(0x173a5e), new THREE.MeshStandardMaterial({ map: mat, roughness: 1 }), flat(0x173a5e), flat(0x173a5e), flat(0x173a5e)], 0, 0.03, 0); spot.add(base);
+    let bot = null; spotProp(spot, 'anqa-robot', { h: 0.38, x: 0.68, onLoad: (h) => { bot = h; } });
+    tick.push((t) => {
+      if (!bot) return;
+      const a = t * 0.45 * (reduceMotion ? 0 : 1);
+      bot.position.set(Math.cos(a) * 0.68, 0.06, Math.sin(a) * 0.5); bot.rotation.y = -a; // nose along the track
+    });
+  },
+  // a see-through duct with streamlines bending round a cylinder, blue where slow and red where fast, like a CFD plot
+  'The Flow Trials'(spot) {
+    const L = 2.2, D0 = 0.75;
+    spot.add(mesh(new THREE.BoxGeometry(L, D0, D0), see(0xcfe8ff, 0.16), 0, 0.55, 0));
+    [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(([y, z]) => { const e = mesh(new THREE.BoxGeometry(L, 0.03, 0.03), flat(0x8a8f99), 0, 0.55 + y * D0 / 2, z * D0 / 2); spot.add(e); });
+    const cyl = mesh(new THREE.CylinderGeometry(0.16, 0.16, D0, 14), flat(0x6a6f7a), 0, 0.55, 0); cyl.rotation.x = Math.PI / 2; spot.add(cyl);
+    [-1, 1].forEach((sx) => spot.add(mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), flat(0x55565e), sx * 0.9, 0.0, 0)));
+    const N2 = 42, dots = new THREE.InstancedMesh(new THREE.SphereGeometry(0.03, 5, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }), N2);
+    dots.castShadow = false; spot.add(dots);
+    const lanes = Array.from({ length: N2 }, (_, k) => ({ y0: -0.28 + (k % 7) * (0.56 / 6), z: -0.25 + Math.floor(k / 7) % 3 * 0.25, off: hash3(k, 3, 3) }));
+    const m4 = new THREE.Matrix4(), col = new THREE.Color(), slow = new THREE.Color(0x3a7bff), fast = new THREE.Color(0xff3a2a);
+    tick.push((t) => {
+      const m = reduceMotion ? 0.05 : 1;
+      lanes.forEach((l, k) => {
+        const u = (t * 0.22 * m + l.off) % 1, x = -L / 2 + u * L;
+        const near = Math.exp(-((x / 0.35) ** 2)); // the flow squeezes round the cylinder and speeds up
+        const y = l.y0 + Math.sign(l.y0 || 0.01) * near * Math.max(0, 0.2 - Math.abs(l.y0) * 0.5);
+        m4.makeTranslation(x, 0.55 + y, l.z); dots.setMatrixAt(k, m4);
+        dots.setColorAt(k, col.copy(slow).lerp(fast, Math.min(1, near * (1.3 - Math.abs(l.y0) * 2))));
+      });
+      dots.instanceMatrix.needsUpdate = true; dots.instanceColor.needsUpdate = true;
+    });
+  },
+  /* the Observatory */
+  // a guard for a substation: commands arrive as pulses; good ones pass, bad ones hit the shield and are quarantined
+  'Sentinel'(spot) {
+    spotProp(spot, 'transformer', { h: 1.3, z: -0.05 });
+    for (let k = 0; k < 14; k++) { const a = (k / 14) * TAU; spot.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 5), flat(0x8a8f99), Math.cos(a) * 1.25, 0.25, Math.sin(a) * 1.25)); }
+    const fence = mesh(new THREE.TorusGeometry(1.25, 0.015, 4, 40), flat(0x8a8f99), 0, 0.45, 0); fence.rotation.x = Math.PI / 2; spot.add(fence);
+    const shield = mesh(new THREE.SphereGeometry(1.1, 24, 12, 0, TAU, 0, Math.PI / 2), see(0x52d4ff, 0.14), 0, 0.02, 0); shield.castShadow = false; spot.add(shield);
+    const pulse = mesh(new THREE.SphereGeometry(0.08, 8, 6), glow(0x52ff9a, 2), 0, 0, 0); pulse.castShadow = false; spot.add(pulse);
+    const ok = new THREE.Color(0x52ff9a), bad = new THREE.Color(0xff3a2a), calm = new THREE.Color(0x52d4ff);
+    let flash = 0;
+    tick.push((t, dt) => {
+      const m = reduceMotion ? 0 : 1, n = Math.floor(t / 2.5), u = (t / 2.5) % 1, isBad = n % 3 === 2, a = n * 2.3;
+      const r = isBad ? Math.max(1.12, 2.4 - u * 2.4) : 2.4 - u * 2.4, h = 0.15 + Math.max(0, r) * 0.25;
+      pulse.visible = m === 1 && r > 0.2; pulse.position.set(Math.cos(a) * r, h, Math.sin(a) * r);
+      pulse.material.emissive.copy(isBad ? bad : ok); pulse.material.color.copy(pulse.material.emissive);
+      if (isBad && r <= 1.12 && u < 0.6) flash = 1;
+      flash = Math.max(0, flash - dt * 1.5);
+      shield.material.color.copy(calm).lerp(bad, flash); shield.material.opacity = 0.14 + flash * 0.3;
+    });
+  },
+  // a telescope on a small dome; now and then the star it points at brightens with the moment its light left Earth
+  'Sirius'(spot) {
+    spot.add(mesh(new THREE.CylinderGeometry(0.75, 0.8, 0.5, 20), flat(0xe8e2d6), 0, 0.25, 0));
+    spot.add(mesh(new THREE.SphereGeometry(0.75, 20, 10, 0, TAU, 0, Math.PI / 2), flat(0xf1ece2), 0, 0.5, 0));
+    spotProp(spot, 'telescope', { h: 1.2, x: 0.85, z: 0.5, ry: -0.6 });
+    const star = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xcfe4ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    star.position.set(-0.3, 3.0, -0.4); star.scale.setScalar(0.5); spot.add(star);
+    const moments = ['1969 · Moon landing', '1687 · Newton\'s Principia', '1905 · Einstein\'s miracle year', '1492 · Columbus sails'];
+    const tags = moments.map((m) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: textTex([m], { w: 512, h: 96, fg: '#cfe4ff', font: 'italic 44px Spectral, serif' }), transparent: true, depthWrite: false })); sp.scale.set(2.2, 0.41, 1); sp.position.set(-0.3, 3.55, -0.4); sp.material.opacity = 0; spot.add(sp); return sp; });
+    tick.push((t) => {
+      const k = Math.floor(t / 5) % tags.length, u = (t / 5) % 1, b = reduceMotion ? 0.6 : Math.sin(u * Math.PI);
+      star.scale.setScalar(0.4 + b * 0.5); star.material.opacity = 0.5 + b * 0.5;
+      tags.forEach((s, j) => { s.material.opacity = j === k ? b : 0; });
+    });
+  },
+};
+// The Arcade's ring, by place: the middle, then the front and round. The tall tower stands in the middle and the
+// least-finished project goes at the back, where the tower hides it most.
+const arcadeOrder = ['Chimera Ants', 'Much Ado About Nothing', 'Riyma', 'Creep Crawlers', 'Saudi National Day VR Museum', 'Nuclear Robot', 'JarBound'];
+function buildIslets(g, hubIndex) {
+  D.areas.forEach((A, ai) => {
+    const pos = isletAt[A.id], col = new THREE.Color(A.color);
+    const isle = island(A.color, A.id === 'games' ? 'neutral' : 'melbourne', 40 + ai * 9);
+    const ISLET = isletScale[A.id];
+    isle.scale.setScalar(ISLET); isle.position.copy(pos);
+    isle.rotation.y = Math.atan2(-pos.x, -pos.z) * 0.25; // turned a little toward the hub
+    // the islet's name floats above it
+    const sign = isletSign(A.name, A.fx, A.color); sign.position.set(0, 7.2, 0); sign.scale.multiplyScalar(1 / ISLET); isle.add(sign);
+    // a stand-in for each project until its landmark is built: a plinth and a glowing crystal
+    let list = isletProjects(A.id);
+    if (A.id === 'games') { // its ring is full: no trees, and the projects in their set places
+      isle.userData.trees.forEach((t) => isle.remove(t)); isle.userData.trees = [];
+      list = [...arcadeOrder.map((n) => list.find((q) => q.name === n)).filter(Boolean), ...list.filter((q) => !arcadeOrder.includes(q.name))];
+    }
+    slotsFor(list.length).forEach(([x, z], k) => {
+      const q = list[k], spot = new THREE.Group(); spot.position.set(x, 0.3, z); spot.name = `spot:${q.name}`;
+      Object.assign(spot.userData, { project: q.name, area: ai, realm: hubIndex });
+      spot.scale.setScalar({ hardware: 1.15, software: 1.5 }[A.id] || 1); // fewer projects, bigger landmarks
+      isle.add(spot);
+      if (landmarkOf[q.name]) landmarkOf[q.name](spot);
+      else { // a stand-in: a plinth and a glowing crystal
+        const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, 0.5, 6), stone(0x6f6878)); plinth.position.y = 0.25;
+        const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), glow(col, 1.2)); gem.position.y = 1.15;
+        spin.push({ o: gem, y: 0.8 });
+        spot.add(plinth, gem);
+      }
+      spot.traverse((o) => { o.userData.project = q.name; });
+    });
+    isle.traverse((o) => { o.userData.area = ai; });
+    isletGroups[A.id] = isle;
+    g.add(isle);
+  });
+  // bridges from the hub's rim to each islet, and from the Workshop up to the Observatory
+  const rim = (to, r) => to.clone().setY(0).normalize().multiplyScalar(r).setY(0.32);
+  const edgeOf = (id, toward) => isletAt[id].clone().add(toward.clone().sub(isletAt[id]).setY(0).normalize().multiplyScalar(5.6 * isletScale[id])).setY(isletAt[id].y + 0.32 * isletScale[id]);
+  ['hardware', 'games'].forEach((id) => ropeBridge(g, rim(isletAt[id], 5.4), edgeOf(id, new THREE.Vector3())));
+  ropeBridge(g, rim(isletAt.software, 5.2), edgeOf('software', new THREE.Vector3()), 0.6);
+  ropeBridge(g, edgeOf('hardware', isletAt.software), edgeOf('software', isletAt.hardware), 0.5);
+}
+
 /* ---------- place realms on the ring ---------- */
 const realms = D.realms.map((r, i) => {
   const angle = (i / N) * TAU;
@@ -1251,6 +1623,7 @@ const realms = D.realms.map((r, i) => {
   g.rotation.y = -angle + Math.PI / 2; // local +z faces outward, toward the camera
   g.userData.realm = i;
   build[r.id](g, r.color);
+  if (r.id === 'quests') buildIslets(g, i);
   if (landmarks[r.id]) landmarks[r.id](g);
   g.traverse((o) => { o.userData.realm = i; });
   scene.add(g);
@@ -1322,8 +1695,10 @@ const head = (r, title) => {
   const where = (D.lands[r.land] || {}).short;
   const idx = D.realms.findIndex((x) => x.id === r.id);
   const ch = ['الفصل الأول', 'الفصل الثاني', 'الفصل الثالث', 'الفصل الرابع', 'الفصل الخامس', 'الفصل السادس', 'الفصل السابع'][idx] || '';
-  return `<p class="chapter"><span lang="ar">${ch}</span> · Chapter ${idx + 1} of ${D.realms.length}</p><p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
+  return `<p class="chapter"><span lang="ar">${ch}</span> · Chapter ${idx + 1} of ${D.realms.length}</p><p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(r.heading)}</h2><p class="fx-title">${esc(title)}</p>`;
 };
+// a plain label first, its fantasy name after it, smaller
+const dual = (plain, fx) => `${esc(plain)} <span class="fx">${esc(fx)}</span>`;
 function journeyMap() { // a real map: the three places I have lived, joined in the order I lived there
   const { W, H, land, at } = MAP;
   const lab = { Makkah: [10, 16, 'start'], Swansea: [10, -2, 'start'], Melbourne: [-10, -22, 'end'] };
@@ -1383,32 +1758,69 @@ const attributesSection = () => {
   const pt = (i, r) => { const a = -Math.PI / 2 + (i / n) * TAU; return [C + Math.cos(a) * r, C + Math.sin(a) * r]; };
   const ring = (f) => A.map((_, i) => pt(i, R * f).map((v) => v.toFixed(1)).join(',')).join(' ');
   const shape = A.map((a, i) => pt(i, R * (a.value - lo) / (hi - lo)).map((v) => v.toFixed(1)).join(',')).join(' ');
-  return `<section><h3>Attributes</h3><p class="note">Scores are for flavour; the evidence under each is real.</p>
-    <svg class="radar" viewBox="0 0 260 260" role="img" aria-label="${A.map((a) => `${a.label} ${a.value}`).join(', ')}">
+  return `<section><h3>${dual('Strengths', 'Attributes')}</h3>
+    <svg class="radar" viewBox="0 0 260 260" role="img" aria-label="Strengths: ${A.map((a) => a.label).join(', ')}">
       ${[0.25, 0.5, 0.75, 1].map((f) => `<polygon class="r-ring" points="${ring(f)}"/>`).join('')}
       ${A.map((_, i) => { const [x, y] = pt(i, R); return `<line class="r-axis" x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('')}
       <polygon class="r-shape" points="${shape}"/>
       ${A.map((a, i) => { const [x, y] = pt(i, R * (a.value - lo) / (hi - lo)); return `<circle class="r-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2"/>`; }).join('')}
-      ${A.map((a, i) => { const [x, y] = pt(i, R + 22); return `<text class="r-key" x="${x.toFixed(1)}" y="${(y - 2).toFixed(1)}">${esc(a.key)}</text><text class="r-val" x="${x.toFixed(1)}" y="${(y + 11).toFixed(1)}">${a.value}</text>`; }).join('')}
+      ${A.map((a, i) => { const [x, y] = pt(i, R + 22); return `<text class="r-key" x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}">${esc(a.key)}</text>`; }).join('')}
     </svg>
     <dl class="r-list">${A.map((a) => `<dt><abbr>${esc(a.key)}</abbr> ${esc(a.label)}</dt><dd>${esc(a.note)}</dd>`).join('')}</dl></section>`;
 };
 
+// a project line: plain text, or a game whose name opens it to play
+const objective = (o) => (typeof o === 'string' ? esc(o)
+  : `<a class="play" href="${esc(o.play)}" target="_blank" rel="noopener" title="Play ${esc(o.game)} in your browser">▶ ${esc(o.game)}</a> ${esc(o.text)}`);
 // The Quests panel lists paid work apart from projects, so an employer sees the job first.
-const questGroup = (title, list, first) => (list.length ? `<section class="q-group"><h3>${title}</h3>${list.map((q, i) => `
-      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 && first === 0 ? ' open' : ''}>
+const questCards = (list, openFirst) => list.map((q, i) => `
+      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 && openFirst ? ' open' : ''}>
         <summary>
-          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
+          ${q.featured || q.award || q.play ? `<span class="badges">${q.featured ? '<span class="start-here">★ Start here</span>' : ''}${q.award ? `<span class="start-here award">♛ ${esc(q.award)}</span>` : ''}${q.play ? '<span class="start-here playable">▶ Playable</span>' : ''}</span>` : ''}<span class="q-kind">${esc(q.plain)}${q.when ? ` · ${esc(q.when)}` : ''} <span class="fx">${esc(q.kind)}</span></span>
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=35" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
-          <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=49" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
+          <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
-          <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
+          <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
           ${q.links ? `<p class="q-links">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
         </div>
-      </details>`).join('')}</section>` : '');
+      </details>`).join('');
+const questGroup = (title, list, first) => (list.length ? `<section class="q-group"><h3>${title}</h3>${questCards(list, first === 0)}</section>` : '');
+
+// Projects split three ways, one tab per islet: Hardware (the Workshop), Software (the Observatory), Games (the Arcade).
+let area = 0;
+const inArea = (ai) => D.quests.filter((q) => (q.areas || []).includes(D.areas[ai].id));
+function areaPanel(ai) {
+  const a = D.areas[ai], list = inArea(ai);
+  return `<p class="area-sum"><b>${esc(a.fx)}</b> · ${esc(a.sub)} · ${list.length} ${list.length === 1 ? 'project' : 'projects'}</p>${questCards(list, false)}`;
+}
+function pickArea(ai, focus = false) {
+  area = ((ai % D.areas.length) + D.areas.length) % D.areas.length;
+  const body = panel.querySelector('#area');
+  if (!body) return;
+  body.innerHTML = areaPanel(area);
+  body.setAttribute('aria-labelledby', `area-tab-${area}`);
+  panel.querySelectorAll('[data-area]').forEach((t) => {
+    const on = +t.dataset.area === area;
+    t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+    if (on && focus) t.focus();
+  });
+  if (playing) history.replaceState(null, '', `#quests/${D.areas[area].id}`);
+  onArea(area);
+}
+// the scene hooks in here to fly the camera to the islet (set once the islets exist)
+let onArea = () => {};
+// find a project's card, switching to the tab it lives under if need be
+function findCard(test) {
+  let el = [...panel.querySelectorAll('[data-name]')].find(test);
+  if (el || !panel.querySelector('#area')) return el;
+  const q = D.quests.find((x) => x.areas && test({ dataset: { name: x.name } }));
+  if (!q) return null;
+  pickArea(D.areas.findIndex((a) => a.id === q.areas[0]));
+  return [...panel.querySelectorAll('[data-name]')].find(test);
+}
 
 // The first thing on the Character panel: who I am in two lines, for someone hiring.
 function glance() {
@@ -1429,19 +1841,23 @@ const panels = {
     ${glance()}
     <p class="lore">${esc(D.hero.lore)}</p>
     <dl class="meta">
-      <dt>Class</dt><dd>${esc(D.hero.klass)}</dd>
-      <dt>Guild</dt><dd>${esc(D.hero.guild)}</dd>
-      <dt>Realm</dt><dd>${esc(D.hero.realm)}</dd>
+      <dt>${dual('Degree', 'Class')}</dt><dd>${esc(D.hero.klass)}</dd>
+      <dt>${dual('University', 'Guild')}</dt><dd>${esc(D.hero.guild)}</dd>
+      <dt>${dual('Based in', 'Realm')}</dt><dd>${esc(D.hero.realm)}</dd>
     </dl>
     ${attributesSection()}
     <section><h3>Journey</h3>${journeyMap()}</section>
-    <section><h3>Tongues</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
+    <section><h3>${dual('Languages', 'Tongues')}</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
 
   quests: (r) => `${head(r, 'Quest Log')}
-    <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
+    <p class="lore">Campaigns fought, raids survived and two epics still unfolding.</p>
     ${motto(D.mottos.quests)}
     ${questGroup('Experience', D.quests.filter((q) => q.experience), 0)}
-    ${questGroup('Projects', D.quests.filter((q) => !q.experience), 1)}`,
+    <section class="q-group"><h3>Projects</h3>
+    <div class="schools areas" role="tablist" aria-label="Kinds of project">${D.areas.map((a, ai) => `
+      <button type="button" role="tab" id="area-tab-${ai}" data-area="${ai}" aria-controls="area" aria-selected="${ai === area}" tabindex="${ai === area ? 0 : -1}" style="--c:${a.color}">
+        <b>${esc(a.name)}</b><span>${esc(a.fx)} · ${inArea(ai).length}</span></button>`).join('')}</div>
+    <div id="area" role="tabpanel" aria-labelledby="area-tab-${area}">${areaPanel(area)}</div></section>`,
 
   skills: (r) => `${head(r, 'Skill Tree')}
     <blockquote class="verse abqar"><p lang="ar" dir="rtl"><b>${esc(D.folklore.abqar.ar[0])}</b><br>${esc(D.folklore.abqar.ar[1])}</p><p>${esc(D.folklore.abqar.en)}</p></blockquote>
@@ -1453,8 +1869,8 @@ const panels = {
   trophies: (r) => `${head(r, 'Deeds & Honours')}
     <section>${D.trophies.map((t) => `
       <div class="trophy"><span class="medal ${t.tier}">♛</span>
-        <div><strong>${esc(t.name)}</strong><span>${esc(t.detail)}</span></div><time>${esc(t.when)}</time></div>`).join('')}</section>
-    <section><h3>Scrolls of Certification</h3><ul class="scrolls">${D.scrolls.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`,
+        <div><strong>${t.plain ? dual(t.plain, t.name) : esc(t.name)}</strong><span>${esc(t.detail)}</span></div><time>${esc(t.when)}</time></div>`).join('')}</section>
+    <section><h3>${dual('Certifications', 'Scrolls')}</h3><ul class="scrolls">${D.scrolls.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`,
 
   pursuits: (r) => `${head(r, 'Beyond the Workshop')}
     <blockquote class="verse"><p lang="ar" dir="rtl">${D.folklore.antarah.ar.map(esc).join('<br>')}</p>
@@ -1465,19 +1881,19 @@ const panels = {
       <div class="score"><span>Last <b id="s-last">–</b></span><span>Best <b id="s-best">${best || '–'}</b></span><span>Shots <b id="s-n">${shots}</b></span></div>
     </div>
     <section style="margin-top:18px">${D.pursuits.map((p) => `
-      <div class="pursuit" data-name="${esc(p.name)}"><span class="pg">${esc(p.glyph)}</span>${p.flag ? `<span class="chequer" title="${esc(p.flag)}" aria-label="${esc(p.flag)}"></span>` : ''}
+      <div class="pursuit" data-name="${esc(p.name)}"><span class="pg">${esc(p.glyph)}</span>${p.flag ? `<span class="chequer" role="img" title="${esc(p.flag)}" aria-label="${esc(p.flag)}"></span>` : ''}
         <div><strong>${esc(p.name)}</strong><p>${esc(p.detail)}</p>${p.extra ? `<p class="extra">${esc(p.extra)}</p>` : ''}</div></div>`).join('')}</section>`,
 
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=35" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
-    <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=35" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=49" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+    <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=49" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
-    <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=35" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+    <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=49" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1498,15 +1914,17 @@ let current = -1;
 let targetAngle = realms[0].angle;
 
 hotbar.innerHTML = realms.map((r, i) =>
-  `<button type="button" data-i="${i}" style="--c:${r.color}"><kbd>${i + 1}</kbd><span class="g">${r.glyph}</span>${r.name}</button>`).join('');
+  `<button type="button" data-i="${i}" style="--c:${r.color}"><kbd>${i + 1}</kbd><span class="g">${r.glyph}</span>${esc(r.short)}</button>`).join('');
+hotbar.querySelectorAll('button').forEach((b, k) => { b.title = `${realms[k].short} · ${realms[k].name}`; });
 hotbar.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); });
 panel.addEventListener('click', (e) => { if (e.target.closest('#loose')) loose(); });
 panel.addEventListener('keydown', (e) => {
-  const tab = e.target.closest('[data-school]');
+  const tab = e.target.closest('[data-school], [data-area]');
   if (!tab || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
   e.preventDefault(); e.stopPropagation();
-  const n = D.skillTree.length;
-  pickSchool(e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : school + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1), true);
+  const isArea = 'area' in tab.dataset, n = isArea ? D.areas.length : D.skillTree.length, at = isArea ? area : school;
+  const to = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : at + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1);
+  if (isArea) pickArea(to, true); else pickSchool(to, true);
 });
 // header buttons that travel, e.g. Contact -> the Portal
 document.addEventListener('click', (e) => {
@@ -1543,6 +1961,8 @@ panel.addEventListener('focusin', (e) => { if (!tapping) lightSkill(skillOf(e) |
 panel.addEventListener('click', (e) => {
   const tab = e.target.closest('[data-school]');
   if (tab) return pickSchool(+tab.dataset.school);
+  const at = e.target.closest('[data-area]');
+  if (at) return pickArea(+at.dataset.area);
   const jump = e.target.closest('[data-goto]');
   if (jump) return showIn(jump.dataset.goto, jump.dataset.find);
   const k = skillOf(e); tapping = false;
@@ -1550,7 +1970,7 @@ panel.addEventListener('click', (e) => {
 });
 function showIn(realmId, name) {
   go(realms.findIndex((r) => r.id === realmId));
-  reveal([...panel.querySelectorAll('[data-name]')].find((x) => x.dataset.name === name));
+  reveal(findCard((x) => x.dataset.name === name));
 }
 const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function reveal(el) {
@@ -1574,17 +1994,20 @@ function go(i) {
   let d = r.angle - (targetAngle % TAU);
   d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
   targetAngle += d;
-  current = i; schedulePump(); skillLit = null;
+  current = i; schedulePump(); skillLit = null; areaFocus = -1;
   document.documentElement.style.setProperty('--accent', r.color);
   place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;
   panel.classList.remove('swap');
   const nx = realms[(i + 1) % N];
-  panel.innerHTML = panels[r.id](r) + `<button type="button" class="next-ch" data-next>${i < N - 1 ? `Next chapter · ${esc(nx.name)} <i>${esc(nx.place)}</i>` : 'Back to chapter one'} →</button>`;
+  panel.innerHTML = panels[r.id](r) + `<button type="button" class="next-ch" data-next>${i < N - 1 ? `Next chapter · ${esc(nx.short)} <i>${esc(nx.place)}</i>` : 'Back to chapter one'} →</button>`;
   panel.scrollTop = 0;
   void panel.offsetWidth;
   panel.classList.add('swap');
   hotbar.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-current', k === i));
-  if (playing) history.replaceState(null, '', `#${r.id}`);
+  if (playing) {
+    history.replaceState(null, '', `#${r.id}`);
+    try { localStorage.setItem('last-realm', r.id); } catch { /* storage blocked */ }
+  }
   hintEl?.classList.remove('on');
   setTimeout(() => { if (current === i) showHint(r.id); }, 1200);
 }
@@ -1598,8 +2021,36 @@ function start() {
   document.body.classList.add('playing');
   document.getElementById('xp-fill').style.width = `${((D.hero.year - 0.15) / D.hero.years) * 100}%`;
   layout();
+  if (current > 0 && !location.hash) history.replaceState(null, '', `#${realms[current].id}`);
 }
 document.getElementById('start').addEventListener('click', start);
+
+// Title screen: who I am, what I build and how to reach me, before anyone has to play.
+const mail = D.email.join('@');
+const contacts = [
+  { label: 'Email', href: `mailto:${mail}`, detail: mail },
+  ...D.portals.map((p) => ({ label: p.name, href: p.href, detail: p.href.replace(/^https?:\/\/(www\.)?/, ''), ext: true })),
+];
+const ext = (c) => (c.ext ? ' target="_blank" rel="noopener"' : '');
+document.getElementById('pitch').innerHTML =
+  `${esc(D.hero.pitch)} <span class="seeking-tag">${esc(D.hero.seeking.split(':')[0])}</span>`;
+document.getElementById('contact-strip').innerHTML =
+  contacts.map((c) => `<a href="${esc(c.href)}"${ext(c)}>${esc(c.label)}</a>`).join('<i aria-hidden="true">·</i>');
+
+// Contact in the header: email, LinkedIn and GitHub in one click, from any realm
+const contactBtn = document.getElementById('contact-btn');
+const contactPop = document.getElementById('contact-pop');
+contactPop.innerHTML = contacts.map((c) => `<a href="${esc(c.href)}"${ext(c)}><strong>${esc(c.label)}</strong><span>${esc(c.detail)}</span></a>`).join('') +
+  `<button type="button" id="copy-mail">Copy email address</button>`;
+const setContact = (on) => { contactPop.hidden = !on; contactBtn.setAttribute('aria-expanded', String(on)); };
+contactBtn.addEventListener('click', () => setContact(contactPop.hidden));
+document.addEventListener('click', (e) => { if (!e.target.closest('.contact-menu')) setContact(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !contactPop.hidden) { setContact(false); contactBtn.focus(); } });
+document.getElementById('copy-mail').addEventListener('click', async (e) => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(mail); b.textContent = 'Copied'; } catch { b.textContent = mail; }
+  setTimeout(() => { b.textContent = 'Copy email address'; }, 2000);
+});
 
 // a tale of Juha, the folk trickster, on the title screen, changing every few seconds
 const juhaEl = document.getElementById('juha');
@@ -1652,11 +2103,17 @@ const pick = (e) => { const hit = pickHit(e); return hit ? hit.object.userData.r
 // a skill node in the tree, if the pointer is on one of the island in view
 const skillAt = (hit) => (hit && hit.object.userData.realm === current && hit.object.userData.skill) || null;
 let skyLit = false;
+const tip = document.createElement('div'); tip.id = 'tip'; tip.hidden = true; tip.setAttribute('aria-hidden', 'true'); document.body.append(tip);
+canvas.addEventListener('pointerleave', () => { tip.hidden = true; });
 canvas.addEventListener('pointermove', (e) => {
   pointer.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   if (e.pointerType !== 'mouse' || !playing) return;
   const hit = pickHit(e), h = hit ? hit.object.userData.realm : -1, k = skillAt(hit);
-  canvas.style.cursor = k || (h >= 0 && h !== current) ? 'pointer' : '';
+  const isle = hit && h === current && hit.object.userData.area !== undefined;
+  canvas.style.cursor = k || isle || (h >= 0 && h !== current) ? 'pointer' : '';
+  // name what is under the pointer on the islets: a project, or the islet itself
+  const label = isle ? (hit.object.userData.project || `${D.areas[hit.object.userData.area].name} · ${D.areas[hit.object.userData.area].fx}`) : '';
+  if (label) { tip.textContent = label; tip.style.transform = `translate(${e.clientX + 14}px, ${e.clientY + 12}px)`; tip.hidden = false; } else tip.hidden = true;
   if (k) { if (k !== skillLit) lightSkill(k); skyLit = true; } else if (skyLit) { lightSkill(null); skyLit = false; }
 });
 canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
@@ -1671,6 +2128,12 @@ canvas.addEventListener('pointerup', (e) => {
       lightSkill(k); skyLit = e.pointerType === 'mouse';
       if (document.body.classList.contains('panel-min')) toggle.click();
       panel.querySelector(`.skill[data-skill="${k}"]`)?.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+    } else if (h >= 0 && h === current && hit.object.userData.area !== undefined) { // an islet, or a project on it
+      const { area: ai, project } = hit.object.userData;
+      if (ai !== area || !panel.querySelector('#area')) pickArea(ai); else onArea(ai);
+      if (document.body.classList.contains('panel-min')) toggle.click();
+      if (project) reveal(findCard((x) => x.dataset.name === project));
+      else panel.querySelector('#area')?.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
     } else if (h >= 0 && h === current && realms[h].id === 'pursuits') loose();
     else if (h >= 0) go(h);
   }
@@ -1698,6 +2161,10 @@ function layout() {
 addEventListener('resize', layout);
 
 let camAngle = realms[0].angle - 0.9;
+// the Projects tabs fly the camera over to an islet; -1 is the hub itself
+let areaFocus = -1, focusLift = 0;
+const focusOff = new THREE.Vector3(), focusTo = new THREE.Vector3();
+onArea = (ai) => { areaFocus = ai; };
 let camY = 10;
 const look = new THREE.Vector3();
 const clock = new THREE.Clock();
@@ -1742,8 +2209,18 @@ function frame() {
   camY += (r.y + 6.5 - camY) * ease;
   applyMood(moods[r.land] || moods.neutral, 1 - Math.exp(-dt * 1.4));
   const d = playing ? dist : 30;
+  // focused on an islet: the camera eases from its usual place to a view of that islet from above and in front
+  let lift = 0;
+  if (areaFocus >= 0 && r.id === 'quests') { isletGroups[D.areas[areaFocus].id].getWorldPosition(focusTo).sub(r.group.position); lift = 1; }
+  focusOff.lerp(focusTo, ease); focusLift += (lift - focusLift) * ease;
   camera.position.set(Math.cos(camAngle) * (RING + d) - Math.sin(camAngle) * pointer.x * 1.2, camY + pointer.y * 0.8 + (playing ? 0 : 5), Math.sin(camAngle) * (RING + d) + Math.cos(camAngle) * pointer.x * 1.2);
   look.set(Math.cos(camAngle) * RING, camY - 3, Math.sin(camAngle) * RING);
+  if (focusLift > 0.001) {
+    const outward = new THREE.Vector3(Math.cos(camAngle), 0, Math.sin(camAngle)), at = r.group.position.clone().add(focusOff);
+    const fLook = at.clone().add(new THREE.Vector3(0, 0.8, 0));
+    const fCam = fLook.clone().addScaledVector(outward, dist * 0.62).add(new THREE.Vector3(-Math.sin(camAngle) * pointer.x * 0.8, 6 + pointer.y * 0.5, Math.cos(camAngle) * pointer.x * 0.8));
+    camera.position.lerp(fCam, focusLift); look.lerp(fLook, focusLift);
+  }
   camera.lookAt(look);
   camera.updateMatrixWorld();
 
@@ -1769,7 +2246,16 @@ function frame() {
 layout();
 // links like #quests or #quests/sentinel open a realm, and optionally one quest or pursuit in it
 const [hashRealm, hashItem] = decodeURIComponent(location.hash.slice(1)).split('/');
-go(Math.max(0, realms.findIndex((r) => r.id === hashRealm)));
+// a returning visitor with no link picks up where they left off; the title screen still comes first
+let lastRealm = null;
+try { lastRealm = localStorage.getItem('last-realm'); } catch { /* storage blocked */ }
+const resumeAt = !hashRealm && lastRealm ? realms.findIndex((r) => r.id === lastRealm) : -1;
+if (resumeAt > 0) document.getElementById('start').textContent = `Continue · ${realms[resumeAt].short}`;
+go(Math.max(0, realms.findIndex((r) => r.id === hashRealm), resumeAt));
 if (hashRealm && (current > 0 || hashItem)) start();
-if (hashItem) reveal([...panel.querySelectorAll('[data-name]')].find((x) => slug(x.dataset.name) === hashItem));
+if (hashItem) {
+  const ai = D.areas.findIndex((a) => a.id === hashItem);
+  if (ai >= 0 && hashRealm === 'quests') pickArea(ai);
+  else reveal(findCard((x) => slug(x.dataset.name) === hashItem));
+}
 frame();
