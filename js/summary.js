@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=55';
+import * as D from './data.js?v=56';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -32,7 +32,7 @@ el.innerHTML = `
       <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.summary)}</p>
       <p class="s-seeking">${esc(D.hero.seeking)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=55"${b.size ? ` width="${b.size[0]}" height="${b.size[1]}"` : ''} alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=56"${b.size ? ` width="${b.size[0]}" height="${b.size[1]}"` : ''} alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Education</h2>
@@ -66,11 +66,30 @@ el.innerHTML = `
     <p class="s-updated">Updated ${esc(D.hero.updated)}</p>
   </article>`;
 
+// Visit counts (GoatCounter: no cookies, no personal data), only when `analytics` in data.js names a site.
+// Besides page views it counts the clicks that matter: the CV, the PDF, game plays and contact links.
+const track = (path, title) => { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title, event: true }); } catch { /* never let counting break the page */ } };
+if (/^[a-z0-9-]+$/.test(D.analytics || '')) {
+  const sc = document.createElement('script'); sc.async = true; sc.src = 'https://gc.zgo.at/count.js';
+  sc.dataset.goatcounter = `https://${D.analytics}.goatcounter.com/count`;
+  document.head.append(sc);
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a, [data-open-summary]');
+    if (!a) return;
+    const game = a.closest('[data-name]')?.dataset.name;
+    if (a.dataset.track) track(a.dataset.track, a.textContent.trim());
+    else if (a.matches('[data-open-summary]')) track('cv-view', 'Opened the plain CV');
+    else if (a.matches('.play-btn, a.play, .q-shot')) track(`play/${(game || a.textContent).trim()}`, `Played ${game || a.textContent.trim()}`);
+    else if (/^mailto:/.test(a.getAttribute('href') || '')) track('contact/email', 'Email');
+    else { const m = (a.href || '').match(/linkedin|github|itch\.io/); if (m) track(`out/${m[0]}`, a.href); }
+  }, true);
+}
+
 // The 3D world (three.js and about 8 MB of models) loads only when it will be seen: straight away for most
 // visitors, but not under a #summary link or with data saver on until the reader goes back to the world,
 // and never on a device without WebGL.
 let world = null;
-const loadWorld = () => { if (!document.body.classList.contains('no-webgl')) world ||= import('./main.js?v=55'); };
+const loadWorld = () => { if (!document.body.classList.contains('no-webgl')) world ||= import('./main.js?v=56'); };
 const saveData = !!(navigator.connection && navigator.connection.saveData);
 
 // On a first visit the text waits (at most 0.8 s) for its font, so lines do not re-wrap and jump when it arrives.

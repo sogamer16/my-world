@@ -480,6 +480,10 @@ export const badges = [
 
 // email is stored in two parts and joined in the browser, so simple scrapers do not pick it up
 export const email = ['sogamer16', 'gmail.com'];
+// Visit counts with GoatCounter (free, no cookies, no personal data). Off while empty. To switch it on, make a
+// free account at goatcounter.com, and put its code here: 'sohaib' for sohaib.goatcounter.com.
+export const analytics = '';
+
 // the downloadable CV, made from the plain view by tools/make-cv-pdf.mjs; remake it after changing this file
 export const cvPdf = 'assets/Sohaib-Qutub-CV.pdf';
 
