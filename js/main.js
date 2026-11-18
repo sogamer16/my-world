@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=36';
-import { map as MAP } from './worldmap.js?v=36';
+import * as D from './data.js?v=37';
+import { map as MAP } from './worldmap.js?v=37';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=36`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=37`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -793,7 +793,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=36`;
+  img.src = `assets/logos/${file}?v=37`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -925,7 +925,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=36`;
+    img.src = `assets/logos/${logo}?v=37`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1322,8 +1322,10 @@ const head = (r, title) => {
   const where = (D.lands[r.land] || {}).short;
   const idx = D.realms.findIndex((x) => x.id === r.id);
   const ch = ['الفصل الأول', 'الفصل الثاني', 'الفصل الثالث', 'الفصل الرابع', 'الفصل الخامس', 'الفصل السادس', 'الفصل السابع'][idx] || '';
-  return `<p class="chapter"><span lang="ar">${ch}</span> · Chapter ${idx + 1} of ${D.realms.length}</p><p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(title)}</h2>`;
+  return `<p class="chapter"><span lang="ar">${ch}</span> · Chapter ${idx + 1} of ${D.realms.length}</p><p class="kicker">${esc(r.place)}${where ? ` · ${esc(where)}` : ''}<span class="kicker-ar" lang="ar">${esc(r.placeAr || '')}</span></p><h2>${esc(r.heading)}</h2><p class="fx-title">${esc(title)}</p>`;
 };
+// a plain label first, its fantasy name after it, smaller
+const dual = (plain, fx) => `${esc(plain)} <span class="fx">${esc(fx)}</span>`;
 function journeyMap() { // a real map: the three places I have lived, joined in the order I lived there
   const { W, H, land, at } = MAP;
   const lab = { Makkah: [10, 16, 'start'], Swansea: [10, -2, 'start'], Melbourne: [-10, -22, 'end'] };
@@ -1383,13 +1385,13 @@ const attributesSection = () => {
   const pt = (i, r) => { const a = -Math.PI / 2 + (i / n) * TAU; return [C + Math.cos(a) * r, C + Math.sin(a) * r]; };
   const ring = (f) => A.map((_, i) => pt(i, R * f).map((v) => v.toFixed(1)).join(',')).join(' ');
   const shape = A.map((a, i) => pt(i, R * (a.value - lo) / (hi - lo)).map((v) => v.toFixed(1)).join(',')).join(' ');
-  return `<section><h3>Attributes</h3><p class="note">Scores are for flavour; the evidence under each is real.</p>
-    <svg class="radar" viewBox="0 0 260 260" role="img" aria-label="${A.map((a) => `${a.label} ${a.value}`).join(', ')}">
+  return `<section><h3>${dual('Strengths', 'Attributes')}</h3>
+    <svg class="radar" viewBox="0 0 260 260" role="img" aria-label="Strengths: ${A.map((a) => a.label).join(', ')}">
       ${[0.25, 0.5, 0.75, 1].map((f) => `<polygon class="r-ring" points="${ring(f)}"/>`).join('')}
       ${A.map((_, i) => { const [x, y] = pt(i, R); return `<line class="r-axis" x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join('')}
       <polygon class="r-shape" points="${shape}"/>
       ${A.map((a, i) => { const [x, y] = pt(i, R * (a.value - lo) / (hi - lo)); return `<circle class="r-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2"/>`; }).join('')}
-      ${A.map((a, i) => { const [x, y] = pt(i, R + 22); return `<text class="r-key" x="${x.toFixed(1)}" y="${(y - 2).toFixed(1)}">${esc(a.key)}</text><text class="r-val" x="${x.toFixed(1)}" y="${(y + 11).toFixed(1)}">${a.value}</text>`; }).join('')}
+      ${A.map((a, i) => { const [x, y] = pt(i, R + 22); return `<text class="r-key" x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}">${esc(a.key)}</text>`; }).join('')}
     </svg>
     <dl class="r-list">${A.map((a) => `<dt><abbr>${esc(a.key)}</abbr> ${esc(a.label)}</dt><dd>${esc(a.note)}</dd>`).join('')}</dl></section>`;
 };
@@ -1398,14 +1400,14 @@ const attributesSection = () => {
 const questGroup = (title, list, first) => (list.length ? `<section class="q-group"><h3>${title}</h3>${list.map((q, i) => `
       <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 && first === 0 ? ' open' : ''}>
         <summary>
-          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.kind)} · ${esc(q.plain)} · ${esc(q.when)}</span>
+          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.plain)} · ${esc(q.when)} <span class="fx">${esc(q.kind)}</span></span>
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=36" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=37" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
-          <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
+          <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
           ${q.links ? `<p class="q-links">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
         </div>
       </details>`).join('')}</section>` : '');
@@ -1429,16 +1431,16 @@ const panels = {
     ${glance()}
     <p class="lore">${esc(D.hero.lore)}</p>
     <dl class="meta">
-      <dt>Class</dt><dd>${esc(D.hero.klass)}</dd>
-      <dt>Guild</dt><dd>${esc(D.hero.guild)}</dd>
-      <dt>Realm</dt><dd>${esc(D.hero.realm)}</dd>
+      <dt>${dual('Degree', 'Class')}</dt><dd>${esc(D.hero.klass)}</dd>
+      <dt>${dual('University', 'Guild')}</dt><dd>${esc(D.hero.guild)}</dd>
+      <dt>${dual('Based in', 'Realm')}</dt><dd>${esc(D.hero.realm)}</dd>
     </dl>
     ${attributesSection()}
     <section><h3>Journey</h3>${journeyMap()}</section>
-    <section><h3>Tongues</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
+    <section><h3>${dual('Languages', 'Tongues')}</h3><div class="chips">${D.hero.tongues.map((t) => `<span class="chip"><b>${esc(t.name)}</b> · ${esc(t.rank)} · <i${t.name === 'Arabic' ? ' lang="ar"' : t.name === 'Welsh' ? ' lang="cy"' : ''}>${esc(t.hello)}</i></span>`).join('')}</div></section>`,
 
   quests: (r) => `${head(r, 'Quest Log')}
-    <p class="lore">Campaigns fought, raids survived and one epic still unfolding.</p>
+    <p class="lore">Campaigns fought, raids survived and two epics still unfolding.</p>
     ${motto(D.mottos.quests)}
     ${questGroup('Experience', D.quests.filter((q) => q.experience), 0)}
     ${questGroup('Projects', D.quests.filter((q) => !q.experience), 1)}`,
@@ -1453,8 +1455,8 @@ const panels = {
   trophies: (r) => `${head(r, 'Deeds & Honours')}
     <section>${D.trophies.map((t) => `
       <div class="trophy"><span class="medal ${t.tier}">♛</span>
-        <div><strong>${esc(t.name)}</strong><span>${esc(t.detail)}</span></div><time>${esc(t.when)}</time></div>`).join('')}</section>
-    <section><h3>Scrolls of Certification</h3><ul class="scrolls">${D.scrolls.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`,
+        <div><strong>${t.plain ? dual(t.plain, t.name) : esc(t.name)}</strong><span>${esc(t.detail)}</span></div><time>${esc(t.when)}</time></div>`).join('')}</section>
+    <section><h3>${dual('Certifications', 'Scrolls')}</h3><ul class="scrolls">${D.scrolls.map((s) => `<li>${esc(s)}</li>`).join('')}</ul></section>`,
 
   pursuits: (r) => `${head(r, 'Beyond the Workshop')}
     <blockquote class="verse"><p lang="ar" dir="rtl">${D.folklore.antarah.ar.map(esc).join('<br>')}</p>
@@ -1472,12 +1474,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=36" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
-    <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=36" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=37" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+    <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=37" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
-    <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=36" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+    <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=37" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1498,7 +1500,8 @@ let current = -1;
 let targetAngle = realms[0].angle;
 
 hotbar.innerHTML = realms.map((r, i) =>
-  `<button type="button" data-i="${i}" style="--c:${r.color}"><kbd>${i + 1}</kbd><span class="g">${r.glyph}</span>${r.name}</button>`).join('');
+  `<button type="button" data-i="${i}" style="--c:${r.color}"><kbd>${i + 1}</kbd><span class="g">${r.glyph}</span>${esc(r.short)}</button>`).join('');
+hotbar.querySelectorAll('button').forEach((b, k) => { b.title = `${realms[k].short} · ${realms[k].name}`; });
 hotbar.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); });
 panel.addEventListener('click', (e) => { if (e.target.closest('#loose')) loose(); });
 panel.addEventListener('keydown', (e) => {
@@ -1579,7 +1582,7 @@ function go(i) {
   place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;
   panel.classList.remove('swap');
   const nx = realms[(i + 1) % N];
-  panel.innerHTML = panels[r.id](r) + `<button type="button" class="next-ch" data-next>${i < N - 1 ? `Next chapter · ${esc(nx.name)} <i>${esc(nx.place)}</i>` : 'Back to chapter one'} →</button>`;
+  panel.innerHTML = panels[r.id](r) + `<button type="button" class="next-ch" data-next>${i < N - 1 ? `Next chapter · ${esc(nx.short)} <i>${esc(nx.place)}</i>` : 'Back to chapter one'} →</button>`;
   panel.scrollTop = 0;
   void panel.offsetWidth;
   panel.classList.add('swap');
@@ -1804,7 +1807,7 @@ const [hashRealm, hashItem] = decodeURIComponent(location.hash.slice(1)).split('
 let lastRealm = null;
 try { lastRealm = localStorage.getItem('last-realm'); } catch { /* storage blocked */ }
 const resumeAt = !hashRealm && lastRealm ? realms.findIndex((r) => r.id === lastRealm) : -1;
-if (resumeAt > 0) document.getElementById('start').textContent = `Continue · ${realms[resumeAt].name}`;
+if (resumeAt > 0) document.getElementById('start').textContent = `Continue · ${realms[resumeAt].short}`;
 go(Math.max(0, realms.findIndex((r) => r.id === hashRealm), resumeAt));
 if (hashRealm && (current > 0 || hashItem)) start();
 if (hashItem) reveal([...panel.querySelectorAll('[data-name]')].find((x) => slug(x.dataset.name) === hashItem));

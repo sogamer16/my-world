@@ -460,3 +460,9 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
 #copy-mail { margin-top: 4px; padding: 8px 10px; font: inherit; font-size: 0.82rem; text-align: left; color: var(--ink); background: none; border: 0; border-top: 1px solid var(--line); cursor: pointer; }
 #copy-mail:hover, #copy-mail:focus-visible { color: var(--gold); outline: none; }
 #hud-top:has(#contact-pop:not([hidden])) { z-index: 15; }
+
+/* ---------- plain names first, fantasy names after ---------- */
+.fx { font-family: var(--body); font-style: italic; font-weight: 400; letter-spacing: 0; text-transform: none; font-size: 0.82em; color: var(--dim); margin-inline-start: 0.35em; }
+.fx-title { margin: -2px 0 10px; font-style: italic; font-size: 1rem; color: var(--gold); opacity: 0.85; }
+.q-kind .fx { font-size: 0.95rem; white-space: nowrap; }
+.chips-label { margin: 12px 0 4px; font-family: var(--display); font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); }

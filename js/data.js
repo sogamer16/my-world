@@ -388,12 +388,13 @@ export const lands = {
 };
 
 // Ordered as the journey runs: Makkah, then Swansea, then Melbourne.
+// name is the fantasy name (on the island); short is the plain hotbar label; heading tops the panel.
 export const realms = [
-  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
-  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
-  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
-  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', place: 'Wadi Abqar', placeAr: 'وادي عبقر', color: '#7cc4ff' },
-  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
-  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
-  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
+  { id: 'hero', land: 'hejaz', glyph: '✦', name: 'Character', short: 'About', heading: 'About me', place: 'The Hejaz Courtyard', placeAr: 'ساحة الحجاز', color: '#f4b860' },
+  { id: 'trophies', land: 'gower', glyph: '♛', name: 'Trophies', short: 'Awards', heading: 'Awards & certifications', place: 'The Gower Headland', placeAr: 'رأس غاور', color: '#e8474f' },
+  { id: 'quests', land: 'melbourne', glyph: '⚔', name: 'Quests', short: 'Projects', heading: 'Experience & projects', place: 'The Pillars of Iram', placeAr: 'إرم ذات العماد', color: '#c79bff' },
+  { id: 'skills', land: 'melbourne', glyph: '❖', name: 'Skills', short: 'Skills', heading: 'Skills', place: 'Wadi Abqar', placeAr: 'وادي عبقر', color: '#7cc4ff' },
+  { id: 'guilds', land: 'melbourne', glyph: '⚑', name: 'Guilds', short: 'Clubs', heading: 'Clubs, leadership & education', place: 'The Kashta Camp', placeAr: 'الكشتة', color: '#8dffb0' },
+  { id: 'pursuits', land: 'neutral', glyph: '➶', name: 'Pursuits', short: 'Interests', heading: 'Interests', place: 'The Archery Range', placeAr: 'ميدان الرماية', color: '#5ee6d6' },
+  { id: 'portal', land: 'neutral', glyph: '◈', name: 'Portal', short: 'Contact', heading: 'Contact', place: 'The Waygate', placeAr: 'البوابة', color: '#ff7ad9' },
 ];
