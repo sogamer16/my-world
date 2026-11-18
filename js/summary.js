@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=51';
+import * as D from './data.js?v=54';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -23,7 +23,7 @@ const keep = (x) => x.cv !== false;
 el.innerHTML = `
   <div class="s-bar">
     <button type="button" data-close-summary>← Back to the world</button>
-    <button type="button" id="s-print">Print / save as PDF</button>
+    <span class="s-actions"><a href="${esc(D.cvPdf)}" download data-track="cv-pdf">Download PDF</a><button type="button" id="s-print">Print</button></span>
   </div>
   <article>
     <header>
@@ -32,7 +32,7 @@ el.innerHTML = `
       <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.summary)}</p>
       <p class="s-seeking">${esc(D.hero.seeking)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=51"${b.size ? ` width="${b.size[0]}" height="${b.size[1]}"` : ''} alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=54"${b.size ? ` width="${b.size[0]}" height="${b.size[1]}"` : ''} alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Education</h2>
@@ -48,7 +48,7 @@ el.innerHTML = `
       return list.length ? `<p class="s-group">${esc(a.name)}</p>${list.map(job).join('')}` : '';
     }).join('')}
     <p class="s-group">Games</p>
-    <ul class="s-games">${D.quests.filter((q) => (q.areas || []).includes('games')).map((q) => `<li><strong>${q.play ? `<a class="play" href="${esc(q.play)}" target="_blank" rel="noopener">${esc(q.name)}</a>` : esc(q.name)}</strong>${q.award ? ` (${esc(q.award)})` : ''} — ${esc(q.role)}${q.when ? `, ${esc(q.when)}` : ''}</li>`).join('')}</ul>
+    <ul class="s-games">${D.quests.filter((q) => (q.areas || []).includes('games')).map((q) => `<li><strong>${q.play ? `<a class="play" href="${esc(q.play)}" target="_blank" rel="noopener">${esc(q.name)}</a>` : esc(q.name)}</strong>${q.award ? ` (${esc(q.award)})` : ''} — ${esc(q.role)}${q.when && !q.role.includes(q.when) ? `, ${esc(q.when)}` : ''}</li>`).join('')}</ul>
 
     <h2>Skills</h2>
     ${D.skillTree.map((b) => `<p><strong>${esc(b.sub)}:</strong> ${b.skills.filter((s) => s.rank > 1).map((s) => esc(s.name)).join(', ')}</p>`).join('')}
@@ -62,8 +62,7 @@ el.innerHTML = `
     <p><strong>Certificates:</strong> ${D.scrolls.map(esc).join(' · ')}</p>
 
     <h2>Languages and interests</h2>
-    <p>${D.hero.tongues.map((t) => `${esc(t.name)} (${esc(t.rank)})`).join(', ')}</p>
-    <p>${D.pursuits.map((p) => esc(p.name)).join(', ')}</p>
+    <p><strong>Languages:</strong> ${D.hero.tongues.map((t) => `${esc(t.name)} (${esc(t.rank)})`).join(', ')}. <strong>Interests:</strong> ${D.pursuits.map((p) => esc(p.name)).join(', ')}.</p>
     <p class="s-updated">Updated ${esc(D.hero.updated)}</p>
   </article>`;
 
@@ -71,7 +70,7 @@ el.innerHTML = `
 // visitors, but not under a #summary link or with data saver on until the reader goes back to the world,
 // and never on a device without WebGL.
 let world = null;
-const loadWorld = () => { if (!document.body.classList.contains('no-webgl')) world ||= import('./main.js?v=51'); };
+const loadWorld = () => { if (!document.body.classList.contains('no-webgl')) world ||= import('./main.js?v=54'); };
 const saveData = !!(navigator.connection && navigator.connection.saveData);
 
 // On a first visit the text waits (at most 0.8 s) for its font, so lines do not re-wrap and jump when it arrives.

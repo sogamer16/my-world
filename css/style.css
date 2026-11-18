@@ -360,10 +360,10 @@ body.no-webgl #title-screen, body.no-webgl #world { display: none; }
   html, body { height: auto; overflow: visible; background: #fff; }
   body > *:not(#summary) { display: none !important; }
   #summary { position: static; display: block !important; overflow: visible; background: #fff; color: #111; padding: 0; }
-  #summary article { max-width: none; font-size: 10pt; line-height: 1.33; }
+  #summary article { max-width: none; font-size: 10pt; line-height: 1.25; }
   .s-bar { display: none; }
   #summary h1 { margin-top: 0; font-size: 22pt; }
-  #summary h2 { color: #111; border-color: #999; margin: 11pt 0 5pt; padding-bottom: 2pt; font-size: 10pt; }
+  #summary h2 { color: #111; border-color: #999; margin: 9pt 0 4pt; padding-bottom: 2pt; font-size: 10pt; }
   #summary ul { margin-top: 2pt; }
   #summary li { margin-bottom: 1pt; }
   #summary p + p { margin-top: 4pt; }
@@ -374,7 +374,7 @@ body.no-webgl #title-screen, body.no-webgl #world { display: none; }
   /* plain text for CV-parsing software: no spaced-out headings, no Arabic name, no logo row */
   #summary h2 { letter-spacing: 0.04em; break-after: avoid; }
   .s-ar, .s-logos { display: none !important; }
-  .s-updated { margin-top: 12pt; }
+  .s-updated { display: none; } /* the PDF puts the date in its footer */
 }
 
 /* ---------- quest links and one-time hints ---------- */
@@ -496,7 +496,7 @@ a.play-btn { display: inline-block; padding: 0.55em 1.1em; font-family: var(--di
 a.play-btn:hover { filter: brightness(1.12); }
 .s-group { margin: 14px 0 4px; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: #e3b866; }
 .s-games li { margin-bottom: 3px; }
-@media print { .s-group { color: #111; } }
+@media print { .s-group { color: #111; margin: 8pt 0 2pt; break-after: avoid; } #summary a.play { color: #111; text-decoration: none; } .s-games li { margin-bottom: 0; } }
 
 /* the name of the project under the pointer on the islets */
 #tip { position: fixed; left: 0; top: 0; z-index: 35; pointer-events: none; padding: 4px 10px; font-size: 0.85rem; color: var(--ink); background: rgba(14, 11, 28, 0.92); border: 1px solid var(--line); white-space: nowrap; }
@@ -512,3 +512,9 @@ a.play-btn:hover { filter: brightness(1.12); }
 @media (min-width: 821px) { #slow { left: calc((100vw - min(440px, 42vw) - 20px) / 2); } }
 
 #summary.wait-font article { visibility: hidden; }
+@media print { #summary.wait-font article { visibility: visible; } }
+
+.s-actions { display: flex; gap: 8px; }
+.s-actions a { display: inline-flex; align-items: center; font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; color: #1a1206; background: var(--gold); border: 1px solid var(--gold); padding: 0.5em 0.9em; }
+#summary .s-actions a { color: #1a1206; }
+#summary .s-actions a:hover, #summary .s-actions a:focus-visible { filter: brightness(1.1); }

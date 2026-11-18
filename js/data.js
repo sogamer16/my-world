@@ -475,6 +475,8 @@ export const badges = [
 
 // email is stored in two parts and joined in the browser, so simple scrapers do not pick it up
 export const email = ['sogamer16', 'gmail.com'];
+// the downloadable CV, made from the plain view by tools/make-cv-pdf.mjs; remake it after changing this file
+export const cvPdf = 'assets/Sohaib-Qutub-CV.pdf';
 
 export const portals = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Message me here' },
