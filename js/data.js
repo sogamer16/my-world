@@ -157,19 +157,21 @@ export const quests = [
     role: 'Game jams and small games · Unity and C# · five games playable on itch.io',
     when: '2025 – 2026',
     status: 'Complete',
-    summary: 'Games built for the fun of it and against the clock, most of them in game jams and in teams.',
+    summary: 'Games built for the fun of it and against the clock, most of them in game jams and in teams. One won People\'s Choice.',
     objectives: [
+      'Chimera Ants — a fast first-person action game inspired by Doom; won People\'s Choice at the University of Melbourne GMC Game Jam 2026',
       'JarBound — a card-based ecosystem strategy game in a glass jar, made with Abdullah for the Click & Claw Game Jam 2026 (Unity)',
       'Nuclear Robot — built in a team of four programmers for the CISSA × UMGMC game jam (Unity)',
-      'Chimera Ants — an action game made for the GMC Game Jam 2026',
-      'Riyma — made for the SSAM Game Jam',
+      'Riyma — a strategy game set in pre-Islamic Arabia, where historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played but shape how the game unfolds; made for the SSAM Game Jam',
       'Much Ado About Nothing: A Benedick\'s Tale — Shakespeare\'s eavesdropping scene as a short stealth game with branching endings (Unity)',
       'Creep Crawlers — built in C#',
       'Turbo Bros: Overdrive — game design',
     ],
     loot: ['Unity', 'C#', 'Game design', 'Game jams', 'Teamwork'],
     links: [
-      { label: 'Play them on itch.io', href: 'https://sogamer16.itch.io/' },
+      { label: 'Play Chimera Ants', href: 'https://sogamer16.itch.io/chimera-ants' },
+      { label: 'Play Riyma', href: 'https://sogamer16.itch.io/riyma' },
+      { label: 'All games on itch.io', href: 'https://sogamer16.itch.io/' },
       { label: 'JarBound code', href: 'https://github.com/sogamer16/gamejam-2026-ecosystem' },
       { label: 'Much Ado code', href: 'https://github.com/sogamer16/game-2d-lit' },
     ],
@@ -230,6 +232,7 @@ export const rankNames = ['', 'Novice', 'Adept', 'Seasoned'];
 export const trophies = [
   { name: 'McKinsey Forward', detail: 'McKinsey & Company professional development program', when: '2025', tier: 'gold' },
   { name: 'Silver Tongue', plain: 'Debating', detail: '2nd place, Trinity College debating', when: '2025', tier: 'silver' },
+  { name: 'Crowd Favourite', plain: "People's Choice", detail: "University of Melbourne GMC Game Jam 2026, for Chimera Ants", when: '2026', tier: 'gold' },
   { name: 'Six Hackathons', plain: 'Hackathons', detail: 'Built and shipped under the clock, six times', when: '2025–26', tier: 'gold' },
   { name: 'Sohaib the Great', plain: 'Leavers hoodie', cv: false, detail: 'Olchfa School leavers hoodie — number 23', when: '2023', tier: 'silver' },
   // medalLogo: put the official logo file in assets/logos and name it here (e.g. 'dofe.png') to show it on the 3D medal
