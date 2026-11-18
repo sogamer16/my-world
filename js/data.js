@@ -134,6 +134,7 @@ export const quests = [
       'Deployed live and presented as a finished product',
     ],
     loot: ['Full-stack', 'Backend', '3D', 'Team lead'],
+    links: [{ label: 'Code', href: 'https://github.com/sogamer16/codebrew2026' }],
   },
   {
     name: 'The Flow Trials',
@@ -153,17 +154,25 @@ export const quests = [
     name: 'The Game Forge',
     kind: 'Side Quest',
     plain: 'Side project',
-    role: 'Game jams and small games · C#',
+    role: 'Game jams and small games · Unity and C# · five games playable on itch.io',
     when: '2025 – 2026',
     status: 'Complete',
-    summary: 'Games built for the fun of it and against the clock.',
+    summary: 'Games built for the fun of it and against the clock, most of them in game jams and in teams.',
     objectives: [
-      'Game Jam 2026 entry on the theme of ecosystems',
+      'JarBound — a card-based ecosystem strategy game in a glass jar, made with Abdullah for the Click & Claw Game Jam 2026 (Unity)',
+      'Nuclear Robot — built in a team of four programmers for the CISSA × UMGMC game jam (Unity)',
+      'Chimera Ants — an action game made for the GMC Game Jam 2026',
+      'Riyma — made for the SSAM Game Jam',
+      'Much Ado About Nothing: A Benedick\'s Tale — Shakespeare\'s eavesdropping scene as a short stealth game with branching endings (Unity)',
       'Creep Crawlers — built in C#',
-      'Much Ado About Nothing — Shakespeare retold as a 2D game',
       'Turbo Bros: Overdrive — game design',
     ],
-    loot: ['C#', 'Game design', 'Game jams'],
+    loot: ['Unity', 'C#', 'Game design', 'Game jams', 'Teamwork'],
+    links: [
+      { label: 'Play them on itch.io', href: 'https://sogamer16.itch.io/' },
+      { label: 'JarBound code', href: 'https://github.com/sogamer16/gamejam-2026-ecosystem' },
+      { label: 'Much Ado code', href: 'https://github.com/sogamer16/game-2d-lit' },
+    ],
   },
 ];
 
@@ -286,7 +295,7 @@ export const pursuits = [
     name: 'Making games',
     glyph: '♞',
     flag: 'For Indianapolis, where I lived when I was very small',
-    detail: 'Game jams and small C# games — the fastest way to learn what "finished" means.',
+    detail: 'Game jams and small Unity and C# games, five of them playable on itch.io — the fastest way to learn what "finished" means.',
   },
   {
     name: 'Debating',
@@ -351,6 +360,7 @@ export const email = ['sogamer16', 'gmail.com'];
 export const portals = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Message me here' },
   { name: 'GitHub', href: 'https://github.com/sogamer16', hint: 'See the code' },
+  { name: 'itch.io', href: 'https://sogamer16.itch.io/', hint: 'Play my games' },
 ];
 
 // The three places that shaped me; each island belongs to one of them.
