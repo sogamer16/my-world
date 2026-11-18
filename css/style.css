@@ -476,3 +476,8 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
 #start:focus-visible, #cv-start:focus-visible { clip-path: none; outline: 2px solid #fff; outline-offset: 3px; }
 #summary :focus-visible { outline-color: #e3b866; }
 @media print { :focus-visible { outline: none; } }
+
+/* a game's name in a project list: click to play it */
+a.play { color: var(--gold); font-weight: 600; text-decoration: underline; text-decoration-color: rgba(227, 184, 102, 0.5); text-underline-offset: 3px; }
+a.play:hover, a.play:focus-visible { color: #fff; text-decoration-color: #fff; }
+#summary a.play { color: inherit; }

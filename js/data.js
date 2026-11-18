@@ -157,20 +157,22 @@ export const quests = [
     role: 'Game jams and small games · Unity and C# · five games playable on itch.io',
     when: '2025 – 2026',
     status: 'Complete',
-    summary: 'Games built for the fun of it and against the clock, most of them in game jams and in teams. One won People\'s Choice.',
+    summary: 'Games built for the fun of it and against the clock, most of them in game jams and in teams. One won People\'s Choice. Click a game\'s name to play it in your browser.',
+    // A game with `play` shows its name as a link that opens the game straight to its menu, full window.
+    // These are itch.io's direct game addresses (right-click the game on its itch.io page → open frame in new tab);
+    // they change when a new build is uploaded, so update `play` after re-uploading a game.
     objectives: [
-      'Chimera Ants — a fast first-person action game inspired by Doom; won People\'s Choice at the University of Melbourne GMC Game Jam 2026',
-      'JarBound — a card-based ecosystem strategy game in a glass jar, made with Abdullah for the Click & Claw Game Jam 2026 (Unity)',
-      'Nuclear Robot — built in a team of four programmers for the CISSA × UMGMC game jam (Unity)',
-      'Riyma — a strategy game set in pre-Islamic Arabia, where historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played but shape how the game unfolds; made for the SSAM Game Jam',
-      'Much Ado About Nothing: A Benedick\'s Tale — Shakespeare\'s eavesdropping scene as a short stealth game with branching endings (Unity)',
+      { game: 'Chimera Ants', play: 'https://html-classic.itch.zone/html/18668009/index.html', text: '— a fast first-person action game inspired by Doom; won People\'s Choice at the University of Melbourne GMC Game Jam 2026' },
+      { game: 'Riyma', play: 'https://html-classic.itch.zone/html/19296473/index.html', text: '— a strategy game set in pre-Islamic Arabia, where historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played but shape how the game unfolds; my entry to the SSAM Game Jam, which I hosted' },
+      'Saudi National Day VR museum — a virtual-reality museum, built in three days for Saudi National Day',
+      { game: 'JarBound', play: 'https://html-classic.itch.zone/html/16823019/game6/index.html', text: '— a card-based ecosystem strategy game in a glass jar, made with Abdullah for the Click & Claw Game Jam 2026 (Unity)' },
+      { game: 'Nuclear Robot', play: 'https://html-classic.itch.zone/html/13048570/index.html', text: '— built in a team of four programmers for the CISSA × UMGMC game jam (Unity)' },
+      { game: 'Much Ado About Nothing: A Benedick\'s Tale', play: 'https://html-classic.itch.zone/html/15430996/New%20folder%20(2)/index.html', text: '— Shakespeare\'s eavesdropping scene as a short stealth game with branching endings (Unity)' },
       'Creep Crawlers — built in C#',
       'Turbo Bros: Overdrive — game design',
     ],
     loot: ['Unity', 'C#', 'Game design', 'Game jams', 'Teamwork'],
     links: [
-      { label: 'Play Chimera Ants', href: 'https://sogamer16.itch.io/chimera-ants' },
-      { label: 'Play Riyma', href: 'https://sogamer16.itch.io/riyma' },
       { label: 'All games on itch.io', href: 'https://sogamer16.itch.io/' },
       { label: 'JarBound code', href: 'https://github.com/sogamer16/gamejam-2026-ecosystem' },
       { label: 'Much Ado code', href: 'https://github.com/sogamer16/game-2d-lit' },
@@ -321,7 +323,7 @@ export const guilds = [
     place: 'Melbourne',
     when: '2025',
     detail:
-      'Planned and delivered events for 200+ attendees — volunteers, logistics, stakeholders — and co-organised a student hackathon from the ground up.',
+      'Planned and delivered events for 200+ attendees — volunteers, logistics, stakeholders — and co-organised a student hackathon from the ground up. Hosted the SSAM Game Jam with a game-making workshop: made my own entry, Riyma, and helped three students build and submit theirs.',
   },
   {
     name: 'CISSA',
