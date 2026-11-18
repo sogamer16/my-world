@@ -464,12 +464,13 @@ export const academies = [
 ];
 
 // Places I belong to, shown as a wall of logos. Logos belong to their organisations.
+// size is the logo's own width and height, so the page keeps its space while it loads.
 export const badges = [
-  { name: 'University of Melbourne', logo: 'unimelb.svg', note: 'Studying', href: 'https://www.unimelb.edu.au' },
-  { name: 'Trinity College', logo: 'trinity.png', note: 'Foundation Studies', href: 'https://www.trinity.unimelb.edu.au' },
-  { name: 'CISSA', logo: 'cissa.svg', note: 'Codebrew', href: 'https://www.cissa.org.au' },
-  { name: 'Saudi Students Association in Melbourne', logo: 'ssam.webp', ar: 'نادي الطلبة السعوديين في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
-  { name: 'Olchfa School', logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
+  { name: 'University of Melbourne', size: [400, 400], logo: 'unimelb.svg', note: 'Studying', href: 'https://www.unimelb.edu.au' },
+  { name: 'Trinity College', size: [445, 100], logo: 'trinity.png', note: 'Foundation Studies', href: 'https://www.trinity.unimelb.edu.au' },
+  { name: 'CISSA', size: [165, 165], logo: 'cissa.svg', note: 'Codebrew', href: 'https://www.cissa.org.au' },
+  { name: 'Saudi Students Association in Melbourne', size: [278, 360], logo: 'ssam.webp', ar: 'نادي الطلبة السعوديين في ملبورن', note: 'Event Coordinator', href: 'https://www.instagram.com/ssamelbourne/' },
+  { name: 'Olchfa School', size: [256, 61], logo: 'olchfa.svg', note: 'Class of 2023', href: 'https://www.olchfa.org.uk' },
 ];
 
 // email is stored in two parts and joined in the browser, so simple scrapers do not pick it up

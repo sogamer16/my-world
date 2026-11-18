@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=49';
+import * as D from './data.js?v=51';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -32,7 +32,7 @@ el.innerHTML = `
       <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.summary)}</p>
       <p class="s-seeking">${esc(D.hero.seeking)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=49" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=51"${b.size ? ` width="${b.size[0]}" height="${b.size[1]}"` : ''} alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Education</h2>
@@ -67,8 +67,25 @@ el.innerHTML = `
     <p class="s-updated">Updated ${esc(D.hero.updated)}</p>
   </article>`;
 
-const open = () => { el.hidden = false; document.body.classList.add('summary-open'); el.scrollTop = 0; el.querySelector('button').focus(); };
-const close = () => { el.hidden = true; document.body.classList.remove('summary-open'); };
+// The 3D world (three.js and about 8 MB of models) loads only when it will be seen: straight away for most
+// visitors, but not under a #summary link or with data saver on until the reader goes back to the world,
+// and never on a device without WebGL.
+let world = null;
+const loadWorld = () => { if (!document.body.classList.contains('no-webgl')) world ||= import('./main.js?v=51'); };
+const saveData = !!(navigator.connection && navigator.connection.saveData);
+
+// On a first visit the text waits (at most 0.8 s) for its font, so lines do not re-wrap and jump when it arrives.
+const fontsIn = new Promise((done) => {
+  setTimeout(done, 800);
+  const go = () => document.fonts.load('400 16px Spectral').then(done, done);
+  if (document.documentElement.classList.contains('fonts-css')) go();
+  else new MutationObserver((_, ob) => { if (document.documentElement.classList.contains('fonts-css')) { ob.disconnect(); go(); } }).observe(document.documentElement, { attributes: true });
+});
+const open = () => {
+  el.hidden = false; document.body.classList.add('summary-open'); el.scrollTop = 0; el.querySelector('button').focus();
+  el.classList.add('wait-font'); fontsIn.then(() => el.classList.remove('wait-font'));
+};
+const close = () => { el.hidden = true; document.body.classList.remove('summary-open'); loadWorld(); };
 
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-open-summary]')) open();
@@ -86,3 +103,8 @@ if (!gl) {
   el.querySelector('[data-close-summary]').remove();
   open();
 }
+if (gl && saveData && location.hash !== '#summary') { // data saver: the plain version first, the world on request
+  el.querySelector('article').insertAdjacentHTML('afterbegin', '<p class="s-note">Data saver is on, so this is the plain version. <button type="button" data-close-summary>Load the 3D world</button> (about 8 MB).</p>');
+  open();
+}
+if (gl && el.hidden) loadWorld();

@@ -249,7 +249,7 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
 .card time { clear: right; }
 .q-logo { height: 30px; margin: 2px 0 8px; }
 .s-logos { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
-.s-logos img { height: 38px; max-width: 130px; object-fit: contain; background: #f6f3ec; padding: 4px 6px; border-radius: 3px; }
+.s-logos img { height: 38px; width: auto; max-width: 130px; object-fit: contain; background: #f6f3ec; padding: 4px 6px; border-radius: 3px; }
 
 .kicker-ar { font-family: 'Aref Ruqaa', serif; letter-spacing: 0; text-transform: none; font-size: 1rem; color: var(--gold); margin-inline-start: 0.6em; }
 .crest span#place i { font-family: 'Aref Ruqaa', serif; font-style: normal; color: var(--gold); margin-inline-start: 0.35em; }
@@ -501,3 +501,14 @@ a.play-btn:hover { filter: brightness(1.12); }
 /* the name of the project under the pointer on the islets */
 #tip { position: fixed; left: 0; top: 0; z-index: 35; pointer-events: none; padding: 4px 10px; font-size: 0.85rem; color: var(--ink); background: rgba(14, 11, 28, 0.92); border: 1px solid var(--line); white-space: nowrap; }
 #tip[hidden] { display: none; }
+
+/* data saver note on the plain view; the slow-device offer */
+.s-note { margin: 16px 0 0; padding: 10px 14px; border: 1px solid var(--line); font-size: 0.95rem; }
+.s-note button { font: inherit; color: var(--gold); background: none; border: 0; border-bottom: 1px solid var(--gold); padding: 0; cursor: pointer; }
+#slow { position: fixed; left: 50%; top: calc(76px + env(safe-area-inset-top)); z-index: 32; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; background: rgba(14, 11, 28, 0.96); border: 1px solid var(--line); font-size: 0.9rem; }
+#slow button { font: inherit; font-size: 0.85rem; color: var(--gold); background: none; border: 1px solid var(--line); padding: 0.35em 0.8em; cursor: pointer; }
+#slow button[data-open-summary] { color: #1a1206; background: var(--gold); border-color: var(--gold); }
+@media (min-width: 821px) { #slow { left: calc((100vw - min(440px, 42vw) - 20px) / 2); } }
+
+#summary.wait-font article { visibility: hidden; }

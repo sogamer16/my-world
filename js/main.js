@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=49';
-import { map as MAP } from './worldmap.js?v=49';
+import * as D from './data.js?v=51';
+import { map as MAP } from './worldmap.js?v=51';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -19,7 +19,10 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 /* ================================================================== */
 const canvas = document.getElementById('world');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-let maxDpr = Math.min(devicePixelRatio, innerWidth <= 820 ? 1.75 : 2);
+// Phones render at a lower resolution; small or old devices start in the light mode (no glow, no shadows).
+const phone = matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 820;
+const weak = (navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+let maxDpr = Math.min(devicePixelRatio, phone ? 1.5 : 2);
 renderer.setPixelRatio(maxDpr);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -35,6 +38,7 @@ composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.32, 0.45, 0.88);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
+if (phone || weak) bloom.enabled = false; // the glow is the costliest pass
 
 const hemi = new THREE.HemisphereLight(0x8f7dff, 0x1a0f2e, 0.9);
 scene.add(hemi);
@@ -474,7 +478,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=49`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=51`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -803,7 +807,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   });
-  img.src = `assets/logos/${file}?v=49`;
+  img.src = `assets/logos/${file}?v=51`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -935,7 +939,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=49`;
+    img.src = `assets/logos/${logo}?v=51`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1780,7 +1784,7 @@ const questCards = (list, openFirst) => list.map((q, i) => `
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=49" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=51" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1888,12 +1892,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=49" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=51" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=49" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=51" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=49" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=51" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -2167,10 +2171,18 @@ const focusOff = new THREE.Vector3(), focusTo = new THREE.Vector3();
 onArea = (ai) => { areaFocus = ai; };
 let camY = 10;
 const look = new THREE.Vector3();
+function offerPlain() {
+  try { if (sessionStorage.getItem('plain-offered')) return; sessionStorage.setItem('plain-offered', '1'); } catch { /* show it anyway */ }
+  const n = document.createElement('div'); n.id = 'slow'; n.setAttribute('role', 'status');
+  n.innerHTML = '<p>The 3D world is running slowly on this device.</p><button type="button" data-open-summary>Read the plain version</button><button type="button" data-dismiss>Keep exploring</button>';
+  n.addEventListener('click', (e) => { if (e.target.closest('button')) n.remove(); });
+  document.body.append(n);
+}
 const clock = new THREE.Clock();
 const motePos = motes.geometry.attributes.position;
 
-let lowPower = false;
+let lowPower = false, slowNoted = false;
+if (weak) { lowPower = true; maxDpr = 1; sun.castShadow = false; renderer.setPixelRatio(1); }
 const moods = Object.fromEntries(Object.keys(D.lands).map((k) => [k, moodOf(k)]));
 applyMood(moods[D.realms[0].land], 1);
 const sunDir = new THREE.Vector3();
@@ -2183,6 +2195,13 @@ function frame() {
     perf.n++; perf.sum += raw;
     if (perf.n === 80) {
       if (perf.sum / perf.n > 0.05) { lowPower = true; maxDpr = 1; bloom.enabled = false; sun.castShadow = false; layout(); }
+      perf.n = 0; perf.sum = 0;
+    }
+  } else if (lowPower && !slowNoted && playing && document.visibilityState === 'visible') {
+    // still struggling in the light mode (under ~12fps): offer the plain version, once
+    perf.n++; perf.sum += raw;
+    if (perf.n === 80) {
+      if (perf.sum / perf.n > 0.085) { slowNoted = true; offerPlain(); }
       perf.n = 0; perf.sum = 0;
     }
   }
