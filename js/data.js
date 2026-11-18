@@ -61,6 +61,7 @@ export const quests = [
   },
   {
     name: 'AquaFlow',
+    areas: ['hardware'],
     featured: true, // marked "Start here" on the Quests panel
     flow: ['Flow sensors on each branch', 'Arduino branch node', 'Central server', 'Alert on flow drop'],
     kind: 'Epic Quest',
@@ -81,6 +82,7 @@ export const quests = [
   },
   {
     name: 'ABAAD Robotics',
+    areas: ['hardware', 'software'], // a robot and its software: shown under both
     flow: ['Build the robot', 'Code it in Arabic blocks', 'Train the AI overnight', 'Showcase'],
     kind: 'Epic Quest',
     plain: 'Ongoing project',
@@ -99,6 +101,7 @@ export const quests = [
   },
   {
     name: 'Sentinel',
+    areas: ['software'],
     featured: true, // marked "Start here" on the Quests panel
     flow: ['Command to field device', 'Check against thermal, vibration, humidity', 'Isolation Forest verdict', 'Execute or quarantine'],
     kind: 'Raid',
@@ -118,6 +121,7 @@ export const quests = [
   },
   {
     name: 'Sirius',
+    areas: ['software'],
     featured: true, // marked "Start here" on the Quests panel
     flow: ['A date in history', 'Distance light has travelled since', 'Stars at that distance', '3D sky map'],
     kind: 'Raid',
@@ -138,6 +142,7 @@ export const quests = [
   },
   {
     name: 'The Flow Trials',
+    areas: ['hardware'],
     kind: 'Side Quest',
     plain: 'Side project',
     role: 'CFD guided project · SimScale / Coursera',
@@ -150,34 +155,142 @@ export const quests = [
     ],
     loot: ['CFD', 'SimScale', 'Fluid mechanics'],
   },
+  // Games: each one is its own entry under the Games tab. `play` is itch.io's direct game address
+  // (on the game's itch.io page, right-click the game → open frame in new tab); it opens the game straight
+  // to its menu. It changes when a new build is uploaded, so update `play` after re-uploading a game.
   {
-    name: 'The Game Forge',
-    kind: 'Side Quest',
-    plain: 'Side project',
-    role: 'Game jams and small games · Unity and C# · five games playable on itch.io',
-    when: '2025 – 2026',
+    name: 'Chimera Ants',
+    areas: ['games'],
+    award: "People's Choice",
+    kind: 'Raid',
+    plain: 'Game jam',
+    role: 'First-person action game · University of Melbourne GMC Game Jam 2026',
+    when: '2026',
     status: 'Complete',
-    summary: 'Games built for the fun of it and against the clock, most of them in game jams and in teams. One won People\'s Choice. Click a game\'s name to play it in your browser.',
-    // A game with `play` shows its name as a link that opens the game straight to its menu, full window.
-    // These are itch.io's direct game addresses (right-click the game on its itch.io page → open frame in new tab);
-    // they change when a new build is uploaded, so update `play` after re-uploading a game.
+    summary: 'You wake up inside the chimera ant that ate a scientist, with his memories behind your eyes, four floors above a Queen who molts at dawn. A fast shooter inspired by Doom.',
     objectives: [
-      { game: 'Chimera Ants', play: 'https://html-classic.itch.zone/html/18668009/index.html', text: '— a fast first-person action game inspired by Doom; won People\'s Choice at the University of Melbourne GMC Game Jam 2026' },
-      { game: 'Riyma', play: 'https://html-classic.itch.zone/html/19296473/index.html', text: '— a strategy game set in pre-Islamic Arabia, where historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played but shape how the game unfolds; my entry to the SSAM Game Jam, which I hosted' },
-      'Saudi National Day VR museum — a virtual-reality museum, built in three days for Saudi National Day',
-      { game: 'JarBound', play: 'https://html-classic.itch.zone/html/16823019/game6/index.html', text: '— a card-based ecosystem strategy game in a glass jar, made with Abdullah for the Click & Claw Game Jam 2026 (Unity)' },
-      { game: 'Nuclear Robot', play: 'https://html-classic.itch.zone/html/13048570/index.html', text: '— built in a team of four programmers for the CISSA × UMGMC game jam (Unity)' },
-      { game: 'Much Ado About Nothing: A Benedick\'s Tale', play: 'https://html-classic.itch.zone/html/15430996/New%20folder%20(2)/index.html', text: '— Shakespeare\'s eavesdropping scene as a short stealth game with branching endings (Unity)' },
-      'Creep Crawlers — built in C#',
-      'Turbo Bros: Overdrive — game design',
+      "Won People's Choice at the University of Melbourne GMC Game Jam 2026",
+      'Eat what you kill, wear its power: what you defeat becomes your ability',
+      'Plays in the browser',
     ],
-    loot: ['Unity', 'C#', 'Game design', 'Game jams', 'Teamwork'],
+    loot: ['Game design', 'Action', 'Game jams'],
+    play: 'https://html-classic.itch.zone/html/18668009/index.html',
+    links: [{ label: 'itch.io page', href: 'https://sogamer16.itch.io/chimera-ants' }],
+  },
+  {
+    name: 'Creep Crawlers',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game',
+    role: 'Action game · C#',
+    when: '2026',
+    status: 'Complete',
+    summary: 'A Doom-style shooter in an ant nest: hunt the ants and take their power-ups.',
+    objectives: [
+      'Kill ants to take their power-ups',
+      'Built in C#',
+    ],
+    loot: ['C#', 'Game design', 'Action'],
+  },
+  {
+    name: 'Riyma',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game jam · host',
+    role: 'Strategy game · SSAM Game Jam, which I hosted',
+    when: '2026',
+    status: 'Complete',
+    summary: 'A strategy game set in pre-Islamic Arabia. Historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played, but they shape how the game unfolds.',
+    objectives: [
+      'My entry to the SSAM Game Jam, which I hosted with a game-making workshop',
+      'Helped three students build and submit their own games',
+      'Set in pre-Islamic Arabia, with historical figures who steer the story',
+    ],
+    loot: ['Game design', 'Strategy', 'Workshop host'],
+    play: 'https://html-classic.itch.zone/html/19296473/index.html',
+    links: [{ label: 'itch.io page', href: 'https://sogamer16.itch.io/riyma' }],
+  },
+  {
+    name: 'JarBound',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game jam',
+    role: 'Card-based ecosystem strategy · Click & Claw Game Jam 2026 · with Abdullah',
+    when: '2026',
+    status: 'Complete',
+    summary: 'Keep a tiny living world in a glass jar alive by playing cards that change its fish, snails, algae, light and nitrates before it collapses.',
+    objectives: [
+      'A rolling three-card hand: play one card a day, then draw a replacement',
+      'Ecosystem simulation with reproduction, starvation, algae blooms and collapse',
+      'A 3D glass jar with water, gravel, plants and bubbles',
+    ],
+    loot: ['Unity', 'C#', 'Simulation', 'Game design'],
+    play: 'https://html-classic.itch.zone/html/16823019/game6/index.html',
     links: [
-      { label: 'All games on itch.io', href: 'https://sogamer16.itch.io/' },
-      { label: 'JarBound code', href: 'https://github.com/sogamer16/gamejam-2026-ecosystem' },
-      { label: 'Much Ado code', href: 'https://github.com/sogamer16/game-2d-lit' },
+      { label: 'Code', href: 'https://github.com/sogamer16/gamejam-2026-ecosystem' },
+      { label: 'itch.io page', href: 'https://sogamer16.itch.io/jarbound' },
     ],
   },
+  {
+    name: 'Nuclear Robot',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game jam',
+    role: 'Team of four programmers · CISSA × UMGMC game jam',
+    when: '2026',
+    status: 'Complete',
+    summary: 'Keep a reactor from overheating: charge and send batteries, work the coolant and keep the heat down.',
+    objectives: [
+      'Built in a jam with three other programmers',
+      'Made in Unity',
+    ],
+    loot: ['Unity', 'Teamwork', 'Game jams'],
+    play: 'https://html-classic.itch.zone/html/13048570/index.html',
+    links: [{ label: 'itch.io page', href: 'https://sogamer16.itch.io/nuclear-robot-four-programmers-in-a-jam' }],
+  },
+  {
+    name: 'Much Ado About Nothing',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'Game',
+    role: "A Benedick's Tale · narrative stealth game · Unity",
+    when: '2025',
+    status: 'Complete',
+    summary: "Shakespeare's eavesdropping scene as a playable stealth game: you are Benedick, creeping through a garden of patrolling friends to overhear a conversation.",
+    objectives: [
+      'Don Pedro, Claudio and Leonato each patrol with their own detection pattern',
+      "How well you stay hidden decides Beatrice's reaction: several endings",
+      'Branching dialogue when you confront Beatrice',
+    ],
+    loot: ['Unity', 'C#', 'Narrative design'],
+    play: 'https://html-classic.itch.zone/html/15430996/New%20folder%20(2)/index.html',
+    links: [
+      { label: 'Code', href: 'https://github.com/sogamer16/game-2d-lit' },
+      { label: 'itch.io page', href: 'https://sogamer16.itch.io/proof-much-ado-about-nothing' },
+    ],
+  },
+  {
+    name: 'Saudi National Day VR Museum',
+    areas: ['games'],
+    kind: 'Side Quest',
+    plain: 'VR project',
+    role: 'Virtual-reality museum · Saudi National Day',
+    when: '',
+    status: 'Complete',
+    summary: 'A virtual-reality museum for Saudi National Day, built in three days.',
+    objectives: [
+      'Built in three days',
+      'Coming to itch.io',
+    ],
+    loot: ['VR', '3D', 'Rapid prototyping'],
+  },
+];
+
+// The Projects realm splits into three islets; each project lists the ones it belongs to in `areas`.
+export const areas = [
+  { id: 'hardware', name: 'Hardware', fx: 'The Workshop', sub: 'Sensors, robots, HVAC and fluids', color: '#f4b860' },
+  { id: 'software', name: 'Software', fx: 'The Observatory', sub: 'Machine learning, web and security', color: '#7cc4ff' },
+  { id: 'games', name: 'Games', fx: 'The Arcade', sub: 'Game jams and games you can play', color: '#ff7ad9' },
 ];
 
 // rank: 1 Novice · 2 Adept · 3 Seasoned (Novice skills show as "Familiar with" on the CV)
@@ -191,7 +304,7 @@ export const skillTree = [
       { name: 'Python', rank: 3, used: ['Sentinel'] },
       { name: 'C / C++', rank: 3, used: ['AquaFlow'] },
       { name: 'JavaScript', rank: 2, used: ['ABAAD Robotics'] },
-      { name: 'C#', rank: 2, used: ['The Game Forge'] },
+      { name: 'C#', rank: 2, used: ['JarBound', 'Creep Crawlers'] },
       { name: 'Bash', rank: 2 },
       { name: 'Linux / WSL', rank: 2, used: ['Totex Energy'] },
       { name: 'Git / GitHub', rank: 2 },

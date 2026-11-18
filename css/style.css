@@ -481,3 +481,19 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
 a.play { color: var(--gold); font-weight: 600; text-decoration: underline; text-decoration-color: rgba(227, 184, 102, 0.5); text-underline-offset: 3px; }
 a.play:hover, a.play:focus-visible { color: #fff; text-decoration-color: #fff; }
 #summary a.play { color: inherit; }
+
+/* ---------- Projects: Hardware / Software / Games tabs and game cards ---------- */
+.areas { margin-top: 10px; }
+.area-sum { margin: 10px 0 4px; font-size: 0.88rem; color: var(--dim); }
+.area-sum b { font-family: var(--display); font-weight: 600; letter-spacing: 0.08em; color: var(--ink); }
+.start-here.award { background: #f6d998; }
+.start-here.playable { color: var(--ink); background: none; border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); }
+.badges { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.badges .start-here { margin: 0; }
+.q-play { margin: 0 0 10px; }
+a.play-btn { display: inline-block; padding: 0.55em 1.1em; font-family: var(--display); font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
+  color: #1a1206; background: linear-gradient(180deg, #f6d998, #c9963f); border: 1px solid #fff0c4; }
+a.play-btn:hover { filter: brightness(1.12); }
+.s-group { margin: 14px 0 4px; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: #e3b866; }
+.s-games li { margin-bottom: 3px; }
+@media print { .s-group { color: #111; } }

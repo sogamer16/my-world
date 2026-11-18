@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=41';
-import { map as MAP } from './worldmap.js?v=41';
+import * as D from './data.js?v=42';
+import { map as MAP } from './worldmap.js?v=42';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=41`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=42`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -533,8 +533,9 @@ const build = {
   },
 
   quests(g, color) {
-    D.quests.forEach((q, i) => {
-      const a = THREE.MathUtils.mapLinear(i, 0, D.quests.length - 1, -1.5, 1.5) + Math.PI / 2;
+    const pillared = D.quests.filter((q) => !(q.areas || []).includes('games')); // games have the Arcade
+    pillared.forEach((q, i) => {
+      const a = THREE.MathUtils.mapLinear(i, 0, pillared.length - 1, -1.5, 1.5) + Math.PI / 2;
       const h = 2.8 + (i % 2) * 0.9 + (i === 0 ? 1.2 : 0);
       const m = new THREE.Mesh(jitter(new THREE.BoxGeometry(0.95, h, 0.6, 2, 4, 2), 0.16), stone(0x8a8277));
       m.castShadow = true; m.receiveShadow = true;
@@ -802,7 +803,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   });
-  img.src = `assets/logos/${file}?v=41`;
+  img.src = `assets/logos/${file}?v=42`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -934,7 +935,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=41`;
+    img.src = `assets/logos/${logo}?v=42`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1409,20 +1410,54 @@ const attributesSection = () => {
 const objective = (o) => (typeof o === 'string' ? esc(o)
   : `<a class="play" href="${esc(o.play)}" target="_blank" rel="noopener" title="Play ${esc(o.game)} in your browser">▶ ${esc(o.game)}</a> ${esc(o.text)}`);
 // The Quests panel lists paid work apart from projects, so an employer sees the job first.
-const questGroup = (title, list, first) => (list.length ? `<section class="q-group"><h3>${title}</h3>${list.map((q, i) => `
-      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 && first === 0 ? ' open' : ''}>
+const questCards = (list, openFirst) => list.map((q, i) => `
+      <details class="quest${q.featured ? ' featured' : ''}" data-name="${esc(q.name)}"${i === 0 && openFirst ? ' open' : ''}>
         <summary>
-          ${q.featured ? '<span class="start-here">★ Start here</span>' : ''}<span class="q-kind">${esc(q.plain)} · ${esc(q.when)} <span class="fx">${esc(q.kind)}</span></span>
+          ${q.featured || q.award || q.play ? `<span class="badges">${q.featured ? '<span class="start-here">★ Start here</span>' : ''}${q.award ? `<span class="start-here award">♛ ${esc(q.award)}</span>` : ''}${q.play ? '<span class="start-here playable">▶ Playable</span>' : ''}</span>` : ''}<span class="q-kind">${esc(q.plain)}${q.when ? ` · ${esc(q.when)}` : ''} <span class="fx">${esc(q.kind)}</span></span>
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=41" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=42" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
           ${q.links ? `<p class="q-links">${q.links.map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
         </div>
-      </details>`).join('')}</section>` : '');
+      </details>`).join('');
+const questGroup = (title, list, first) => (list.length ? `<section class="q-group"><h3>${title}</h3>${questCards(list, first === 0)}</section>` : '');
+
+// Projects split three ways, one tab per islet: Hardware (the Workshop), Software (the Observatory), Games (the Arcade).
+let area = 0;
+const inArea = (ai) => D.quests.filter((q) => (q.areas || []).includes(D.areas[ai].id));
+function areaPanel(ai) {
+  const a = D.areas[ai], list = inArea(ai);
+  return `<p class="area-sum"><b>${esc(a.fx)}</b> · ${esc(a.sub)} · ${list.length} ${list.length === 1 ? 'project' : 'projects'}</p>${questCards(list, false)}`;
+}
+function pickArea(ai, focus = false) {
+  area = ((ai % D.areas.length) + D.areas.length) % D.areas.length;
+  const body = panel.querySelector('#area');
+  if (!body) return;
+  body.innerHTML = areaPanel(area);
+  body.setAttribute('aria-labelledby', `area-tab-${area}`);
+  panel.querySelectorAll('[data-area]').forEach((t) => {
+    const on = +t.dataset.area === area;
+    t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+    if (on && focus) t.focus();
+  });
+  if (playing) history.replaceState(null, '', `#quests/${D.areas[area].id}`);
+  onArea(area);
+}
+// the scene hooks in here to fly the camera to the islet (set once the islets exist)
+let onArea = () => {};
+// find a project's card, switching to the tab it lives under if need be
+function findCard(test) {
+  let el = [...panel.querySelectorAll('[data-name]')].find(test);
+  if (el || !panel.querySelector('#area')) return el;
+  const q = D.quests.find((x) => x.areas && test({ dataset: { name: x.name } }));
+  if (!q) return null;
+  pickArea(D.areas.findIndex((a) => a.id === q.areas[0]));
+  return [...panel.querySelectorAll('[data-name]')].find(test);
+}
 
 // The first thing on the Character panel: who I am in two lines, for someone hiring.
 function glance() {
@@ -1455,7 +1490,11 @@ const panels = {
     <p class="lore">Campaigns fought, raids survived and two epics still unfolding.</p>
     ${motto(D.mottos.quests)}
     ${questGroup('Experience', D.quests.filter((q) => q.experience), 0)}
-    ${questGroup('Projects', D.quests.filter((q) => !q.experience), 1)}`,
+    <section class="q-group"><h3>Projects</h3>
+    <div class="schools areas" role="tablist" aria-label="Kinds of project">${D.areas.map((a, ai) => `
+      <button type="button" role="tab" id="area-tab-${ai}" data-area="${ai}" aria-controls="area" aria-selected="${ai === area}" tabindex="${ai === area ? 0 : -1}" style="--c:${a.color}">
+        <b>${esc(a.name)}</b><span>${esc(a.fx)} · ${inArea(ai).length}</span></button>`).join('')}</div>
+    <div id="area" role="tabpanel" aria-labelledby="area-tab-${area}">${areaPanel(area)}</div></section>`,
 
   skills: (r) => `${head(r, 'Skill Tree')}
     <blockquote class="verse abqar"><p lang="ar" dir="rtl"><b>${esc(D.folklore.abqar.ar[0])}</b><br>${esc(D.folklore.abqar.ar[1])}</p><p>${esc(D.folklore.abqar.en)}</p></blockquote>
@@ -1486,12 +1525,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=41" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=42" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=41" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=42" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=41" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=42" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1517,11 +1556,12 @@ hotbar.querySelectorAll('button').forEach((b, k) => { b.title = `${realms[k].sho
 hotbar.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); });
 panel.addEventListener('click', (e) => { if (e.target.closest('#loose')) loose(); });
 panel.addEventListener('keydown', (e) => {
-  const tab = e.target.closest('[data-school]');
+  const tab = e.target.closest('[data-school], [data-area]');
   if (!tab || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
   e.preventDefault(); e.stopPropagation();
-  const n = D.skillTree.length;
-  pickSchool(e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : school + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1), true);
+  const isArea = 'area' in tab.dataset, n = isArea ? D.areas.length : D.skillTree.length, at = isArea ? area : school;
+  const to = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : at + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1);
+  if (isArea) pickArea(to, true); else pickSchool(to, true);
 });
 // header buttons that travel, e.g. Contact -> the Portal
 document.addEventListener('click', (e) => {
@@ -1558,6 +1598,8 @@ panel.addEventListener('focusin', (e) => { if (!tapping) lightSkill(skillOf(e) |
 panel.addEventListener('click', (e) => {
   const tab = e.target.closest('[data-school]');
   if (tab) return pickSchool(+tab.dataset.school);
+  const at = e.target.closest('[data-area]');
+  if (at) return pickArea(+at.dataset.area);
   const jump = e.target.closest('[data-goto]');
   if (jump) return showIn(jump.dataset.goto, jump.dataset.find);
   const k = skillOf(e); tapping = false;
@@ -1565,7 +1607,7 @@ panel.addEventListener('click', (e) => {
 });
 function showIn(realmId, name) {
   go(realms.findIndex((r) => r.id === realmId));
-  reveal([...panel.querySelectorAll('[data-name]')].find((x) => x.dataset.name === name));
+  reveal(findCard((x) => x.dataset.name === name));
 }
 const slug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function reveal(el) {
@@ -1822,5 +1864,9 @@ const resumeAt = !hashRealm && lastRealm ? realms.findIndex((r) => r.id === last
 if (resumeAt > 0) document.getElementById('start').textContent = `Continue · ${realms[resumeAt].short}`;
 go(Math.max(0, realms.findIndex((r) => r.id === hashRealm), resumeAt));
 if (hashRealm && (current > 0 || hashItem)) start();
-if (hashItem) reveal([...panel.querySelectorAll('[data-name]')].find((x) => slug(x.dataset.name) === hashItem));
+if (hashItem) {
+  const ai = D.areas.findIndex((a) => a.id === hashItem);
+  if (ai >= 0 && hashRealm === 'quests') pickArea(ai);
+  else reveal(findCard((x) => slug(x.dataset.name) === hashItem));
+}
 frame();
