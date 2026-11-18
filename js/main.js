@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=37';
-import { map as MAP } from './worldmap.js?v=37';
+import * as D from './data.js?v=38';
+import { map as MAP } from './worldmap.js?v=38';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=37`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=38`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -779,21 +779,30 @@ const build = {
 
 /* ---------- logos, signs and banners ---------- */
 // Draws an organisation's logo onto a canvas texture once it has loaded.
-function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, onReady } = {}) {
+// Oswald and Graduate are painted only into two textures (the CISSA banner and the hoodie print),
+// so they load here, after the page, instead of holding up the first paint.
+let texFonts = null;
+const textureFonts = () => texFonts || (texFonts = new Promise((done) => {
+  const l = document.createElement('link'); l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Graduate&family=Oswald:wght@500;600&display=swap';
+  l.onload = () => Promise.all(['600px Graduate', '600 112px Oswald', '500 40px Oswald'].map((f) => document.fonts.load(f))).then(done, done);
+  l.onerror = done; document.head.append(l);
+}));
+function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, onReady, fonts } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d');
   x.fillStyle = bg; x.fillRect(0, 0, w, h);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   const img = new Image();
-  img.onload = () => {
+  img.onload = () => Promise.resolve(fonts).then(() => {
     const [bx, by, bw, bh] = box || [w * pad, h * pad, w * (1 - 2 * pad), h * (1 - 2 * pad)];
     const iw = img.naturalWidth || 300, ih = img.naturalHeight || 150, k = Math.min(bw / iw, bh / ih);
     x.drawImage(img, bx + (bw - iw * k) / 2, by + (bh - ih * k) / 2, iw * k, ih * k);
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
     if (onReady) onReady();
-  };
-  img.src = `assets/logos/${file}?v=37`;
+  });
+  img.src = `assets/logos/${file}?v=38`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -819,7 +828,7 @@ function ssamBanner() {
 function rollup(g, { x, z, ry = 0 }) {
   const b = new THREE.Group();
   const foot = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.09, 0.28), flat(0x2a2a2e)); foot.position.y = 0.05;
-  const tex = logoTexture('cissa.svg', { w: 512, h: 1280, bg: '#0b0b0e', box: [96, 150, 320, 320], extra: (c, w) => {
+  const tex = logoTexture('cissa.svg', { w: 512, h: 1280, bg: '#0b0b0e', box: [96, 150, 320, 320], fonts: textureFonts(), extra: (c, w) => {
     c.textAlign = 'center'; c.fillStyle = '#ffffff'; c.font = '600 132px Oswald, Arial, sans-serif'; c.fillText('CISSA', w / 2, 640);
     c.fillStyle = '#4fc3dc'; c.font = '500 40px Oswald, Arial, sans-serif'; c.fillText('COMPUTING AND INFORMATION', w / 2, 730); c.fillText('SYSTEMS STUDENT ASSOCIATION', w / 2, 782);
     c.fillStyle = '#ffffff'; c.font = '600 44px Oswald, Arial, sans-serif'; c.fillText('CODEBREW 2026', w / 2, 980);
@@ -858,7 +867,7 @@ function hoodiePrint() {
     tex.needsUpdate = true;
   };
   draw();
-  Promise.all([document.fonts.load('600px Graduate'), document.fonts.load('600 112px Oswald')]).then(draw).catch(() => {});
+  textureFonts().then(draw);
   return tex;
 }
 function applyHoodiePrint(holder, g) {
@@ -925,7 +934,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=37`;
+    img.src = `assets/logos/${logo}?v=38`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1404,7 +1413,7 @@ const questGroup = (title, list, first) => (list.length ? `<section class="q-gro
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=37" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=38" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1467,19 +1476,19 @@ const panels = {
       <div class="score"><span>Last <b id="s-last">–</b></span><span>Best <b id="s-best">${best || '–'}</b></span><span>Shots <b id="s-n">${shots}</b></span></div>
     </div>
     <section style="margin-top:18px">${D.pursuits.map((p) => `
-      <div class="pursuit" data-name="${esc(p.name)}"><span class="pg">${esc(p.glyph)}</span>${p.flag ? `<span class="chequer" title="${esc(p.flag)}" aria-label="${esc(p.flag)}"></span>` : ''}
+      <div class="pursuit" data-name="${esc(p.name)}"><span class="pg">${esc(p.glyph)}</span>${p.flag ? `<span class="chequer" role="img" title="${esc(p.flag)}" aria-label="${esc(p.flag)}"></span>` : ''}
         <div><strong>${esc(p.name)}</strong><p>${esc(p.detail)}</p>${p.extra ? `<p class="extra">${esc(p.extra)}</p>` : ''}</div></div>`).join('')}</section>`,
 
   guilds: (r) => `${head(r, 'Guilds & Academies')}
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=37" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=38" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=37" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=38" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=37" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=38" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
