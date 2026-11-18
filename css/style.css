@@ -497,3 +497,7 @@ a.play-btn:hover { filter: brightness(1.12); }
 .s-group { margin: 14px 0 4px; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: #e3b866; }
 .s-games li { margin-bottom: 3px; }
 @media print { .s-group { color: #111; } }
+
+/* the name of the project under the pointer on the islets */
+#tip { position: fixed; left: 0; top: 0; z-index: 35; pointer-events: none; padding: 4px 10px; font-size: 0.85rem; color: var(--ink); background: rgba(14, 11, 28, 0.92); border: 1px solid var(--line); white-space: nowrap; }
+#tip[hidden] { display: none; }
