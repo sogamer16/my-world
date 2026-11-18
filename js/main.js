@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=35';
-import { map as MAP } from './worldmap.js?v=35';
+import * as D from './data.js?v=36';
+import { map as MAP } from './worldmap.js?v=36';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=35`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=36`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -793,7 +793,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   };
-  img.src = `assets/logos/${file}?v=35`;
+  img.src = `assets/logos/${file}?v=36`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -925,7 +925,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=35`;
+    img.src = `assets/logos/${logo}?v=36`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1402,7 +1402,7 @@ const questGroup = (title, list, first) => (list.length ? `<section class="q-gro
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=35" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=36" alt="${esc(q.name)} logo">` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${esc(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1472,12 +1472,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=35" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=36" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>Banners carried</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=35" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=36" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>Academies</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=35" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=36" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1584,7 +1584,10 @@ function go(i) {
   void panel.offsetWidth;
   panel.classList.add('swap');
   hotbar.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-current', k === i));
-  if (playing) history.replaceState(null, '', `#${r.id}`);
+  if (playing) {
+    history.replaceState(null, '', `#${r.id}`);
+    try { localStorage.setItem('last-realm', r.id); } catch { /* storage blocked */ }
+  }
   hintEl?.classList.remove('on');
   setTimeout(() => { if (current === i) showHint(r.id); }, 1200);
 }
@@ -1598,8 +1601,36 @@ function start() {
   document.body.classList.add('playing');
   document.getElementById('xp-fill').style.width = `${((D.hero.year - 0.15) / D.hero.years) * 100}%`;
   layout();
+  if (current > 0 && !location.hash) history.replaceState(null, '', `#${realms[current].id}`);
 }
 document.getElementById('start').addEventListener('click', start);
+
+// Title screen: who I am, what I build and how to reach me, before anyone has to play.
+const mail = D.email.join('@');
+const contacts = [
+  { label: 'Email', href: `mailto:${mail}`, detail: mail },
+  ...D.portals.map((p) => ({ label: p.name, href: p.href, detail: p.href.replace(/^https?:\/\/(www\.)?/, ''), ext: true })),
+];
+const ext = (c) => (c.ext ? ' target="_blank" rel="noopener"' : '');
+document.getElementById('pitch').innerHTML =
+  `${esc(D.hero.pitch)} <span class="seeking-tag">${esc(D.hero.seeking.split(':')[0])}</span>`;
+document.getElementById('contact-strip').innerHTML =
+  contacts.map((c) => `<a href="${esc(c.href)}"${ext(c)}>${esc(c.label)}</a>`).join('<i aria-hidden="true">·</i>');
+
+// Contact in the header: email, LinkedIn and GitHub in one click, from any realm
+const contactBtn = document.getElementById('contact-btn');
+const contactPop = document.getElementById('contact-pop');
+contactPop.innerHTML = contacts.map((c) => `<a href="${esc(c.href)}"${ext(c)}><strong>${esc(c.label)}</strong><span>${esc(c.detail)}</span></a>`).join('') +
+  `<button type="button" id="copy-mail">Copy email address</button>`;
+const setContact = (on) => { contactPop.hidden = !on; contactBtn.setAttribute('aria-expanded', String(on)); };
+contactBtn.addEventListener('click', () => setContact(contactPop.hidden));
+document.addEventListener('click', (e) => { if (!e.target.closest('.contact-menu')) setContact(false); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && !contactPop.hidden) { setContact(false); contactBtn.focus(); } });
+document.getElementById('copy-mail').addEventListener('click', async (e) => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(mail); b.textContent = 'Copied'; } catch { b.textContent = mail; }
+  setTimeout(() => { b.textContent = 'Copy email address'; }, 2000);
+});
 
 // a tale of Juha, the folk trickster, on the title screen, changing every few seconds
 const juhaEl = document.getElementById('juha');
@@ -1769,7 +1800,12 @@ function frame() {
 layout();
 // links like #quests or #quests/sentinel open a realm, and optionally one quest or pursuit in it
 const [hashRealm, hashItem] = decodeURIComponent(location.hash.slice(1)).split('/');
-go(Math.max(0, realms.findIndex((r) => r.id === hashRealm)));
+// a returning visitor with no link picks up where they left off; the title screen still comes first
+let lastRealm = null;
+try { lastRealm = localStorage.getItem('last-realm'); } catch { /* storage blocked */ }
+const resumeAt = !hashRealm && lastRealm ? realms.findIndex((r) => r.id === lastRealm) : -1;
+if (resumeAt > 0) document.getElementById('start').textContent = `Continue · ${realms[resumeAt].name}`;
+go(Math.max(0, realms.findIndex((r) => r.id === hashRealm), resumeAt));
 if (hashRealm && (current > 0 || hashItem)) start();
 if (hashItem) reveal([...panel.querySelectorAll('[data-name]')].find((x) => slug(x.dataset.name) === hashItem));
 frame();

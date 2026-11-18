@@ -9,6 +9,8 @@ export const hero = {
   realm: 'Melbourne, VIC',
   // two lines for employers: the top of the Character panel and of the CV
   summary: 'Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software, from wiring and commissioning HVAC hardware to anomaly-detection models and live web apps.',
+  // one line under the name on the title screen
+  pitch: 'I build sensor systems, robotics and software.',
   seeking: 'Open to learning opportunities: a chance to work alongside engineers, learn how real systems are built, and be useful while I do it.',
   updated: 'November 2026', // shown on the CV view; change it when you update this file
   year: 1,
