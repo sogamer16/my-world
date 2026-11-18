@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=42';
-import { map as MAP } from './worldmap.js?v=42';
+import * as D from './data.js?v=43';
+import { map as MAP } from './worldmap.js?v=43';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=42`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=43`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -803,7 +803,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     tex.needsUpdate = true;
     if (onReady) onReady();
   });
-  img.src = `assets/logos/${file}?v=42`;
+  img.src = `assets/logos/${file}?v=43`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -935,7 +935,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=42`;
+    img.src = `assets/logos/${logo}?v=43`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1252,6 +1252,103 @@ function rain(g) {
   });
 }
 
+
+/* ---------- the Projects islets: Hardware, Software and Games around the Pillars of Iram ---------- */
+// In the hub's own frame: +z faces the camera, x runs along the ring. The islets sit behind and to the sides,
+// clear of the stepping stones, and are joined by rope bridges.
+// islets are small islands, scaled down; the Arcade holds the most, so it is the biggest
+const isletScale = { hardware: 0.62, software: 0.55, games: 0.8 };
+const isletAt = {
+  hardware: new THREE.Vector3(-10.5, 1.6, -9.5),
+  software: new THREE.Vector3(-2, 4.6, -18),
+  games: new THREE.Vector3(11.5, 1.0, -11),
+};
+const isletGroups = {}; // area id → group, for the camera and the landmarks
+// where each project stands on its islet, in islet units (radius about 5.5)
+function slotsFor(n) {
+  if (n === 1) return [[0, 0.8]];
+  if (n <= 4) return Array.from({ length: n }, (_, k) => { // an arc across the front half
+    const a = Math.PI * (0.15 + 0.7 * (k / (n - 1)));
+    return [-Math.cos(a) * 3.4, Math.sin(a) * 2.2 + 0.3];
+  });
+  // more than four: one in the middle, the rest in a ring, the first of them at the front
+  return [[0, 0], ...Array.from({ length: n - 1 }, (_, k) => {
+    const a = Math.PI / 2 + (k / (n - 1)) * TAU;
+    return [Math.cos(a) * 3.7, Math.sin(a) * 3.7];
+  })];
+}
+// which projects stand on which islet: ABAAD is on the Workshop, and its robot crosses to the Observatory
+const isletProjects = (id) => D.quests.filter((q) => (id === 'hardware' && q.experience) || (q.areas || [])[0] === id);
+function isletSign(text, sub, color) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 160;
+  const x = c.getContext('2d');
+  x.fillStyle = 'rgba(14, 11, 28, 0.82)'; x.fillRect(0, 0, 512, 160);
+  x.strokeStyle = color; x.lineWidth = 6; x.strokeRect(6, 6, 500, 148);
+  x.textAlign = 'center'; x.fillStyle = color; x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(text.toUpperCase(), 256, 72);
+  x.fillStyle = '#efe6d2'; x.font = 'italic 36px Spectral, Georgia, serif'; x.fillText(sub, 256, 124);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(4.2, 1.31, 1);
+  document.fonts.ready.then(() => { // redraw once the fonts are in
+    x.clearRect(0, 0, 512, 160); x.fillStyle = 'rgba(14, 11, 28, 0.82)'; x.fillRect(0, 0, 512, 160);
+    x.strokeRect(6, 6, 500, 148); x.fillStyle = color; x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(text.toUpperCase(), 256, 72);
+    x.fillStyle = '#efe6d2'; x.font = 'italic 36px Spectral, Georgia, serif'; x.fillText(sub, 256, 124); tex.needsUpdate = true;
+  });
+  return sp;
+}
+// a rope bridge: planks hanging between two points, with a rope either side
+function ropeBridge(g, a, b, sag = 0.9) {
+  const n = Math.max(8, Math.round(a.distanceTo(b) / 0.42)), dir = b.clone().sub(a), side = new THREE.Vector3(-dir.z, 0, dir.x).normalize();
+  const at = (t, lift = 0) => a.clone().lerp(b, t).add(new THREE.Vector3(0, -Math.sin(t * Math.PI) * sag + lift, 0));
+  const plank = new THREE.InstancedMesh(new THREE.BoxGeometry(0.34, 0.07, 1.1), flat(0x7a5232), n - 1);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), tmp = new THREE.Object3D();
+  for (let k = 1; k < n; k++) {
+    const t = k / n, p = at(t), p2 = at(t + 0.01);
+    tmp.position.copy(p); tmp.lookAt(p.clone().add(side)); tmp.rotateZ(Math.atan2(p2.y - p.y, p2.clone().setY(0).distanceTo(p.clone().setY(0))) * 0);
+    tmp.updateMatrix(); plank.setMatrixAt(k - 1, tmp.matrix);
+  }
+  plank.castShadow = true; g.add(plank);
+  [-0.55, 0.55].forEach((o) => {
+    const pts = Array.from({ length: 13 }, (_, k) => at(k / 12, 0.55).addScaledVector(side, o));
+    const rope = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.03, 4), flat(0xc9a66b));
+    g.add(rope);
+    [0, 1].forEach((e) => { // posts at each end
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.9, 5), flat(0x5a3b22));
+      post.position.copy((e ? b : a).clone().addScaledVector(side, o)).add(new THREE.Vector3(0, 0.3, 0)); g.add(post);
+    });
+  });
+}
+function buildIslets(g, hubIndex) {
+  D.areas.forEach((A, ai) => {
+    const pos = isletAt[A.id], col = new THREE.Color(A.color);
+    const isle = island(A.color, A.id === 'games' ? 'neutral' : 'melbourne', 40 + ai * 9);
+    const ISLET = isletScale[A.id];
+    isle.scale.setScalar(ISLET); isle.position.copy(pos);
+    isle.rotation.y = Math.atan2(-pos.x, -pos.z) * 0.25; // turned a little toward the hub
+    // the islet's name floats above it
+    const sign = isletSign(A.name, A.fx, A.color); sign.position.set(0, 7.2, 0); sign.scale.multiplyScalar(1 / ISLET); isle.add(sign);
+    // a stand-in for each project until its landmark is built: a plinth and a glowing crystal
+    const list = isletProjects(A.id);
+    slotsFor(list.length).forEach(([x, z], k) => {
+      const q = list[k], spot = new THREE.Group(); spot.position.set(x, 0.3, z); spot.name = `spot:${q.name}`;
+      const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, 0.5, 6), stone(0x6f6878)); plinth.position.y = 0.25;
+      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), glow(col, 1.2)); gem.position.y = 1.15;
+      spin.push({ o: gem, y: 0.8 });
+      spot.add(plinth, gem); isle.add(spot);
+      spot.traverse((o) => { o.userData.project = q.name; });
+    });
+    isle.traverse((o) => { o.userData.area = ai; });
+    isletGroups[A.id] = isle;
+    g.add(isle);
+  });
+  // bridges from the hub's rim to each islet, and from the Workshop up to the Observatory
+  const rim = (to, r) => to.clone().setY(0).normalize().multiplyScalar(r).setY(0.32);
+  const edgeOf = (id, toward) => isletAt[id].clone().add(toward.clone().sub(isletAt[id]).setY(0).normalize().multiplyScalar(5.6 * isletScale[id])).setY(isletAt[id].y + 0.32 * isletScale[id]);
+  ['hardware', 'games'].forEach((id) => ropeBridge(g, rim(isletAt[id], 5.4), edgeOf(id, new THREE.Vector3())));
+  ropeBridge(g, rim(isletAt.software, 5.2), edgeOf('software', new THREE.Vector3()), 0.6);
+  ropeBridge(g, edgeOf('hardware', isletAt.software), edgeOf('software', isletAt.hardware), 0.5);
+}
+
 /* ---------- place realms on the ring ---------- */
 const realms = D.realms.map((r, i) => {
   const angle = (i / N) * TAU;
@@ -1261,6 +1358,7 @@ const realms = D.realms.map((r, i) => {
   g.rotation.y = -angle + Math.PI / 2; // local +z faces outward, toward the camera
   g.userData.realm = i;
   build[r.id](g, r.color);
+  if (r.id === 'quests') buildIslets(g, i);
   if (landmarks[r.id]) landmarks[r.id](g);
   g.traverse((o) => { o.userData.realm = i; });
   scene.add(g);
@@ -1417,7 +1515,7 @@ const questCards = (list, openFirst) => list.map((q, i) => `
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=42" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=43" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1525,12 +1623,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=42" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=43" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=42" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=43" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=42" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=43" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -1631,7 +1729,7 @@ function go(i) {
   let d = r.angle - (targetAngle % TAU);
   d = ((d + Math.PI) % TAU + TAU) % TAU - Math.PI;
   targetAngle += d;
-  current = i; schedulePump(); skillLit = null;
+  current = i; schedulePump(); skillLit = null; areaFocus = -1;
   document.documentElement.style.setProperty('--accent', r.color);
   place.innerHTML = `${esc(r.place)} <i lang="ar">${esc(r.placeAr || '')}</i>`;
   panel.classList.remove('swap');
@@ -1744,7 +1842,8 @@ canvas.addEventListener('pointermove', (e) => {
   pointer.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   if (e.pointerType !== 'mouse' || !playing) return;
   const hit = pickHit(e), h = hit ? hit.object.userData.realm : -1, k = skillAt(hit);
-  canvas.style.cursor = k || (h >= 0 && h !== current) ? 'pointer' : '';
+  const isle = hit && h === current && hit.object.userData.area !== undefined;
+  canvas.style.cursor = k || isle || (h >= 0 && h !== current) ? 'pointer' : '';
   if (k) { if (k !== skillLit) lightSkill(k); skyLit = true; } else if (skyLit) { lightSkill(null); skyLit = false; }
 });
 canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
@@ -1759,6 +1858,12 @@ canvas.addEventListener('pointerup', (e) => {
       lightSkill(k); skyLit = e.pointerType === 'mouse';
       if (document.body.classList.contains('panel-min')) toggle.click();
       panel.querySelector(`.skill[data-skill="${k}"]`)?.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+    } else if (h >= 0 && h === current && hit.object.userData.area !== undefined) { // an islet, or a project on it
+      const { area: ai, project } = hit.object.userData;
+      if (ai !== area || !panel.querySelector('#area')) pickArea(ai); else onArea(ai);
+      if (document.body.classList.contains('panel-min')) toggle.click();
+      if (project) reveal(findCard((x) => x.dataset.name === project));
+      else panel.querySelector('#area')?.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
     } else if (h >= 0 && h === current && realms[h].id === 'pursuits') loose();
     else if (h >= 0) go(h);
   }
@@ -1786,6 +1891,10 @@ function layout() {
 addEventListener('resize', layout);
 
 let camAngle = realms[0].angle - 0.9;
+// the Projects tabs fly the camera over to an islet; -1 is the hub itself
+let areaFocus = -1, focusLift = 0;
+const focusOff = new THREE.Vector3(), focusTo = new THREE.Vector3();
+onArea = (ai) => { areaFocus = ai; };
 let camY = 10;
 const look = new THREE.Vector3();
 const clock = new THREE.Clock();
@@ -1830,8 +1939,18 @@ function frame() {
   camY += (r.y + 6.5 - camY) * ease;
   applyMood(moods[r.land] || moods.neutral, 1 - Math.exp(-dt * 1.4));
   const d = playing ? dist : 30;
-  camera.position.set(Math.cos(camAngle) * (RING + d) - Math.sin(camAngle) * pointer.x * 1.2, camY + pointer.y * 0.8 + (playing ? 0 : 5), Math.sin(camAngle) * (RING + d) + Math.cos(camAngle) * pointer.x * 1.2);
-  look.set(Math.cos(camAngle) * RING, camY - 3, Math.sin(camAngle) * RING);
+  // focused on an islet: the view slides over to it and rises, so it is seen over the pillars
+  focusTo.set(0, 0, 0); let lift = 0;
+  if (areaFocus >= 0 && r.id === 'quests') {
+    const isle = isletGroups[D.areas[areaFocus].id];
+    isle.getWorldPosition(focusTo).sub(r.group.position);
+    const outward = new THREE.Vector3(Math.cos(camAngle), 0, Math.sin(camAngle));
+    focusTo.addScaledVector(outward, -focusTo.dot(outward) * 0.35); // only partly toward the back
+    lift = 1;
+  }
+  focusOff.lerp(focusTo, ease); focusLift += (lift - focusLift) * ease;
+  camera.position.set(Math.cos(camAngle) * (RING + d) - Math.sin(camAngle) * pointer.x * 1.2, camY + pointer.y * 0.8 + (playing ? 0 : 5) + focusLift * 6, Math.sin(camAngle) * (RING + d) + Math.cos(camAngle) * pointer.x * 1.2).add(focusOff);
+  look.set(Math.cos(camAngle) * RING, camY - 3 + focusLift * 1.5, Math.sin(camAngle) * RING).add(focusOff);
   camera.lookAt(look);
   camera.updateMatrixWorld();
 
