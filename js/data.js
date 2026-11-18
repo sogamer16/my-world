@@ -155,12 +155,13 @@ export const quests = [
     ],
     loot: ['CFD', 'SimScale', 'Fluid mechanics'],
   },
-  // Games: each one is its own entry under the Games tab. `play` is itch.io's direct game address
+  // Games: each one is its own entry under the Games tab. `shot` is a screenshot of its title screen (assets/shots). `play` is itch.io's direct game address
   // (on the game's itch.io page, right-click the game → open frame in new tab); it opens the game straight
   // to its menu. It changes when a new build is uploaded, so update `play` after re-uploading a game.
   {
     name: 'Chimera Ants',
     areas: ['games'],
+    shot: { src: 'assets/shots/chimera-ants.webp', w: 640, h: 360, alt: 'Chimera Ants title screen' },
     award: "People's Choice",
     kind: 'Raid',
     plain: 'Game jam',
@@ -195,12 +196,13 @@ export const quests = [
   {
     name: 'Riyma',
     areas: ['games'],
+    shot: { src: 'assets/shots/riyma.webp', w: 640, h: 367, alt: 'Riyma (نار القِرى, Fire of Hospitality) title screen' },
     kind: 'Side Quest',
     plain: 'Game jam · host',
     role: 'Strategy game · SSAM Game Jam, which I hosted',
     when: '2026',
     status: 'Complete',
-    summary: 'A strategy game set in pre-Islamic Arabia. Historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played, but they shape how the game unfolds.',
+    summary: 'A strategy game set in 6th-century Arabia, titled نار القِرى, the Fire of Hospitality. Rival chiefs hoard and raid; you unite the land by giving: feed travellers at your fire and feast villages into friendship. Historical figures such as Antarah ibn Shaddad and Hatim al-Ta\'i are not played, but they shape how the game unfolds.',
     objectives: [
       'My entry to the SSAM Game Jam, which I hosted with a game-making workshop',
       'Helped three students build and submit their own games',
@@ -213,6 +215,7 @@ export const quests = [
   {
     name: 'JarBound',
     areas: ['games'],
+    shot: { src: 'assets/shots/jarbound.webp', w: 529, h: 400, alt: 'JarBound setup screen' },
     kind: 'Side Quest',
     plain: 'Game jam',
     role: 'Card-based ecosystem strategy · Click & Claw Game Jam 2026 · with Abdullah',
@@ -234,6 +237,7 @@ export const quests = [
   {
     name: 'Nuclear Robot',
     areas: ['games'],
+    shot: { src: 'assets/shots/nuclear-robot.webp', w: 640, h: 383, alt: 'Nuclear Robot title screen' },
     kind: 'Side Quest',
     plain: 'Game jam',
     role: 'Team of four programmers · CISSA × UMGMC game jam',
@@ -251,6 +255,7 @@ export const quests = [
   {
     name: 'Much Ado About Nothing',
     areas: ['games'],
+    shot: { src: 'assets/shots/much-ado.webp', w: 640, h: 383, alt: 'Much Ado About Nothing: Benedick receives Don Pedro\'s summons' },
     kind: 'Side Quest',
     plain: 'Game',
     role: "A Benedick's Tale · narrative stealth game · Unity",

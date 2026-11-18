@@ -518,3 +518,8 @@ a.play-btn:hover { filter: brightness(1.12); }
 .s-actions a { display: inline-flex; align-items: center; font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; color: #1a1206; background: var(--gold); border: 1px solid var(--gold); padding: 0.5em 0.9em; }
 #summary .s-actions a { color: #1a1206; }
 #summary .s-actions a:hover, #summary .s-actions a:focus-visible { filter: brightness(1.1); }
+
+/* a game's title screen at the top of its card; clicking it plays the game too */
+.q-shot { display: block; margin: 0 0 10px; border: 1px solid var(--line); line-height: 0; }
+.q-shot img { width: 100%; height: auto; display: block; }
+.q-shot:hover { border-color: var(--gold); }
