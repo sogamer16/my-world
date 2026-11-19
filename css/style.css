@@ -261,7 +261,6 @@ ul.scrolls li::before { content: '❧'; position: absolute; left: 0; color: var(
 .verse cite span { font-family: 'Aref Ruqaa', serif; }
 .chapter { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-bottom: 2px; }
 .chapter span { font-family: 'Aref Ruqaa', serif; letter-spacing: 0; text-transform: none; font-size: 0.95rem; color: var(--gold); }
-.verse .verse-note { font-style: normal; color: var(--ink); font-size: 0.86rem; margin-top: 8px; opacity: 0.85; }
 .juha { max-width: 520px; margin: 1.6rem auto 0; font-size: 0.9rem; line-height: 1.5; color: var(--ink); opacity: 0; transition: opacity 0.8s; }
 .juha.in { opacity: 0.85; }
 .juha b { display: block; font-family: var(--display); font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.72rem; color: var(--gold); margin-bottom: 4px; }
@@ -407,7 +406,6 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
 .r-shape { fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: var(--gold); stroke-width: 1.6; stroke-linejoin: round; }
 .r-dot { fill: #f6e3b4; }
 .r-key { fill: var(--gold); font-family: var(--display); font-size: 10px; letter-spacing: 0.12em; text-anchor: middle; }
-.r-val { fill: var(--ink); font-family: var(--display); font-size: 12px; font-weight: 700; text-anchor: middle; }
 .r-list { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.84rem; }
 .r-list dt { font-family: var(--display); font-size: 0.8rem; color: var(--ink); white-space: nowrap; }
 .r-list dt abbr { text-decoration: none; color: var(--gold); font-size: 0.72rem; letter-spacing: 0.12em; margin-right: 4px; }
