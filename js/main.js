@@ -6,8 +6,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=49';
-import { map as MAP } from './worldmap.js?v=49';
+import * as D from './data.js?v=50';
+import { map as MAP } from './worldmap.js?v=50';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -474,7 +474,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=49`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=50`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -789,7 +789,7 @@ const textureFonts = () => texFonts || (texFonts = new Promise((done) => {
   l.onload = () => Promise.all(['600px Graduate', '600 112px Oswald', '500 40px Oswald'].map((f) => document.fonts.load(f))).then(done, done);
   l.onerror = done; document.head.append(l);
 }));
-function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, onReady, fonts } = {}) {
+function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, extra, fonts } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d');
   x.fillStyle = bg; x.fillRect(0, 0, w, h);
@@ -801,9 +801,8 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     x.drawImage(img, bx + (bw - iw * k) / 2, by + (bh - ih * k) / 2, iw * k, ih * k);
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
-    if (onReady) onReady();
   });
-  img.src = `assets/logos/${file}?v=49`;
+  img.src = `assets/logos/${file}?v=50`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -935,7 +934,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=49`;
+    img.src = `assets/logos/${logo}?v=50`;
   }
   draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
   return tex;
@@ -1012,32 +1011,6 @@ function saduRug(g, { x, z, w = 2.6, d = 1.6, ry = 0 }) {
   const rug = new THREE.Mesh(new THREE.BoxGeometry(w, 0.04, d), [flat(0x9e1b1b), flat(0x9e1b1b), new THREE.MeshStandardMaterial({ map: saduTexture(), roughness: 1 }), flat(0x1a1412), flat(0x9e1b1b), flat(0x9e1b1b)]);
   rug.position.set(x, 0.33, z); rug.rotation.y = ry; rug.receiveShadow = true; g.add(rug);
   return rug;
-}
-// The Saudi flag, flying properly on both sides (never mirrored), on a tall pole.
-function saudiFlag(g, { x, z, h = 6.2, ry = 0, size = 1, fog = true, glowAmt = 0 }) {
-  const pr = Math.max(1, size * 0.45);
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * pr, 0.08 * pr, h, 8), new THREE.MeshStandardMaterial({ color: 0xd9d9dc, metalness: 0.7, roughness: 0.3 }));
-  pole.position.set(x, 0.3 + h / 2, z); pole.castShadow = true;
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.11 * pr, 12, 8), new THREE.MeshStandardMaterial({ color: 0xd9b064, metalness: 0.8, roughness: 0.3 }));
-  cap.position.set(x, 0.3 + h + 0.08, z);
-  g.add(pole, cap);
-  let backTex;
-  const tex = logoTexture('saudi-flag.svg', { w: 900, h: 600, bg: '#006c35', pad: 0, onReady: () => { if (backTex) backTex.needsUpdate = true; } });
-  const geo = new THREE.PlaneGeometry(2.4 * size, 1.6 * size, 16, 8); geo.translate(1.2 * size, 0, 0);
-  const base = geo.attributes.position.array.slice();
-  const flagG = new THREE.Group(); flagG.position.set(x + 0.05, 0.3 + h - 0.9 * size, z); flagG.rotation.y = ry;
-  const front = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, side: THREE.FrontSide, fog, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: glowAmt }));
-  backTex = tex.clone(); backTex.wrapS = THREE.RepeatWrapping; backTex.repeat.x = -1; backTex.offset.x = 1; backTex.needsUpdate = true;
-  const back = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: backTex, roughness: 0.85, side: THREE.BackSide, fog, emissive: 0xffffff, emissiveMap: backTex, emissiveIntensity: glowAmt }));
-  [front, back].forEach((m) => { m.castShadow = true; flagG.add(m); });
-  g.add(flagG);
-  g.userData.flagY = 0.3 + h - 0.9 * size;
-  tick.push((t) => {
-    if (reduceMotion) return;
-    const p = geo.attributes.position;
-    for (let k = 0; k < p.count; k++) { const px = base[k * 3] / size; p.setZ(k, Math.sin(px * 2.4 - t * 2.6) * 0.09 * px * size); }
-    p.needsUpdate = true; geo.computeVertexNormals();
-  });
 }
 
 /* ---------- things I watch ---------- */
@@ -1780,7 +1753,7 @@ const questCards = (list, openFirst) => list.map((q, i) => `
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=49" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=50" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1888,12 +1861,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=49" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=50" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=49" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=50" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=49" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=50" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
@@ -2174,6 +2147,8 @@ let lowPower = false;
 const moods = Object.fromEntries(Object.keys(D.lands).map((k) => [k, moodOf(k)]));
 applyMood(moods[D.realms[0].land], 1);
 const sunDir = new THREE.Vector3();
+// scratch vectors reused every frame, so the loop allocates nothing
+const camOut = new THREE.Vector3(), fLook = new THREE.Vector3(), fCam = new THREE.Vector3();
 const perf = { n: 0, sum: 0 };
 function frame() {
   const raw = clock.getDelta();
@@ -2216,18 +2191,20 @@ function frame() {
   camera.position.set(Math.cos(camAngle) * (RING + d) - Math.sin(camAngle) * pointer.x * 1.2, camY + pointer.y * 0.8 + (playing ? 0 : 5), Math.sin(camAngle) * (RING + d) + Math.cos(camAngle) * pointer.x * 1.2);
   look.set(Math.cos(camAngle) * RING, camY - 3, Math.sin(camAngle) * RING);
   if (focusLift > 0.001) {
-    const outward = new THREE.Vector3(Math.cos(camAngle), 0, Math.sin(camAngle)), at = r.group.position.clone().add(focusOff);
-    const fLook = at.clone().add(new THREE.Vector3(0, 0.8, 0));
-    const fCam = fLook.clone().addScaledVector(outward, dist * 0.62).add(new THREE.Vector3(-Math.sin(camAngle) * pointer.x * 0.8, 6 + pointer.y * 0.5, Math.cos(camAngle) * pointer.x * 0.8));
+    camOut.set(Math.cos(camAngle), 0, Math.sin(camAngle));
+    fLook.copy(r.group.position).add(focusOff); fLook.y += 0.8;
+    fCam.copy(fLook).addScaledVector(camOut, dist * 0.62);
+    fCam.x -= Math.sin(camAngle) * pointer.x * 0.8; fCam.y += 6 + pointer.y * 0.5; fCam.z += Math.cos(camAngle) * pointer.x * 0.8;
     camera.position.lerp(fCam, focusLift); look.lerp(fLook, focusLift);
   }
   camera.lookAt(look);
   camera.updateMatrixWorld();
 
   // the sun sits off to one side of the view and slightly behind the island, so shapes read in 3D
-  const out = new THREE.Vector3(Math.cos(camAngle), 0, Math.sin(camAngle)), side = new THREE.Vector3(-out.z, 0, out.x);
-  sunDir.copy(side).multiplyScalar(mood.side).addScaledVector(out, 0.35).normalize()
-    .multiplyScalar(Math.cos(mood.elev)).add(new THREE.Vector3(0, Math.sin(mood.elev), 0)).normalize();
+  camOut.set(Math.cos(camAngle), 0, Math.sin(camAngle));
+  sunDir.set(-camOut.z, 0, camOut.x).multiplyScalar(mood.side).addScaledVector(camOut, 0.35).normalize()
+    .multiplyScalar(Math.cos(mood.elev));
+  sunDir.y += Math.sin(mood.elev); sunDir.normalize();
   skyU.sunDir.value.copy(sunDir);
   sun.position.copy(look).addScaledVector(sunDir, 60); sun.target.position.copy(look); sun.target.updateMatrixWorld();
   skyU.time.value = t; groundU.time.value = t;
