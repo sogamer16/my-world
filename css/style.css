@@ -410,6 +410,7 @@ details.quest.featured:not([open]) { border-color: color-mix(in srgb, var(--gold
 .r-list dt { font-family: var(--display); font-size: 0.8rem; color: var(--ink); white-space: nowrap; }
 .r-list dt abbr { text-decoration: none; color: var(--gold); font-size: 0.72rem; letter-spacing: 0.12em; margin-right: 4px; }
 .r-list dd { color: #cfc5b0; }
+.r-list .s-used { --c: var(--gold); }
 @media (max-width: 520px) {
   .radar { width: min(250px, 100%); }
   .r-list { grid-template-columns: 1fr; gap: 0; }

@@ -26,13 +26,14 @@ export const hero = {
     { place: 'Swansea', ar: 'سوانزي', land: 'gower', note: 'School · 9 GCSEs, 2023' },
     { place: 'Melbourne', ar: 'ملبورن', land: 'melbourne', note: 'Trinity 2025 · UniMelb 2026 →' },
   ],
+  // used: the projects or pursuits that prove each strength; the Character panel links to them
   attributes: [
-    { key: 'INT', label: 'Intellect', value: 16, note: 'A* Maths & Physics · CFD · ML' },
-    { key: 'DEX', label: 'Craft', value: 17, note: 'Wiring, sensors, Arduino, Raspberry Pi' },
-    { key: 'CHA', label: 'Voice', value: 15, note: 'Debating · pitches · 200+ person events' },
-    { key: 'STR', label: 'Discipline', value: 14, note: 'Karate medals · Duke of Edinburgh' },
-    { key: 'WIS', label: 'Systems Sense', value: 15, note: 'Sees how the whole thing fits together' },
-    { key: 'PER', label: 'Focus', value: 15, note: 'Compound archery · draw, anchor, release, repeat' },
+    { key: 'INT', label: 'Intellect', value: 16, note: 'A* Maths & Physics · CFD · ML', used: ['The Flow Trials', 'Sentinel'] },
+    { key: 'DEX', label: 'Craft', value: 17, note: 'Wiring, sensors, Arduino, Raspberry Pi', used: ['AquaFlow', 'Totex Energy'] },
+    { key: 'CHA', label: 'Voice', value: 15, note: 'Debating · pitches · 200+ person events', used: ['Debating', 'Sentinel'] },
+    { key: 'STR', label: 'Discipline', value: 14, note: 'Karate medals · Duke of Edinburgh', used: ['Karate'] },
+    { key: 'WIS', label: 'Systems Sense', value: 15, note: 'Sees how the whole thing fits together', used: ['AquaFlow', 'ABAAD Robotics'] },
+    { key: 'PER', label: 'Focus', value: 15, note: 'Compound archery · draw, anchor, release, repeat', used: ['Compound archery'] },
   ],
   tongues: [
     { name: 'Arabic', rank: 'Native', hello: 'أهلاً' },
