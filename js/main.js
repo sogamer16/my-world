@@ -6,13 +6,19 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=50';
-import { map as MAP } from './worldmap.js?v=50';
+import * as D from './data.js?v=51';
+import { map as MAP } from './worldmap.js?v=51';
 
 const TAU = Math.PI * 2;
 const RING = 46;
 const N = D.realms.length;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// The page fonts stylesheet loads without blocking paint (index.html), so text drawn into
+// canvas textures waits for it first; otherwise document.fonts would report ready too early.
+const pageFonts = new Promise((ok) => {
+  const l = document.getElementById('page-fonts');
+  if (!l || l.media === 'all') ok(); else { l.addEventListener('load', ok); l.addEventListener('error', ok); }
+}).then(() => document.fonts.ready);
 
 /* ================================================================== */
 /*  Renderer, scene, camera                                            */
@@ -474,7 +480,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=50`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=51`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
@@ -802,7 +808,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
   });
-  img.src = `assets/logos/${file}?v=50`;
+  img.src = `assets/logos/${file}?v=51`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -934,9 +940,9 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=50`;
+    img.src = `assets/logos/${logo}?v=51`;
   }
-  draw(); document.fonts.load('900 70px Cinzel').then(draw).catch(() => {});
+  draw(); pageFonts.then(() => document.fonts.load('900 70px Cinzel')).then(draw).catch(() => {});
   return tex;
 }
 function bronzeMedal(g, { x, z, ry = 0, scale = 1 }) {
@@ -1079,7 +1085,7 @@ function verseTablet(g, { x, z, ry = 0, w = 1.9, h = 1.15 }) {
     x.font = '700 46px "Aref Ruqaa", serif'; x.fillStyle = '#5c3a1c'; x.fillText('— ' + v.byAr, W / 2, H * 0.84);
     tex.needsUpdate = true;
   };
-  draw(); document.fonts.load('700 74px "Aref Ruqaa"', 'عنترة').then(draw).catch(() => {});
+  draw(); pageFonts.then(() => document.fonts.load('700 74px "Aref Ruqaa"', 'عنترة')).then(draw).catch(() => {});
   const stoneM = flat(0x9c8462);
   const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.18), [stoneM, stoneM, stoneM, stoneM, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 }), stoneM]);
   slab.position.set(x, 0.3 + h / 2 + 0.25, z); slab.rotation.set(-0.12, ry, 0); slab.castShadow = true; slab.receiveShadow = true;
@@ -1136,7 +1142,7 @@ function nameStone(g, { x, z, ry = 0, ar, en }) {
     k.direction = 'ltr'; k.font = '700 40px Cinzel, Georgia, serif'; k.fillStyle = '#5c3a1c'; k.fillText(en.toUpperCase(), W / 2, H * 0.86);
     tex.needsUpdate = true;
   };
-  draw(); document.fonts.load('700 120px "Aref Ruqaa"', ar).then(draw).catch(() => {});
+  draw(); pageFonts.then(() => document.fonts.load('700 120px "Aref Ruqaa"', ar)).then(draw).catch(() => {});
   const stoneM = flat(0x8f7656);
   const face = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.95 });
   const slab = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.62, 0.34), [stoneM, stoneM, stoneM, stoneM, face, stoneM]);
@@ -1262,7 +1268,7 @@ function isletSign(text, sub, color) {
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
   sp.scale.set(4.2, 1.31, 1);
-  document.fonts.ready.then(() => { // redraw once the fonts are in
+  pageFonts.then(() => { // redraw once the fonts are in
     x.clearRect(0, 0, 512, 160); x.fillStyle = 'rgba(14, 11, 28, 0.82)'; x.fillRect(0, 0, 512, 160);
     x.strokeRect(6, 6, 500, 148); x.fillStyle = color; x.font = '700 50px Cinzel, Georgia, serif'; x.fillText(text.toUpperCase(), 256, 72);
     x.fillStyle = '#efe6d2'; x.font = 'italic 36px Spectral, Georgia, serif'; x.fillText(sub, 256, 124); tex.needsUpdate = true;
@@ -1314,7 +1320,7 @@ function textTex(lines, { w = 256, h = 128, bg = null, fg = '#efe6d2', font = '6
     lines.forEach((t, k) => { x.font = fs[Math.min(k, fs.length - 1)]; x.fillText(t, w / 2, (h / (lines.length + 1)) * (k + 1)); });
     tex.needsUpdate = true;
   };
-  draw(); document.fonts.ready.then(draw);
+  draw(); pageFonts.then(draw);
   return tex;
 }
 // a little blocky figure for the pixel stage: legs, body, head
@@ -1475,7 +1481,7 @@ const landmarkOf = {
   'ABAAD Robotics'(spot) {
     const mat = textTex(['', 'ABAAD · أبعاد', ''], { w: 256, h: 256, bg: '#173a5e', fg: '#e3b866', font: '600 26px Spectral, serif' });
     const ctx = mat.image.getContext('2d'); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10; ctx.beginPath(); ctx.ellipse(128, 128, 96, 72, 0, 0, TAU); ctx.stroke(); mat.needsUpdate = true;
-    document.fonts.ready.then(() => { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10; ctx.beginPath(); ctx.ellipse(128, 128, 96, 72, 0, 0, TAU); ctx.stroke(); mat.needsUpdate = true; });
+    pageFonts.then(() => { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10; ctx.beginPath(); ctx.ellipse(128, 128, 96, 72, 0, 0, TAU); ctx.stroke(); mat.needsUpdate = true; });
     const base = mesh(new THREE.BoxGeometry(1.8, 0.05, 1.8), [flat(0x173a5e), flat(0x173a5e), new THREE.MeshStandardMaterial({ map: mat, roughness: 1 }), flat(0x173a5e), flat(0x173a5e), flat(0x173a5e)], 0, 0.03, 0); spot.add(base);
     let bot = null; spotProp(spot, 'anqa-robot', { h: 0.38, x: 0.68, onLoad: (h) => { bot = h; } });
     tick.push((t) => {
@@ -1753,7 +1759,7 @@ const questCards = (list, openFirst) => list.map((q, i) => `
           <span class="q-status ${q.status === 'Active' ? 'active' : ''}">${esc(q.status)}</span>
           <span class="q-name">${esc(q.name)}</span><span class="q-role">${esc(q.role)}</span>
         </summary>
-        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=50" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
+        <div class="q-body">${q.logo ? `<img class="q-logo" src="assets/logos/${esc(q.logo)}?v=51" alt="${esc(q.name)} logo">` : ''}${q.play ? `<p class="q-play"><a class="play-btn" href="${esc(q.play)}" target="_blank" rel="noopener">▶ Play ${esc(q.name)} in your browser</a></p>` : ''}<p>${esc(q.summary)}</p>
           <ul>${q.objectives.map((o) => `<li>${objective(o)}</li>`).join('')}</ul>
           ${q.flow ? `<div class="flow" aria-label="How it works">${q.flow.map((f) => `<span>${esc(f)}</span>`).join('<i>→</i>')}</div>` : ''}
           <p class="chips-label">Tools &amp; skills</p><div class="chips">${q.loot.map((l) => `<span class="chip">${esc(l)}</span>`).join('')}</div>
@@ -1861,12 +1867,12 @@ const panels = {
     ${motto(D.mottos.guilds)}
     <section><h3>Where I belong</h3><div class="logo-wall">${D.badges.map((b) => `
       <a class="logo-tile" href="${esc(b.href)}" target="_blank" rel="noopener" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>
-        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=50" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
+        ${b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=51" alt="${esc(b.name)} logo" loading="lazy">` : `<b class="name-badge"><i lang="ar">${esc(b.ar)}</i>${esc(b.name)}</b>`}<span>${esc(b.note)}</span></a>`).join('')}</div></section>
     <section><h3>${dual('Clubs & leadership', 'Banners carried')}</h3>${D.guilds.map((g) => `
-      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=50" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
+      <div class="card">${g.logo ? `<img class="card-logo" src="assets/logos/${esc(g.logo)}?v=51" alt=""${g.logoBg ? ` style="background:${esc(g.logoBg)}"` : ''}>` : ''}<time>${esc(g.when)}</time><strong>${esc(g.name)}</strong>
         <span class="sub">${esc(g.role)} · ${esc(g.place)}</span><p>${esc(g.detail)}</p></div>`).join('')}</section>
     <section><h3>${dual('Education', 'Academies')}</h3>${D.academies.map((a) => `
-      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=50" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
+      <div class="card">${a.logo ? `<img class="card-logo" src="assets/logos/${esc(a.logo)}?v=51" alt="">` : ''}<time>${esc(a.when)}</time><strong>${esc(a.name)}</strong><p>${esc(a.what)}</p></div>`).join('')}</section>`,
 
   portal: (r) => `${head(r, 'Open a Gate')}
     <p class="lore">Looking for an engineer who is ready to be useful from day one? Step through.</p>
