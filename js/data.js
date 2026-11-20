@@ -11,7 +11,9 @@ export const hero = {
   summary: 'Mechanical Engineering Systems student at the University of Melbourne who builds sensor systems, robotics and software, from wiring and commissioning HVAC hardware to anomaly-detection models and live web apps.',
   // one line under the name on the title screen
   pitch: 'I build sensor systems, robotics and software.',
-  seeking: 'Open to learning opportunities: a chance to work alongside engineers, learn how real systems are built, and be useful while I do it.',
+  // the part before the colon is the tag on the title screen
+  seeking: 'Seeking internships and part-time engineering work: summer (Nov – Feb) and mid-year (Jun – Jul) internships, part-time roles during term, and volunteer research or student-team roles. Based in Melbourne.',
+  rights: 'Student visa: up to 48 hours per fortnight during term, full-time during university breaks.',
   updated: 'November 2026', // shown on the CV view; change it when you update this file
   year: 1,
   years: 3,
@@ -75,8 +77,8 @@ export const quests = [
     objectives: [
       'Water-flow sensors on a branch topology catch flow drops and blockages early',
       'Cascading Arduino data pipeline: each branch aggregates and forwards to a central server',
-      'Single sensor node built and working; designed for multi-node expansion',
       'Design target: 50–60% less water than overhead irrigation',
+      'Single sensor node built and working; designed for multi-node expansion',
       'Next: stepper or solenoid valves to throttle flow at specific points',
     ],
     loot: ['Arduino', 'C/C++', 'Flow sensors', 'IoT', 'Solar'],
@@ -134,9 +136,9 @@ export const quests = [
       'Connects historical events to the real stars whose light from that moment is reaching Earth now.',
     objectives: [
       'Led backend architecture in a three-person team',
+      'Deployed live and presented as a finished product',
       'Navigable 3D star map with real-time sky directions',
       'Personalised constellation generation',
-      'Deployed live and presented as a finished product',
     ],
     loot: ['Full-stack', 'Backend', '3D', 'Team lead'],
     links: [{ label: 'Code', href: 'https://github.com/sogamer16/codebrew2026' }],
@@ -310,7 +312,7 @@ export const skillTree = [
       { name: 'Linux / WSL', rank: 2, used: ['Totex Energy'] },
       { name: 'Git / GitHub', rank: 2 },
       { name: 'Full-stack web', rank: 2, used: ['Sirius'] },
-      { name: 'ML · Isolation Forest', rank: 2, used: ['Sentinel'] },
+      { name: 'Machine learning (Isolation Forest)', rank: 2, used: ['Sentinel'] },
     ],
   },
   {
@@ -319,7 +321,7 @@ export const skillTree = [
     color: '#ffb454',
     skills: [
       { name: 'Fluid mechanics', rank: 2, used: ['The Flow Trials'] },
-      { name: 'CFD · SimScale', rank: 2, used: ['The Flow Trials'] },
+      { name: 'CFD (SimScale)', rank: 2, used: ['The Flow Trials'] },
       { name: 'MATLAB', rank: 2 },
       { name: 'Blender', rank: 2, used: ['Design & 3D'] },
       { name: 'SolidWorks', rank: 1 },
@@ -454,7 +456,7 @@ export const guilds = [
     role: 'Form Leader',
     place: 'Swansea, Wales',
     when: '2021 – 2023',
-    detail: 'Elected peer representative and trusted point of contact across the year group. Left in 2023 as "Sohaib the great, 23".',
+    detail: 'Elected peer representative and trusted point of contact across the year group.',
   },
 ];
 

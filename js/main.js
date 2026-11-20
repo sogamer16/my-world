@@ -4,12 +4,12 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import * as D from './data.js?v=56';
-import { N, RING, TAU, bob, build, jitter, landmarks, reduceMotion, shoot, spin, stone, tick } from './props.js?v=56';
-import { hops, loadModel, schedulePump } from './loader.js?v=56';
-import { buildIslets, island, isletGroups } from './islets.js?v=56';
-import { applyMood, clouds, groundU, mood, moodOf, moon, motes, scene, skyU, stars } from './sky.js?v=56';
-import { area, esc, findCard, hintEl, panels, pickArea, pickSchool, school, showHint } from './panels.js?v=56';
+import * as D from './data.js?v=58';
+import { N, RING, TAU, bob, build, jitter, landmarks, reduceMotion, shoot, spin, stone, tick } from './props.js?v=58';
+import { hops, loadModel, schedulePump } from './loader.js?v=58';
+import { buildIslets, island, isletGroups } from './islets.js?v=58';
+import { applyMood, clouds, groundU, mood, moodOf, moon, motes, scene, skyU, stars } from './sky.js?v=58';
+import { area, esc, findCard, hintEl, panels, pickArea, pickSchool, school, showHint } from './panels.js?v=58';
 
 /* ================================================================== */
 /*  Renderer, scene, camera                                            */

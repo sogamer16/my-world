@@ -1,9 +1,9 @@
 // Shared basics (constants, per-frame lists, materials) and the things placed on the islands: archery range, trees, realm builders, signs, medals, hoodie, folklore, landmarks.
 import * as THREE from 'three';
 import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
-import * as D from './data.js?v=56';
-import { prop } from './loader.js?v=56';
-import { skillBoughs, skillLit, skillNodes } from './main.js?v=56';
+import * as D from './data.js?v=58';
+import { prop } from './loader.js?v=58';
+import { skillBoughs, skillLit, skillNodes } from './main.js?v=58';
 
 const TAU = Math.PI * 2;
 const RING = 46;
@@ -416,7 +416,7 @@ function logoTexture(file, { w = 512, h = 512, bg = '#ffffff', pad = 0.12, box, 
     if (extra) extra(x, w, h);
     tex.needsUpdate = true;
   });
-  img.src = `assets/logos/${file}?v=56`;
+  img.src = `assets/logos/${file}?v=58`;
   return tex;
 }
 const wood = () => flat(0x6b4a2e);
@@ -548,7 +548,7 @@ function medalFace(top, mid, bottom, logo, onLogo) {
   if (logo) {
     const img = new Image();
     img.onload = () => { logoImg = img; draw(); if (onLogo) onLogo(img.naturalWidth / img.naturalHeight); };
-    img.src = `assets/logos/${logo}?v=56`;
+    img.src = `assets/logos/${logo}?v=58`;
   }
   draw(); pageFonts.then(() => document.fonts.load('900 70px Cinzel')).then(draw).catch(() => {});
   return tex;

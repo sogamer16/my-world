@@ -1,6 +1,6 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=56';
+import * as D from './data.js?v=58';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -31,8 +31,8 @@ el.innerHTML = `
       <p class="s-role">${esc(D.hero.klass)} student · ${esc(D.hero.guild)} · ${esc(D.hero.realm)}</p>
       <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.summary)}</p>
-      <p class="s-seeking">${esc(D.hero.seeking)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=56" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <p class="s-seeking">${esc(D.hero.seeking)}<br>${esc(D.hero.rights)}</p>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=58" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Education</h2>
@@ -61,9 +61,9 @@ el.innerHTML = `
     <ul>${D.trophies.filter(keep).map((t) => `<li>${esc(t.plain || t.name)} — ${esc(t.detail)}${t.when ? ` (${esc(t.when)})` : ''}</li>`).join('')}</ul>
     <p><strong>Certificates:</strong> ${D.scrolls.map(esc).join(' · ')}</p>
 
-    <h2>Languages and interests</h2>
+    <h2>Languages<span class="s-interests"> and interests</span></h2>
     <p>${D.hero.tongues.map((t) => `${esc(t.name)} (${esc(t.rank)})`).join(', ')}</p>
-    <p>${D.pursuits.map((p) => esc(p.name)).join(', ')}</p>
+    <p class="s-interests">${D.pursuits.map((p) => esc(p.name)).join(', ')}</p>
     <p class="s-updated">Updated ${esc(D.hero.updated)}</p>
   </article>`;
 

@@ -354,7 +354,7 @@ body.no-webgl #title-screen, body.no-webgl #world { display: none; }
   *, *::before, *::after { animation: none !important; transition-duration: 0.01s !important; }
 }
 
-@page { margin: 13mm 14mm; }
+@page { size: A4; margin: 12mm 14mm 10mm; }
 @media print {
   html, body { height: auto; overflow: visible; background: #fff; }
   body > *:not(#summary) { display: none !important; }
@@ -373,7 +373,12 @@ body.no-webgl #title-screen, body.no-webgl #world { display: none; }
   /* plain text for CV-parsing software: no spaced-out headings, no Arabic name, no logo row */
   #summary h2 { letter-spacing: 0.04em; break-after: avoid; }
   .s-ar, .s-logos { display: none !important; }
-  .s-updated { margin-top: 12pt; }
+  /* two pages: the strongest three lines per project (listed first in data.js), games run on as one paragraph, no interests line */
+  .s-item li:nth-child(n+4) { display: none; }
+  .s-games { padding: 0; } .s-games li { display: inline; list-style: none; } .s-games li + li::before { content: ' · '; }
+  .s-interests { display: none; }
+  .s-updated { margin: 3pt 0 0; }
+  #summary article > :last-child { margin-bottom: 0; }
 }
 
 /* ---------- quest links and one-time hints ---------- */
@@ -495,7 +500,7 @@ a.play-btn { display: inline-block; padding: 0.55em 1.1em; font-family: var(--di
 a.play-btn:hover { filter: brightness(1.12); }
 .s-group { margin: 14px 0 4px; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: #e3b866; }
 .s-games li { margin-bottom: 3px; }
-@media print { .s-group { color: #111; } }
+@media print { .s-group { color: #111; letter-spacing: 0.04em; break-after: avoid; } }
 
 /* the name of the project under the pointer on the islets */
 #tip { position: fixed; left: 0; top: 0; z-index: 35; pointer-events: none; padding: 4px 10px; font-size: 0.85rem; color: var(--ink); background: rgba(14, 11, 28, 0.92); border: 1px solid var(--line); white-space: nowrap; }
