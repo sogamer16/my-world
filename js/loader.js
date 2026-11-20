@@ -2,8 +2,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { N } from './props.js?v=56';
-import { current } from './main.js?v=56';
+import { N } from './props.js?v=58';
+import { current } from './main.js?v=58';
 
 /* ---------- generated models ---------- */
 // Each prop loads on top of a hand-built stand-in, which it replaces once ready.
@@ -38,7 +38,7 @@ function pump() {
   while (active < LOAD_AT_ONCE && queue.length) {
     const job = queue.shift(); active++;
     // The next download starts as soon as this one arrives, while it is still being decoded.
-    const bytes = fetch(`assets/models/${job.name}.glb?v=56`)
+    const bytes = fetch(`assets/models/${job.name}.glb?v=58`)
       .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
       .finally(() => { active--; pump(); });
     bytes.then((buf) => gltf.parseAsync(buf, 'assets/models/'))
