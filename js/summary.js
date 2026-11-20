@@ -1,6 +1,7 @@
 // The plain view: everything on the site as one readable, printable page.
 // Kept separate from the 3D scene so it still works when WebGL does not.
-import * as D from './data.js?v=58';
+import * as D from './data.js?v=59';
+import { track } from './track.js?v=59';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const el = document.getElementById('summary');
@@ -32,7 +33,7 @@ el.innerHTML = `
       <p class="s-links"><a href="mailto:${esc(D.email.join('@'))}">${esc(D.email.join('@'))}</a> · ${D.portals.map((p) => `<a href="${esc(p.href)}" target="_blank" rel="noopener">${esc(p.href.replace(/^https?:\/\/(www\.)?/, ''))}</a>`).join(' · ')}</p>
       <p>${esc(D.hero.summary)}</p>
       <p class="s-seeking">${esc(D.hero.seeking)}<br>${esc(D.hero.rights)}</p>
-      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=58" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
+      <div class="s-logos">${D.badges.map((b) => (b.logo ? `<img src="assets/logos/${esc(b.logo)}?v=59" alt="${esc(b.name)}" title="${esc(b.name)}"${b.bg ? ` style="background:${esc(b.bg)}"` : ''}>` : `<span class="s-badge" title="${esc(b.name)}"><i lang="ar">${esc(b.ar)}</i> ${esc(b.name)}</span>`)).join('')}</div>
     </header>
 
     <h2>Education</h2>
@@ -67,8 +68,11 @@ el.innerHTML = `
     <p class="s-updated">Updated ${esc(D.hero.updated)}</p>
   </article>`;
 
-const open = () => { el.hidden = false; document.body.classList.add('summary-open'); el.scrollTop = 0; el.querySelector('button').focus(); };
-const close = () => { el.hidden = true; document.body.classList.remove('summary-open'); };
+const open = () => { if (el.hidden) track('summary'); el.hidden = false; document.body.classList.add('summary-open'); el.scrollTop = 0; el.querySelector('button').focus(); };
+const close = () => {
+  el.hidden = true; document.body.classList.remove('summary-open');
+  try { localStorage.setItem('chose-3d', '1'); } catch { /* storage blocked */ }
+};
 
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-open-summary]')) open();
@@ -76,7 +80,22 @@ document.addEventListener('click', (e) => {
   else if (e.target.closest('#s-print')) print();
 });
 addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.hidden) close(); });
-if (location.hash === '#summary') open();
+track(''); // the visit itself, whichever view it starts in
+// On a phone, a first visit with no link opens the plain view: the projects are readable at once,
+// and the 3D world is one tap away. Someone who has chosen the world before goes straight there.
+let chose3d = false;
+try { chose3d = !!localStorage.getItem('chose-3d'); } catch { /* storage blocked */ }
+const phone = matchMedia('(max-width: 820px), (pointer: coarse) and (max-height: 500px)').matches;
+if (phone && !chose3d && !location.hash) {
+  const back = el.querySelector('[data-close-summary]');
+  back.textContent = 'Explore the 3D world →';
+  // the first time, this button goes straight into the world rather than back to the title screen
+  back.addEventListener('click', () => {
+    document.getElementById('start')?.click();
+    back.textContent = '← Back to the world';
+  }, { once: true });
+  open();
+} else if (location.hash === '#summary') open();
 
 // No WebGL: the 3D world cannot run, so the plain view becomes the site.
 let gl = null;

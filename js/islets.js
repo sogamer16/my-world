@@ -1,8 +1,8 @@
 // Terrain: island() and the Projects islets with a landmark for each project.
 import * as THREE from 'three';
-import * as D from './data.js?v=58';
-import { TAU, bob, flat, glow, jitter, localTree, pageFonts, reduceMotion, spin, stone, tick } from './props.js?v=58';
-import { prop } from './loader.js?v=58';
+import * as D from './data.js?v=59';
+import { TAU, bob, flat, glow, jitter, localTree, pageFonts, reduceMotion, spin, stone, tick } from './props.js?v=59';
+import { prop } from './loader.js?v=59';
 
 // small value-noise helpers for shaping islands
 const hash3 = (x, y, z) => { const n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return n - Math.floor(n); };

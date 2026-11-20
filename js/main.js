@@ -4,12 +4,13 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import * as D from './data.js?v=58';
-import { N, RING, TAU, bob, build, jitter, landmarks, reduceMotion, shoot, spin, stone, tick } from './props.js?v=58';
-import { hops, loadModel, schedulePump } from './loader.js?v=58';
-import { buildIslets, island, isletGroups } from './islets.js?v=58';
-import { applyMood, clouds, groundU, mood, moodOf, moon, motes, scene, skyU, stars } from './sky.js?v=58';
-import { area, esc, findCard, hintEl, panels, pickArea, pickSchool, school, showHint } from './panels.js?v=58';
+import * as D from './data.js?v=59';
+import { N, RING, TAU, bob, build, jitter, landmarks, reduceMotion, shoot, spin, stone, tick } from './props.js?v=59';
+import { hops, loadModel, schedulePump } from './loader.js?v=59';
+import { buildIslets, island, isletGroups } from './islets.js?v=59';
+import { applyMood, clouds, groundU, mood, moodOf, moon, motes, scene, skyU, stars } from './sky.js?v=59';
+import { track } from './track.js?v=59';
+import { area, esc, findCard, hintEl, panels, pickArea, pickSchool, school, showHint } from './panels.js?v=59';
 
 /* ================================================================== */
 /*  Renderer, scene, camera                                            */
@@ -226,6 +227,7 @@ function go(i) {
   if (playing) {
     history.replaceState(null, '', `#${r.id}`);
     try { localStorage.setItem('last-realm', r.id); } catch { /* storage blocked */ }
+    track(r.id);
   }
   hintEl?.classList.remove('on');
   setTimeout(() => { if (current === i) showHint(r.id); }, 1200);
@@ -242,6 +244,7 @@ function start() {
   layout();
   setTimeout(() => showHint('controls'), 2500);
   if (current > 0 && !location.hash) history.replaceState(null, '', `#${realms[current].id}`);
+  track(realms[current].id);
 }
 document.getElementById('start').addEventListener('click', start);
 
@@ -358,6 +361,8 @@ const sunDir = new THREE.Vector3();
 const camOut = new THREE.Vector3(), fLook = new THREE.Vector3(), fCam = new THREE.Vector3();
 const perf = { n: 0, sum: 0 };
 function frame() {
+  // the plain view covers the canvas: skip the work until it closes
+  if (document.body.classList.contains('summary-open')) { clock.getDelta(); requestAnimationFrame(frame); return; }
   const raw = clock.getDelta();
   const dt = Math.min(raw, 0.05);
   // if the device cannot hold ~20fps, trade the glow and sharpness for smoothness
@@ -437,11 +442,20 @@ const resumeAt = !hashRealm && lastRealm ? realms.findIndex((r) => r.id === last
 if (resumeAt > 0) document.getElementById('start').textContent = `Continue · ${realms[resumeAt].short}`;
 go(Math.max(0, realms.findIndex((r) => r.id === hashRealm), resumeAt));
 if (hashRealm && (current > 0 || hashItem)) start();
-if (hashItem) {
-  const ai = D.areas.findIndex((a) => a.id === hashItem);
-  if (ai >= 0 && hashRealm === 'quests') pickArea(ai);
-  else reveal(findCard((x) => slug(x.dataset.name) === hashItem));
+openItem(hashRealm, hashItem);
+function openItem(realm, item) {
+  if (!item) return;
+  const ai = D.areas.findIndex((a) => a.id === item);
+  if (ai >= 0 && realm === 'quests') pickArea(ai);
+  else reveal(findCard((x) => slug(x.dataset.name) === item));
 }
+// a link followed while the site is open (pasted, or clicked in another tab's text) travels there too
+addEventListener('hashchange', () => {
+  const [realm, item] = decodeURIComponent(location.hash.slice(1)).split('/');
+  const i = realms.findIndex((r) => r.id === realm);
+  if (i < 0) return;
+  go(i); start(); openItem(realm, item);
+});
 frame();
 
 export { best, current, hemi, lightSkill, lowPower, onArea, panel, playing, renderer, shots, skillBoughs, skillLit, skillNodes, sun };

@@ -1,8 +1,8 @@
 // The scene and its sky: fog, sky dome, ground below, stars, motes, clouds and moon.
 import * as THREE from 'three';
-import * as D from './data.js?v=58';
-import { RING, TAU, points } from './props.js?v=58';
-import { hemi, lowPower, renderer, sun } from './main.js?v=58';
+import * as D from './data.js?v=59';
+import { RING, TAU, points } from './props.js?v=59';
+import { hemi, lowPower, renderer, sun } from './main.js?v=59';
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x0a0718, 0.006);

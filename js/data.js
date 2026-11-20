@@ -478,6 +478,9 @@ export const badges = [
 // email is stored in two parts and joined in the browser, so simple scrapers do not pick it up
 export const email = ['sogamer16', 'gmail.com'];
 
+// GoatCounter site code for visitor counts (the part before .goatcounter.com); '' turns counting off
+export const analytics = '';
+
 export const portals = [
   { name: 'LinkedIn', href: 'https://www.linkedin.com/in/sohaibqutub', hint: 'Message me here' },
   { name: 'GitHub', href: 'https://github.com/sogamer16', hint: 'See the code' },
